@@ -128,3 +128,8 @@ All development updates will be tracked in this section as each phase executes:
   - Resolved unstyled HTML glitch caused by overlapping `npm run build` overwriting `.next` while `next dev` was running in-memory.
   - Cleared stale `.next` directory and booted clean dev server on `http://localhost:3000`.
   - Verified `/_next/static/css/app/layout.css` compiles and returns 35,756 bytes with HTTP Status 200 OK. Fully styled dark theme, Tailwind utility classes, and typography restored.
+- **[2026-10-31 16:10] Codebase Published to GitHub:**
+  - Initialized Git repository with `main` branch.
+  - Added `.gitignore` to securely exclude `.env` credentials, `node_modules`, `.next`, and build caches.
+  - Added `.env.example` template and comprehensive `README.md`.
+  - Pushed initial project baseline commit (`0f32ad1`) to **`https://github.com/galadhruv16/AutoReel-Studio.git`** (`branch 'main' -> 'origin/main'`). All code, documentation, Remotion compositions, and assets published.
