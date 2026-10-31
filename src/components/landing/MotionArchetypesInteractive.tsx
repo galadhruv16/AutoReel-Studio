@@ -92,41 +92,41 @@ export const MotionArchetypesInteractive: React.FC = () => {
         }
       `}</style>
 
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#2B3040] bg-[#12141C] px-4 py-1 text-xs font-mono font-bold text-[#F59E0B] mb-4">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#2B3040] bg-[#12141C] px-3.5 py-1 text-[11px] sm:text-xs font-mono font-bold text-[#F59E0B] mb-4">
             <span>ENGINE ARCHITECTURE • 4 CORE MOTION ARCHETYPES</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
             Code-Driven Visual Archetypes
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-[#94A3B8]">
+          <p className="mt-3 sm:mt-4 text-sm sm:text-base md:text-lg text-[#94A3B8]">
             AutoReel renders concepts through mathematically timed visual paradigms. Click <span className="font-mono text-white font-semibold">Replay ↺</span> to test each live animation.
           </p>
         </div>
 
         {/* 4 Interactive Animated Pattern Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto">
           {/* ========================================================
               ARCHETYPE 1: EXPLODED ISOMETRIC ANATOMY
              ======================================================== */}
-          <div className="rounded-2xl border border-[#232736] bg-[#0E1017] p-6 shadow-xl flex flex-col justify-between">
+          <div className="rounded-2xl border border-[#232736] bg-[#0E1017] p-4 sm:p-6 shadow-xl flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-lg bg-[#38BDF8]/10 text-[#38BDF8]">
+              <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
+                <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-[#38BDF8]/10 text-[#38BDF8] shrink-0">
                     <Layers className="h-4 w-4" />
                   </div>
-                  <div>
-                    <span className="text-xs font-mono text-[#38BDF8] uppercase tracking-wider font-semibold">
+                  <div className="min-w-0">
+                    <span className="text-[10px] sm:text-xs font-mono text-[#38BDF8] uppercase tracking-wider font-semibold block">
                       Archetype 01
                     </span>
-                    <h3 className="text-lg font-bold text-white leading-tight">Exploded Isometric Anatomy</h3>
+                    <h3 className="text-base sm:text-lg font-bold text-white leading-tight truncate">Exploded Isometric Anatomy</h3>
                   </div>
                 </div>
                 <button
                   onClick={() => triggerReplay('exploded')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#181B26] border border-[#2A2F42] text-xs font-mono text-[#E2E8F0] hover:bg-[#23283B] hover:text-white transition active:scale-95"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-[#181B26] border border-[#2A2F42] text-[11px] sm:text-xs font-mono text-[#E2E8F0] hover:bg-[#23283B] hover:text-white transition active:scale-95 shrink-0"
                 >
                   <RotateCcw className="h-3 w-3 text-[#38BDF8]" />
                   Replay ↺
@@ -136,66 +136,66 @@ export const MotionArchetypesInteractive: React.FC = () => {
               {/* Animated Interactive Canvas */}
               <div
                 key={replayKeys.exploded}
-                className="relative h-64 rounded-xl bg-[#090C14] border border-[#1C2030] flex items-center justify-center overflow-hidden px-6"
+                className="relative h-60 sm:h-64 rounded-xl bg-[#090C14] border border-[#1C2030] flex items-center justify-center overflow-hidden px-2 xs:px-4 sm:px-6"
               >
                 {/* Isometric 3-Layer Stack */}
-                <div className="relative w-48 h-36 flex flex-col items-center justify-center">
+                <div className="relative w-32 xs:w-36 sm:w-44 h-32 sm:h-36 flex flex-col items-center justify-center shrink-0">
                   {/* Top Layer: Application Runtime */}
                   <div
                     style={{ animation: 'explodeTop 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}
-                    className="absolute z-30 w-36 h-12 rounded-lg border-2 border-[#38BDF8] bg-[#38BDF8]/20 shadow-lg shadow-[#38BDF8]/30 flex items-center justify-center font-mono text-xs font-bold text-[#E0F2FE]"
+                    className="absolute z-30 w-28 xs:w-32 sm:w-36 h-9 sm:h-11 rounded-lg border-2 border-[#38BDF8] bg-[#38BDF8]/20 shadow-lg shadow-[#38BDF8]/30 flex items-center justify-center font-mono text-[10px] sm:text-xs font-bold text-[#E0F2FE]"
                   >
                     User Service
                   </div>
 
                   {/* Middle Layer: Virtual Boundary */}
-                  <div className="absolute z-20 w-44 h-12 rounded-lg border-2 border-[#10B981] bg-[#10B981]/15 shadow-lg shadow-[#10B981]/25 flex items-center justify-center font-mono text-xs font-bold text-[#D1FAE5]">
+                  <div className="absolute z-20 w-32 xs:w-36 sm:w-40 h-9 sm:h-11 rounded-lg border-2 border-[#10B981] bg-[#10B981]/15 shadow-lg shadow-[#10B981]/25 flex items-center justify-center font-mono text-[10px] sm:text-xs font-bold text-[#D1FAE5]">
                     Virtual Namespace
                   </div>
 
                   {/* Bottom Layer: Kernel & Hardware */}
                   <div
                     style={{ animation: 'explodeBottom 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}
-                    className="absolute z-10 w-48 h-12 rounded-lg border-2 border-[#F59E0B] bg-[#F59E0B]/20 shadow-lg shadow-[#F59E0B]/30 flex items-center justify-center font-mono text-xs font-bold text-[#FEF3C7]"
+                    className="absolute z-10 w-34 xs:w-38 sm:w-44 h-9 sm:h-11 rounded-lg border-2 border-[#F59E0B] bg-[#F59E0B]/20 shadow-lg shadow-[#F59E0B]/30 flex items-center justify-center font-mono text-[10px] sm:text-xs font-bold text-[#FEF3C7]"
                   >
                     Host Kernel
                   </div>
                 </div>
 
                 {/* Leader Labels pinned on the right */}
-                <div className="ml-8 space-y-5 z-20">
+                <div className="ml-3 xs:ml-4 sm:ml-7 space-y-2.5 sm:space-y-4 z-20 shrink-0">
                   <div
                     style={{ animation: 'popUp 0.8s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both' }}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1.5 sm:gap-2"
                   >
-                    <div className="w-2 h-2 rounded-full bg-[#38BDF8] animate-ping" />
-                    <span className="text-xs font-mono text-[#38BDF8] bg-[#38BDF8]/10 px-2.5 py-1 rounded border border-[#38BDF8]/30">
-                      Layer 3 • App Logic
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#38BDF8] animate-ping shrink-0" />
+                    <span className="text-[10px] sm:text-xs font-mono text-[#38BDF8] bg-[#38BDF8]/10 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded border border-[#38BDF8]/30 whitespace-nowrap">
+                      L3 • App Logic
                     </span>
                   </div>
                   <div
                     style={{ animation: 'popUp 0.8s 0.6s cubic-bezier(0.16, 1, 0.3, 1) both' }}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1.5 sm:gap-2"
                   >
-                    <div className="w-2 h-2 rounded-full bg-[#10B981]" />
-                    <span className="text-xs font-mono text-[#10B981] bg-[#10B981]/10 px-2.5 py-1 rounded border border-[#10B981]/30">
-                      Layer 2 • Isolation
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#10B981] shrink-0" />
+                    <span className="text-[10px] sm:text-xs font-mono text-[#10B981] bg-[#10B981]/10 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded border border-[#10B981]/30 whitespace-nowrap">
+                      L2 • Isolation
                     </span>
                   </div>
                   <div
                     style={{ animation: 'popUp 0.8s 0.9s cubic-bezier(0.16, 1, 0.3, 1) both' }}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1.5 sm:gap-2"
                   >
-                    <div className="w-2 h-2 rounded-full bg-[#F59E0B]" />
-                    <span className="text-xs font-mono text-[#F59E0B] bg-[#F59E0B]/10 px-2.5 py-1 rounded border border-[#F59E0B]/30">
-                      Layer 1 • CPU / RAM
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#F59E0B] shrink-0" />
+                    <span className="text-[10px] sm:text-xs font-mono text-[#F59E0B] bg-[#F59E0B]/10 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded border border-[#F59E0B]/30 whitespace-nowrap">
+                      L1 • CPU / RAM
                     </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <p className="mt-4 text-xs text-[#94A3B8]">
+            <p className="mt-3 sm:mt-4 text-xs text-[#94A3B8]">
               Deconstructs complex architectures into vertically separated 3D layers with pinned telemetry pins.
             </p>
           </div>
@@ -203,23 +203,23 @@ export const MotionArchetypesInteractive: React.FC = () => {
           {/* ========================================================
               ARCHETYPE 2: MULTI-STAGE TRANSFORMATION PIPELINE
              ======================================================== */}
-          <div className="rounded-2xl border border-[#232736] bg-[#0E1017] p-6 shadow-xl flex flex-col justify-between">
+          <div className="rounded-2xl border border-[#232736] bg-[#0E1017] p-4 sm:p-6 shadow-xl flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-lg bg-[#10B981]/10 text-[#10B981]">
+              <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
+                <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-[#10B981]/10 text-[#10B981] shrink-0">
                     <GitBranch className="h-4 w-4" />
                   </div>
-                  <div>
-                    <span className="text-xs font-mono text-[#10B981] uppercase tracking-wider font-semibold">
+                  <div className="min-w-0">
+                    <span className="text-[10px] sm:text-xs font-mono text-[#10B981] uppercase tracking-wider font-semibold block">
                       Archetype 02
                     </span>
-                    <h3 className="text-lg font-bold text-white leading-tight">Sequential Flow Pipeline</h3>
+                    <h3 className="text-base sm:text-lg font-bold text-white leading-tight truncate">Sequential Flow Pipeline</h3>
                   </div>
                 </div>
                 <button
                   onClick={() => triggerReplay('pipeline')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#181B26] border border-[#2A2F42] text-xs font-mono text-[#E2E8F0] hover:bg-[#23283B] hover:text-white transition active:scale-95"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-[#181B26] border border-[#2A2F42] text-[11px] sm:text-xs font-mono text-[#E2E8F0] hover:bg-[#23283B] hover:text-white transition active:scale-95 shrink-0"
                 >
                   <RotateCcw className="h-3 w-3 text-[#10B981]" />
                   Replay ↺
@@ -229,10 +229,10 @@ export const MotionArchetypesInteractive: React.FC = () => {
               {/* Animated Interactive Canvas */}
               <div
                 key={replayKeys.pipeline}
-                className="relative h-64 rounded-xl bg-[#090C14] border border-[#1C2030] flex items-center justify-between px-8 overflow-hidden"
+                className="relative h-60 sm:h-64 rounded-xl bg-[#090C14] border border-[#1C2030] flex items-center justify-between px-3 xs:px-5 sm:px-8 overflow-hidden"
               >
                 {/* Connecting Rail */}
-                <div className="absolute left-16 right-16 top-1/2 -translate-y-1/2 h-1 bg-[#1C2233] z-0">
+                <div className="absolute left-8 right-8 sm:left-14 sm:right-14 top-1/2 -translate-y-1/2 h-1 bg-[#1C2233] z-0">
                   <div className="h-full bg-gradient-to-r from-[#10B981] via-[#38BDF8] to-[#F59E0B] w-full opacity-60" />
                 </div>
 
@@ -240,45 +240,45 @@ export const MotionArchetypesInteractive: React.FC = () => {
                 <div
                   style={{
                     position: 'absolute',
-                    top: 'calc(50% - 9px)',
+                    top: 'calc(50% - 8px)',
                     animation: 'packetTravel 2.4s ease-in-out infinite',
                   }}
-                  className="w-4 h-4 rounded-full bg-white shadow-[0_0_15px_#38BDF8] z-20 pointer-events-none"
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-white shadow-[0_0_15px_#38BDF8] z-20 pointer-events-none"
                 />
 
                 {/* Node 1: Ingest */}
                 <div
                   style={{ animation: 'pulseNode1 2.4s infinite' }}
-                  className="relative z-10 w-24 h-24 rounded-2xl bg-[#0C121A] border-2 border-[#10B981]/40 flex flex-col items-center justify-center text-center p-2"
+                  className="relative z-10 w-20 xs:w-22 sm:w-24 h-20 xs:h-22 sm:h-24 rounded-xl sm:rounded-2xl bg-[#0C121A] border-2 border-[#10B981]/40 flex flex-col items-center justify-center text-center p-1 sm:p-2 shadow-lg"
                 >
-                  <span className="text-xl">📥</span>
-                  <span className="text-xs font-mono font-bold text-white mt-1">Prompt</span>
-                  <span className="text-[10px] font-mono text-[#10B981]">01 • INGEST</span>
+                  <span className="text-lg sm:text-xl">📥</span>
+                  <span className="text-[11px] sm:text-xs font-mono font-bold text-white mt-0.5 sm:mt-1 truncate max-w-full">Prompt</span>
+                  <span className="text-[8px] sm:text-[10px] font-mono text-[#10B981]">01 • INGEST</span>
                 </div>
 
                 {/* Node 2: Neural Storyboard */}
                 <div
                   style={{ animation: 'pulseNode2 2.4s infinite' }}
-                  className="relative z-10 w-24 h-24 rounded-2xl bg-[#0C121A] border-2 border-[#38BDF8]/40 flex flex-col items-center justify-center text-center p-2"
+                  className="relative z-10 w-20 xs:w-22 sm:w-24 h-20 xs:h-22 sm:h-24 rounded-xl sm:rounded-2xl bg-[#0C121A] border-2 border-[#38BDF8]/40 flex flex-col items-center justify-center text-center p-1 sm:p-2 shadow-lg"
                 >
-                  <span className="text-xl">🧠</span>
-                  <span className="text-xs font-mono font-bold text-white mt-1">Interactions</span>
-                  <span className="text-[10px] font-mono text-[#38BDF8]">02 • PARSE</span>
+                  <span className="text-lg sm:text-xl">🧠</span>
+                  <span className="text-[11px] sm:text-xs font-mono font-bold text-white mt-0.5 sm:mt-1 truncate max-w-full">Parse</span>
+                  <span className="text-[8px] sm:text-[10px] font-mono text-[#38BDF8]">02 • PARSE</span>
                 </div>
 
                 {/* Node 3: Render Engine */}
                 <div
                   style={{ animation: 'pulseNode3 2.4s infinite' }}
-                  className="relative z-10 w-24 h-24 rounded-2xl bg-[#0C121A] border-2 border-[#F59E0B]/40 flex flex-col items-center justify-center text-center p-2"
+                  className="relative z-10 w-20 xs:w-22 sm:w-24 h-20 xs:h-22 sm:h-24 rounded-xl sm:rounded-2xl bg-[#0C121A] border-2 border-[#F59E0B]/40 flex flex-col items-center justify-center text-center p-1 sm:p-2 shadow-lg"
                 >
-                  <span className="text-xl">🎬</span>
-                  <span className="text-xs font-mono font-bold text-white mt-1">Remotion</span>
-                  <span className="text-[10px] font-mono text-[#F59E0B]">03 • RENDER</span>
+                  <span className="text-lg sm:text-xl">🎬</span>
+                  <span className="text-[11px] sm:text-xs font-mono font-bold text-white mt-0.5 sm:mt-1 truncate max-w-full">Remotion</span>
+                  <span className="text-[8px] sm:text-[10px] font-mono text-[#F59E0B]">03 • RENDER</span>
                 </div>
               </div>
             </div>
 
-            <p className="mt-4 text-xs text-[#94A3B8]">
+            <p className="mt-3 sm:mt-4 text-xs text-[#94A3B8]">
               Tracks asynchronous processing lifecycles with continuous photon packets triggering node state updates.
             </p>
           </div>
@@ -286,23 +286,23 @@ export const MotionArchetypesInteractive: React.FC = () => {
           {/* ========================================================
               ARCHETYPE 3: DYNAMIC KINETIC TELEMETRY CHART
              ======================================================== */}
-          <div className="rounded-2xl border border-[#232736] bg-[#0E1017] p-6 shadow-xl flex flex-col justify-between">
+          <div className="rounded-2xl border border-[#232736] bg-[#0E1017] p-4 sm:p-6 shadow-xl flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-lg bg-[#F59E0B]/10 text-[#F59E0B]">
+              <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
+                <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-[#F59E0B]/10 text-[#F59E0B] shrink-0">
                     <LineChart className="h-4 w-4" />
                   </div>
-                  <div>
-                    <span className="text-xs font-mono text-[#F59E0B] uppercase tracking-wider font-semibold">
+                  <div className="min-w-0">
+                    <span className="text-[10px] sm:text-xs font-mono text-[#F59E0B] uppercase tracking-wider font-semibold block">
                       Archetype 03
                     </span>
-                    <h3 className="text-lg font-bold text-white leading-tight">Kinetic Telemetry Chart</h3>
+                    <h3 className="text-base sm:text-lg font-bold text-white leading-tight truncate">Kinetic Telemetry Chart</h3>
                   </div>
                 </div>
                 <button
                   onClick={() => triggerReplay('telemetry')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#181B26] border border-[#2A2F42] text-xs font-mono text-[#E2E8F0] hover:bg-[#23283B] hover:text-white transition active:scale-95"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-[#181B26] border border-[#2A2F42] text-[11px] sm:text-xs font-mono text-[#E2E8F0] hover:bg-[#23283B] hover:text-white transition active:scale-95 shrink-0"
                 >
                   <RotateCcw className="h-3 w-3 text-[#F59E0B]" />
                   Replay ↺
@@ -312,21 +312,21 @@ export const MotionArchetypesInteractive: React.FC = () => {
               {/* Animated Interactive Canvas */}
               <div
                 key={replayKeys.telemetry}
-                className="relative h-64 rounded-xl bg-[#090C14] border border-[#1C2030] p-4 flex flex-col justify-between overflow-hidden"
+                className="relative h-60 sm:h-64 rounded-xl bg-[#090C14] border border-[#1C2030] p-3 sm:p-4 flex flex-col justify-between overflow-hidden"
               >
                 {/* Metric Summary Header */}
                 <div className="flex justify-between items-center z-10">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl font-black font-mono text-white">92.4%</span>
-                    <span className="text-xs font-mono text-[#10B981] bg-[#10B981]/15 px-2 py-0.5 rounded border border-[#10B981]/30">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <span className="text-xl sm:text-2xl font-black font-mono text-white">92.4%</span>
+                    <span className="text-[10px] sm:text-xs font-mono text-[#10B981] bg-[#10B981]/15 px-1.5 sm:px-2 py-0.5 rounded border border-[#10B981]/30">
                       +142% Retention
                     </span>
                   </div>
-                  <span className="text-[11px] font-mono text-[#64748B]">Attention Telemetry</span>
+                  <span className="text-[10px] sm:text-[11px] font-mono text-[#64748B]">Attention Curve</span>
                 </div>
 
                 {/* SVG Line Graph */}
-                <div className="relative h-40 w-full">
+                <div className="relative h-36 sm:h-40 w-full">
                   <svg className="w-full h-full overflow-visible" viewBox="0 0 400 120" preserveAspectRatio="none">
                     {/* Grid lines */}
                     <line x1="0" y1="30" x2="400" y2="30" stroke="#1E2436" strokeDasharray="4 4" />
@@ -392,16 +392,16 @@ export const MotionArchetypesInteractive: React.FC = () => {
                 </div>
 
                 {/* X-Axis Timeline Labels */}
-                <div className="flex justify-between text-[10px] font-mono text-[#64748B] pt-1 border-t border-[#1C2030]">
+                <div className="flex justify-between text-[9px] sm:text-[10px] font-mono text-[#64748B] pt-1.5 border-t border-[#1C2030]">
                   <span>0.0s (Hook)</span>
-                  <span>10.0s (Mechanism)</span>
+                  <span className="hidden xs:inline">10.0s (Proof)</span>
                   <span>20.0s (Climax)</span>
                   <span className="text-[#10B981] font-semibold">30.0s (Resolve)</span>
                 </div>
               </div>
             </div>
 
-            <p className="mt-4 text-xs text-[#94A3B8]">
+            <p className="mt-3 sm:mt-4 text-xs text-[#94A3B8]">
               Plots smooth mathematical bezier curves with milestone inflection points and animated value badges.
             </p>
           </div>
@@ -409,23 +409,23 @@ export const MotionArchetypesInteractive: React.FC = () => {
           {/* ========================================================
               ARCHETYPE 4: DIMENSIONAL MATRIX & RATIO ASSORTMENT
              ======================================================== */}
-          <div className="rounded-2xl border border-[#232736] bg-[#0E1017] p-6 shadow-xl flex flex-col justify-between">
+          <div className="rounded-2xl border border-[#232736] bg-[#0E1017] p-4 sm:p-6 shadow-xl flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-lg bg-[#E11D48]/10 text-[#E11D48]">
+              <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
+                <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-[#E11D48]/10 text-[#E11D48] shrink-0">
                     <LayoutGrid className="h-4 w-4" />
                   </div>
-                  <div>
-                    <span className="text-xs font-mono text-[#E11D48] uppercase tracking-wider font-semibold">
+                  <div className="min-w-0">
+                    <span className="text-[10px] sm:text-xs font-mono text-[#E11D48] uppercase tracking-wider font-semibold block">
                       Archetype 04
                     </span>
-                    <h3 className="text-lg font-bold text-white leading-tight">Dimensional Ratio Matrix</h3>
+                    <h3 className="text-base sm:text-lg font-bold text-white leading-tight truncate">Dimensional Ratio Matrix</h3>
                   </div>
                 </div>
                 <button
                   onClick={() => triggerReplay('matrix')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#181B26] border border-[#2A2F42] text-xs font-mono text-[#E2E8F0] hover:bg-[#23283B] hover:text-white transition active:scale-95"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-[#181B26] border border-[#2A2F42] text-[11px] sm:text-xs font-mono text-[#E2E8F0] hover:bg-[#23283B] hover:text-white transition active:scale-95 shrink-0"
                 >
                   <RotateCcw className="h-3 w-3 text-[#E11D48]" />
                   Replay ↺
@@ -435,83 +435,83 @@ export const MotionArchetypesInteractive: React.FC = () => {
               {/* Animated Interactive Canvas */}
               <div
                 key={replayKeys.matrix}
-                className="relative h-64 rounded-xl bg-[#090C14] border border-[#1C2030] p-4 grid grid-cols-2 gap-3 overflow-hidden"
+                className="relative h-60 sm:h-64 rounded-xl bg-[#090C14] border border-[#1C2030] p-2.5 sm:p-4 grid grid-cols-2 gap-2 sm:gap-3 overflow-hidden"
               >
                 {/* Quadrant 1 */}
                 <div
                   style={{ animation: 'matrixCell1 0.6s cubic-bezier(0.16, 1, 0.3, 1) both' }}
-                  className="rounded-xl border border-[#EAB308]/40 bg-[#EAB308]/10 p-3 flex flex-col justify-between"
+                  className="rounded-lg sm:rounded-xl border border-[#EAB308]/40 bg-[#EAB308]/10 p-2 sm:p-3 flex flex-col justify-between"
                 >
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-mono font-bold text-[#FDE047] uppercase">Primary Dominant</span>
-                    <span className="text-xs font-black font-mono text-white">9 / 16</span>
+                    <span className="text-[9px] sm:text-[10px] font-mono font-bold text-[#FDE047] uppercase truncate">9/16 Dominant</span>
+                    <span className="text-[10px] sm:text-xs font-black font-mono text-white/90">9:3:3:1</span>
                   </div>
-                  <div className="my-auto">
-                    <div className="text-lg font-extrabold text-[#FDE047]">56.25%</div>
-                    <div className="text-[10px] text-[#CBD5E1]">Yellow Round Phenotype</div>
+                  <div className="my-0.5 sm:my-1">
+                    <div className="text-base sm:text-xl font-black text-[#FDE047]">56.25%</div>
+                    <div className="text-[10px] sm:text-xs text-[#CBD5E1] font-medium truncate">Yellow & Round</div>
                   </div>
-                  <div className="w-full bg-[#EAB308]/20 h-1.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-[#EAB308]/20 h-1 sm:h-1.5 rounded-full overflow-hidden">
                     <div className="bg-[#EAB308] h-full w-[56%]" />
                   </div>
                 </div>
 
                 {/* Quadrant 2 */}
                 <div
-                  style={{ animation: 'matrixCell2 0.6s cubic-bezier(0.16, 1, 0.3, 1) both' }}
-                  className="rounded-xl border border-[#22C55E]/40 bg-[#22C55E]/10 p-3 flex flex-col justify-between"
+                  style={{ animation: 'matrixCell2 0.6s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both' }}
+                  className="rounded-lg sm:rounded-xl border border-[#22C55E]/40 bg-[#22C55E]/10 p-2 sm:p-3 flex flex-col justify-between"
                 >
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-mono font-bold text-[#4ADE80] uppercase">Recombinant A</span>
-                    <span className="text-xs font-black font-mono text-white">3 / 16</span>
+                    <span className="text-[9px] sm:text-[10px] font-mono font-bold text-[#4ADE80] uppercase truncate">3/16 Recomb A</span>
+                    <span className="text-[10px] sm:text-xs font-black font-mono text-white/90">3:16</span>
                   </div>
-                  <div className="my-auto">
-                    <div className="text-lg font-extrabold text-[#4ADE80]">18.75%</div>
-                    <div className="text-[10px] text-[#CBD5E1]">Green Round Phenotype</div>
+                  <div className="my-0.5 sm:my-1">
+                    <div className="text-base sm:text-xl font-black text-[#4ADE80]">18.75%</div>
+                    <div className="text-[10px] sm:text-xs text-[#CBD5E1] font-medium truncate">Green & Round</div>
                   </div>
-                  <div className="w-full bg-[#22C55E]/20 h-1.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-[#22C55E]/20 h-1 sm:h-1.5 rounded-full overflow-hidden">
                     <div className="bg-[#22C55E] h-full w-[19%]" />
                   </div>
                 </div>
 
                 {/* Quadrant 3 */}
                 <div
-                  style={{ animation: 'matrixCell3 0.6s cubic-bezier(0.16, 1, 0.3, 1) both' }}
-                  className="rounded-xl border border-[#F59E0B]/40 bg-[#F59E0B]/10 p-3 flex flex-col justify-between"
+                  style={{ animation: 'matrixCell3 0.6s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both' }}
+                  className="rounded-lg sm:rounded-xl border border-[#F59E0B]/40 bg-[#F59E0B]/10 p-2 sm:p-3 flex flex-col justify-between"
                 >
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-mono font-bold text-[#FBBF24] uppercase">Recombinant B</span>
-                    <span className="text-xs font-black font-mono text-white">3 / 16</span>
+                    <span className="text-[9px] sm:text-[10px] font-mono font-bold text-[#FBBF24] uppercase truncate">3/16 Recomb B</span>
+                    <span className="text-[10px] sm:text-xs font-black font-mono text-white/90">3:16</span>
                   </div>
-                  <div className="my-auto">
-                    <div className="text-lg font-extrabold text-[#FBBF24]">18.75%</div>
-                    <div className="text-[10px] text-[#CBD5E1]">Yellow Wrinkled Phenotype</div>
+                  <div className="my-0.5 sm:my-1">
+                    <div className="text-base sm:text-xl font-black text-[#FBBF24]">18.75%</div>
+                    <div className="text-[10px] sm:text-xs text-[#CBD5E1] font-medium truncate">Yellow Wrinkled</div>
                   </div>
-                  <div className="w-full bg-[#F59E0B]/20 h-1.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-[#F59E0B]/20 h-1 sm:h-1.5 rounded-full overflow-hidden">
                     <div className="bg-[#F59E0B] h-full w-[19%]" />
                   </div>
                 </div>
 
                 {/* Quadrant 4 */}
                 <div
-                  style={{ animation: 'matrixCell4 0.6s cubic-bezier(0.16, 1, 0.3, 1) both' }}
-                  className="rounded-xl border border-[#10B981]/50 bg-[#10B981]/20 p-3 flex flex-col justify-between shadow-lg shadow-[#10B981]/15"
+                  style={{ animation: 'matrixCell4 0.6s 0.6s cubic-bezier(0.16, 1, 0.3, 1) both' }}
+                  className="rounded-lg sm:rounded-xl border border-[#10B981]/50 bg-[#10B981]/20 p-2 sm:p-3 flex flex-col justify-between shadow-lg shadow-[#10B981]/15"
                 >
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-mono font-bold text-[#34D399] uppercase">Lone Recessive</span>
-                    <span className="text-xs font-black font-mono text-white">1 / 16</span>
+                    <span className="text-[9px] sm:text-[10px] font-mono font-bold text-[#34D399] uppercase truncate">1/16 Recessive</span>
+                    <span className="text-[10px] sm:text-xs font-black font-mono text-white/90">1:16</span>
                   </div>
-                  <div className="my-auto">
-                    <div className="text-lg font-extrabold text-[#34D399]">6.25%</div>
-                    <div className="text-[10px] text-[#CBD5E1]">Green Wrinkled Phenotype</div>
+                  <div className="my-0.5 sm:my-1">
+                    <div className="text-base sm:text-xl font-black text-[#34D399]">6.25%</div>
+                    <div className="text-[10px] sm:text-xs text-[#CBD5E1] font-medium truncate">Green Wrinkled</div>
                   </div>
-                  <div className="w-full bg-[#10B981]/30 h-1.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-[#10B981]/30 h-1 sm:h-1.5 rounded-full overflow-hidden">
                     <div className="bg-[#10B981] h-full w-[6%]" />
                   </div>
                 </div>
               </div>
             </div>
 
-            <p className="mt-4 text-xs text-[#94A3B8]">
+            <p className="mt-3 sm:mt-4 text-xs text-[#94A3B8]">
               Organizes multi-variable outcomes into dimensional grids with animated cell reveals and ratio bars.
             </p>
           </div>

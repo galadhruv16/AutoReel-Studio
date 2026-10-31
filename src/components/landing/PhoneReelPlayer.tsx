@@ -98,7 +98,7 @@ export const PhoneReelPlayer: React.FC<PhoneReelPlayerProps> = ({
       {/* 9:16 Phone Device Bezel */}
       <div
         onClick={togglePlay}
-        className="relative w-[280px] sm:w-[310px] h-[500px] sm:h-[550px] rounded-[38px] p-2.5 cursor-pointer shadow-2xl transition-all duration-300"
+        className="relative w-[265px] xs:w-[285px] sm:w-[310px] h-[470px] xs:h-[505px] sm:h-[550px] rounded-[34px] sm:rounded-[38px] p-2 sm:p-2.5 cursor-pointer shadow-2xl transition-all duration-300"
         style={{
           backgroundColor: '#0F1117',
           border: `2px solid ${isPlaying ? accentColor : borderColor}`,

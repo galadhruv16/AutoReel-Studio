@@ -215,73 +215,192 @@ export const KubernetesReel: React.FC = () => {
           </div>
 
           {/* Dials for cgroups and namespaces */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 24, width: '100%' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 32, width: '100%' }}>
             {/* 1. cgroups Dial */}
             <div
               style={{
-                backgroundColor: 'rgba(10, 20, 35, 0.8)',
-                border: '1px solid rgba(0, 240, 255, 0.4)',
-                borderRadius: 20,
-                padding: 24,
+                backgroundColor: 'rgba(10, 22, 40, 0.9)',
+                border: '1.5px solid rgba(0, 240, 255, 0.4)',
+                borderRadius: 24,
+                padding: '28px 20px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                boxShadow: '0 12px 40px rgba(0, 240, 255, 0.1)',
               }}
             >
-              <div style={{ fontSize: 24, fontWeight: 800, color: '#00F0FF' }}>cgroups</div>
+              <div style={{ fontSize: 26, fontWeight: 900, color: '#00F0FF', letterSpacing: '0.02em' }}>cgroups</div>
               <div style={{ fontSize: 16, color: '#94A3B8', marginTop: 4 }}>Resource Throttling</div>
+
+              {/* High-Tech Telemetry Circle */}
               <div
                 style={{
-                  marginTop: 20,
-                  width: 140,
-                  height: 140,
-                  borderRadius: '50%',
-                  border: '6px solid rgba(0, 240, 255, 0.2)',
-                  borderTopColor: '#00F0FF',
+                  position: 'relative',
+                  marginTop: 24,
+                  width: 200,
+                  height: 200,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 28,
-                  fontWeight: 900,
-                  color: '#FFFFFF',
-                  transform: `rotate(${frame * 2}deg)`,
                 }}
               >
-                <span style={{ transform: `rotate(-${frame * 2}deg)` }}>512 MB</span>
+                {/* Rotating Outer Dashed Reticle */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: '50%',
+                    border: '2px dashed rgba(0, 240, 255, 0.4)',
+                    transform: `rotate(${frame * 1.5}deg)`,
+                  }}
+                />
+
+                {/* Inner Glowing Gauge Ring */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 8,
+                    borderRadius: '50%',
+                    border: '5px solid rgba(0, 240, 255, 0.15)',
+                    borderTopColor: '#00F0FF',
+                    borderRightColor: '#00F0FF',
+                    boxShadow: '0 0 25px rgba(0, 240, 255, 0.3)',
+                  }}
+                />
+
+                {/* Center Core HUD */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 16,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, rgba(0, 240, 255, 0.15) 0%, rgba(8, 16, 32, 0.95) 75%)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 10,
+                  }}
+                >
+                  <span style={{ fontSize: 11, fontVariant: 'all-small-caps', letterSpacing: '0.18em', color: '#00F0FF', fontWeight: 800 }}>
+                    MEMORY LIMIT
+                  </span>
+                  <span style={{ fontSize: 28, fontWeight: 900, color: '#FFFFFF', margin: '4px 0' }}>
+                    512 MB
+                  </span>
+                  <span style={{ fontSize: 13, color: '#94A3B8', fontFamily: 'monospace', fontWeight: 600 }}>
+                    CPU • 1.0 CORE
+                  </span>
+                  <div
+                    style={{
+                      marginTop: 6,
+                      padding: '2px 8px',
+                      borderRadius: 10,
+                      backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                      border: '1px solid #F59E0B',
+                      fontSize: 10,
+                      fontWeight: 800,
+                      color: '#FCD34D',
+                      letterSpacing: '0.1em',
+                    }}
+                  >
+                    THROTTLED
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* 2. namespaces Dial */}
             <div
               style={{
-                backgroundColor: 'rgba(10, 20, 35, 0.8)',
-                border: '1px solid rgba(0, 240, 255, 0.4)',
-                borderRadius: 20,
-                padding: 24,
+                backgroundColor: 'rgba(10, 22, 40, 0.9)',
+                border: '1.5px solid rgba(0, 240, 255, 0.4)',
+                borderRadius: 24,
+                padding: '28px 20px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                boxShadow: '0 12px 40px rgba(0, 240, 255, 0.1)',
               }}
             >
-              <div style={{ fontSize: 24, fontWeight: 800, color: '#00F0FF' }}>namespaces</div>
-              <div style={{ fontSize: 16, color: '#94A3B8', marginTop: 4 }}>Vision Masking</div>
+              <div style={{ fontSize: 26, fontWeight: 900, color: '#00F0FF', letterSpacing: '0.02em' }}>namespaces</div>
+              <div style={{ fontSize: 16, color: '#94A3B8', marginTop: 4 }}>Vision & Process Masking</div>
+
+              {/* High-Tech Telemetry Circle */}
               <div
                 style={{
-                  marginTop: 20,
-                  width: 140,
-                  height: 140,
-                  borderRadius: '50%',
-                  border: '6px solid rgba(0, 240, 255, 0.2)',
-                  borderRightColor: '#00F0FF',
+                  position: 'relative',
+                  marginTop: 24,
+                  width: 200,
+                  height: 200,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 28,
-                  fontWeight: 900,
-                  color: '#FFFFFF',
                 }}
               >
-                PID / NET
+                {/* Rotating Outer Dashed Reticle */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: '50%',
+                    border: '2px dashed rgba(0, 240, 255, 0.4)',
+                    transform: `rotate(${-frame * 1.5}deg)`,
+                  }}
+                />
+
+                {/* Inner Glowing Gauge Ring */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 8,
+                    borderRadius: '50%',
+                    border: '5px solid rgba(0, 240, 255, 0.15)',
+                    borderTopColor: '#00F0FF',
+                    borderLeftColor: '#00F0FF',
+                    boxShadow: '0 0 25px rgba(0, 240, 255, 0.3)',
+                  }}
+                />
+
+                {/* Center Core HUD */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 16,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, rgba(0, 240, 255, 0.15) 0%, rgba(8, 16, 32, 0.95) 75%)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 10,
+                  }}
+                >
+                  <span style={{ fontSize: 11, fontVariant: 'all-small-caps', letterSpacing: '0.18em', color: '#00F0FF', fontWeight: 800 }}>
+                    KERNEL MASK
+                  </span>
+                  <span style={{ fontSize: 24, fontWeight: 900, color: '#FFFFFF', margin: '4px 0', letterSpacing: '0.04em' }}>
+                    PID • NET
+                  </span>
+                  <span style={{ fontSize: 13, color: '#94A3B8', fontFamily: 'monospace', fontWeight: 600 }}>
+                    IPC • MNT • UTS
+                  </span>
+                  <div
+                    style={{
+                      marginTop: 6,
+                      padding: '2px 8px',
+                      borderRadius: 10,
+                      backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                      border: '1px solid #10B981',
+                      fontSize: 10,
+                      fontWeight: 800,
+                      color: '#6EE7B7',
+                      letterSpacing: '0.1em',
+                    }}
+                  >
+                    ISOLATED
+                  </div>
+                </div>
               </div>
             </div>
           </div>

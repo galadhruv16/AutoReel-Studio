@@ -138,5 +138,14 @@ All development updates will be tracked in this section as each phase executes:
   - Pushed all 3 rendered MP4 binaries (`reel_genetics.mp4` 8.04 MB, `reel_kubernetes.mp4` 8.98 MB, `reel_saraighat.mp4` 7.86 MB) to GitHub `main` branch (commits `0bddbfd`, `b537469`, `712541c`). Verified all 3 MP4s and PNG posters are present on `origin/main`.
   - Investigated Vercel production endpoint (`https://autoreelprod.vercel.app`):
     - Confirmed CSS (`/_next/static/css/c21321c9850604cc.css`, 24.2 KB) and posters (`/videos/poster_genetics.png`, 1.52 MB) return HTTP 200 OK.
-    - Verified video requests (`/videos/reel_*.mp4`) return 404 because the active deployment on Vercel is serving an earlier build snapshot (`0f32ad1`) deployed prior to the MP4 pushes.
-    - Queried GitHub API (`check-runs` and `statuses`); confirmed 0 webhook triggers, indicating Vercel requires a manual "Redeploy" on the Vercel dashboard to fetch the latest commit `712541c`.
+    - Identified that Vercel had linked the production deployment to a private repository (`https://github.com/galadhruv16/autoreelprod.git`). Added `prod` remote and pushed full history and assets to `autoreelprod`.
+    - Verified all 3 video files return HTTP 200 OK directly on `https://autoreelprod.vercel.app/videos/`.
+- **[2026-10-31 17:25] Mobile UI Optimization & Kubernetes Telemetry Dial Upgrade:**
+  - **Kubernetes Video Overhaul (Scene 2):** Redesigned the cheap/cramped `namespaces` CSS circle into an enterprise-grade 200px telemetry HUD. Integrated a rotating outer dashed reticle (`rotate(${-frame * 1.5}deg)`), glowing cyan arc progress ring, radial dark HUD core, balanced typography hierarchy (`KERNEL MASK` -> `PID • NET` -> `IPC • MNT • UTS`), and an emerald `ISOLATED` status badge. Re-rendered `public/videos/reel_kubernetes.mp4` (9.17 MB, 901 frames @ 30fps).
+  - **Motion Archetypes Mobile Optimization:**
+    - Archetype 01 (Exploded Isometric Anatomy): Replaced rigid widths with responsive dimensions (`w-32 xs:w-36 sm:w-44`) and shortened leader badge labels (`L3 • App Logic`, `L2 • Isolation`, `L1 • CPU / RAM`) so all layers and leader pins fit inside small mobile viewports with zero clipping.
+    - Archetype 02 (Sequential Flow Pipeline): Scaled node boxes (`w-20 sm:w-24`) and horizontal rail margins so all 3 transformation stages fit comfortably across 320px–420px mobile screens.
+    - Archetype 03 (Kinetic Telemetry Chart): Refactored X-axis timeline markers into responsive milestones (`0.0s (Hook)`, `10.0s (Proof)`, `20.0s (Climax)`, `30.0s (Resolve)`).
+    - Archetype 04 (Dimensional Ratio Matrix): Adjusted grid gap and cell padding (`p-2 sm:p-3`) with compact headers and ratio bars (`9/16 Dominant`, `3/16 Recomb A`, `3/16 Recomb B`, `1/16 Recessive`) to eliminate text wrapping.
+  - **Hero & Reel Players Mobile Polish:** Made section paddings responsive (`px-4 sm:px-6`), adjusted phone bezel dimensions (`w-[265px] xs:w-[285px] sm:w-[310px]`) for mobile devices.
+  - **Verification:** `npm run build` executed with code 0 (100% static generation success).

@@ -11,12 +11,12 @@ export const HeroSection: React.FC = () => {
         <div className="absolute top-20 left-1/4 w-[400px] h-[300px] rounded-full bg-[#38BDF8]/8 blur-[100px]" />
       </div>
 
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Editorial Eyebrow Tag */}
         <div className="flex justify-center mb-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#2A2E3D] bg-[#12141C] px-4 py-1.5 text-xs font-mono text-[#E2E8F0] shadow-sm">
-            <span className="flex h-2 w-2 rounded-full bg-[#FF4F00] animate-pulse" />
-            <span>AI MOTION STUDIO • 100% DETERMINISTIC VECTOR GRAPHICS</span>
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#2A2E3D] bg-[#12141C] px-3.5 sm:px-4 py-1.5 text-[11px] sm:text-xs font-mono text-[#E2E8F0] shadow-sm text-center">
+            <span className="flex h-2 w-2 rounded-full bg-[#FF4F00] animate-pulse shrink-0" />
+            <span className="truncate">AI MOTION STUDIO • 100% DETERMINISTIC VECTOR GRAPHICS</span>
           </div>
         </div>
 
