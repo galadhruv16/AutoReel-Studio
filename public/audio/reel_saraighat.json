@@ -1,0 +1,355 @@
+{
+  "id": "reel_saraighat",
+  "voice": "en-US-AndrewMultilingualNeural",
+  "text": "In 1671, four thousand Mughal warships sailed down the Brahmaputra River to conquer Assam. On open ground, the imperial army was unbeatable. So General Lachit Borphukan lured them into the Saraighat gorge, where the river narrows to one kilometer. As the massive Mughal fleet choked in the rapids, agile Assamese war boats launched a devastating ambush from both banks. Trapped and helpless, the imperial armada was shattered. Assam stood free.",
+  "wordCount": 69,
+  "totalDurationMs": 31797,
+  "totalDurationSeconds": 31.8,
+  "wordTimestamps": [
+    {
+      "word": "In 1671",
+      "startMs": 86,
+      "endMs": 1324
+    },
+    {
+      "word": "four",
+      "startMs": 1703,
+      "endMs": 1826
+    },
+    {
+      "word": "thousand",
+      "startMs": 1826,
+      "endMs": 2341
+    },
+    {
+      "word": "Mughal",
+      "startMs": 2353,
+      "endMs": 2708
+    },
+    {
+      "word": "warships",
+      "startMs": 2721,
+      "endMs": 3346
+    },
+    {
+      "word": "sailed",
+      "startMs": 3542,
+      "endMs": 3922
+    },
+    {
+      "word": "down",
+      "startMs": 3922,
+      "endMs": 4228
+    },
+    {
+      "word": "the",
+      "startMs": 4228,
+      "endMs": 4314
+    },
+    {
+      "word": "Brahmaputra",
+      "startMs": 4326,
+      "endMs": 5135
+    },
+    {
+      "word": "River",
+      "startMs": 5147,
+      "endMs": 5527
+    },
+    {
+      "word": "to",
+      "startMs": 5772,
+      "endMs": 5858
+    },
+    {
+      "word": "conquer",
+      "startMs": 5870,
+      "endMs": 6336
+    },
+    {
+      "word": "Assam",
+      "startMs": 6336,
+      "endMs": 6789
+    },
+    {
+      "word": "On",
+      "startMs": 7169,
+      "endMs": 7304
+    },
+    {
+      "word": "open",
+      "startMs": 7316,
+      "endMs": 7586
+    },
+    {
+      "word": "ground",
+      "startMs": 7586,
+      "endMs": 8137
+    },
+    {
+      "word": "the",
+      "startMs": 8542,
+      "endMs": 8591
+    },
+    {
+      "word": "imperial",
+      "startMs": 8591,
+      "endMs": 9118
+    },
+    {
+      "word": "army",
+      "startMs": 9130,
+      "endMs": 9510
+    },
+    {
+      "word": "was",
+      "startMs": 9583,
+      "endMs": 9840
+    },
+    {
+      "word": "unbeatable",
+      "startMs": 9853,
+      "endMs": 10625
+    },
+    {
+      "word": "So",
+      "startMs": 11017,
+      "endMs": 11201
+    },
+    {
+      "word": "General",
+      "startMs": 11287,
+      "endMs": 11642
+    },
+    {
+      "word": "Lachit",
+      "startMs": 11642,
+      "endMs": 12059
+    },
+    {
+      "word": "Borphukan",
+      "startMs": 12071,
+      "endMs": 12708
+    },
+    {
+      "word": "lured",
+      "startMs": 13015,
+      "endMs": 13334
+    },
+    {
+      "word": "them",
+      "startMs": 13346,
+      "endMs": 13616
+    },
+    {
+      "word": "into",
+      "startMs": 13726,
+      "endMs": 13849
+    },
+    {
+      "word": "the",
+      "startMs": 13848,
+      "endMs": 13934
+    },
+    {
+      "word": "Saraighat",
+      "startMs": 13946,
+      "endMs": 14571
+    },
+    {
+      "word": "gorge",
+      "startMs": 14571,
+      "endMs": 15073
+    },
+    {
+      "word": "where",
+      "startMs": 15441,
+      "endMs": 15551
+    },
+    {
+      "word": "the",
+      "startMs": 15551,
+      "endMs": 15649
+    },
+    {
+      "word": "river",
+      "startMs": 15650,
+      "endMs": 15895
+    },
+    {
+      "word": "narrows",
+      "startMs": 15895,
+      "endMs": 16471
+    },
+    {
+      "word": "to",
+      "startMs": 16483,
+      "endMs": 16630
+    },
+    {
+      "word": "one",
+      "startMs": 16630,
+      "endMs": 17010
+    },
+    {
+      "word": "kilometer",
+      "startMs": 17010,
+      "endMs": 17709
+    },
+    {
+      "word": "As",
+      "startMs": 18113,
+      "endMs": 18236
+    },
+    {
+      "word": "the",
+      "startMs": 18235,
+      "endMs": 18284
+    },
+    {
+      "word": "massive",
+      "startMs": 18297,
+      "endMs": 18775
+    },
+    {
+      "word": "Mughal",
+      "startMs": 18774,
+      "endMs": 19215
+    },
+    {
+      "word": "fleet",
+      "startMs": 19216,
+      "endMs": 19535
+    },
+    {
+      "word": "choked",
+      "startMs": 19547,
+      "endMs": 19902
+    },
+    {
+      "word": "in",
+      "startMs": 19902,
+      "endMs": 19951
+    },
+    {
+      "word": "the",
+      "startMs": 19951,
+      "endMs": 20000
+    },
+    {
+      "word": "rapids",
+      "startMs": 20000,
+      "endMs": 20637
+    },
+    {
+      "word": "agile",
+      "startMs": 21029,
+      "endMs": 21409
+    },
+    {
+      "word": "Assamese",
+      "startMs": 21409,
+      "endMs": 22009
+    },
+    {
+      "word": "war",
+      "startMs": 22022,
+      "endMs": 22328
+    },
+    {
+      "word": "boats",
+      "startMs": 22328,
+      "endMs": 22720
+    },
+    {
+      "word": "launched",
+      "startMs": 22855,
+      "endMs": 23296
+    },
+    {
+      "word": "a",
+      "startMs": 23395,
+      "endMs": 23481
+    },
+    {
+      "word": "devastating",
+      "startMs": 23627,
+      "endMs": 24326
+    },
+    {
+      "word": "ambush",
+      "startMs": 24338,
+      "endMs": 24951
+    },
+    {
+      "word": "from",
+      "startMs": 25110,
+      "endMs": 25282
+    },
+    {
+      "word": "both",
+      "startMs": 25282,
+      "endMs": 25588
+    },
+    {
+      "word": "banks",
+      "startMs": 25588,
+      "endMs": 26139
+    },
+    {
+      "word": "Trapped",
+      "startMs": 26520,
+      "endMs": 26937
+    },
+    {
+      "word": "and",
+      "startMs": 27181,
+      "endMs": 27267
+    },
+    {
+      "word": "helpless",
+      "startMs": 27267,
+      "endMs": 27953
+    },
+    {
+      "word": "the",
+      "startMs": 28346,
+      "endMs": 28407
+    },
+    {
+      "word": "imperial",
+      "startMs": 28407,
+      "endMs": 28946
+    },
+    {
+      "word": "armada",
+      "startMs": 28946,
+      "endMs": 29399
+    },
+    {
+      "word": "was",
+      "startMs": 29412,
+      "endMs": 29522
+    },
+    {
+      "word": "shattered",
+      "startMs": 29522,
+      "endMs": 30073
+    },
+    {
+      "word": "Assam",
+      "startMs": 30466,
+      "endMs": 30821
+    },
+    {
+      "word": "stood",
+      "startMs": 30821,
+      "endMs": 31029
+    },
+    {
+      "word": "free",
+      "startMs": 31029,
+      "endMs": 31397
+    }
+  ]
+}

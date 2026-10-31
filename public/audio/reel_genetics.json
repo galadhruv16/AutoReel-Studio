@@ -1,0 +1,355 @@
+{
+  "id": "reel_genetics",
+  "voice": "en-US-JennyNeural",
+  "text": "Why do two yellow round peas produce wrinkled green offspring? In 1866, Gregor Mendel crossed yellow round peas with green wrinkled ones. Every first-generation child was yellow and round! But the green trait didn’t vanish—it was hiding. In the F2 generation, alleles recombined into a sixteen-cell matrix. Nine yellow round, three green round, three yellow wrinkled, and one lone green wrinkled pea. That nine-to-three-to-three-to-one ratio proved genes sort independently.",
+  "wordCount": 69,
+  "totalDurationMs": 31528,
+  "totalDurationSeconds": 31.53,
+  "wordTimestamps": [
+    {
+      "word": "Why",
+      "startMs": 99,
+      "endMs": 332
+    },
+    {
+      "word": "do",
+      "startMs": 344,
+      "endMs": 479
+    },
+    {
+      "word": "two",
+      "startMs": 491,
+      "endMs": 675
+    },
+    {
+      "word": "yellow",
+      "startMs": 687,
+      "endMs": 981
+    },
+    {
+      "word": "round",
+      "startMs": 994,
+      "endMs": 1276
+    },
+    {
+      "word": "peas",
+      "startMs": 1288,
+      "endMs": 1545
+    },
+    {
+      "word": "produce",
+      "startMs": 1557,
+      "endMs": 1937
+    },
+    {
+      "word": "wrinkled",
+      "startMs": 1950,
+      "endMs": 2269
+    },
+    {
+      "word": "green",
+      "startMs": 2280,
+      "endMs": 2525
+    },
+    {
+      "word": "offspring",
+      "startMs": 2538,
+      "endMs": 3126
+    },
+    {
+      "word": "In 1866",
+      "startMs": 3971,
+      "endMs": 5405
+    },
+    {
+      "word": "Gregor",
+      "startMs": 5527,
+      "endMs": 5907
+    },
+    {
+      "word": "Mendel",
+      "startMs": 5919,
+      "endMs": 6238
+    },
+    {
+      "word": "crossed",
+      "startMs": 6250,
+      "endMs": 6605
+    },
+    {
+      "word": "yellow",
+      "startMs": 6618,
+      "endMs": 6900
+    },
+    {
+      "word": "round",
+      "startMs": 6912,
+      "endMs": 7255
+    },
+    {
+      "word": "peas",
+      "startMs": 7267,
+      "endMs": 7622
+    },
+    {
+      "word": "with",
+      "startMs": 7635,
+      "endMs": 7782
+    },
+    {
+      "word": "green",
+      "startMs": 7794,
+      "endMs": 8100
+    },
+    {
+      "word": "wrinkled",
+      "startMs": 8113,
+      "endMs": 8456
+    },
+    {
+      "word": "ones",
+      "startMs": 8468,
+      "endMs": 8995
+    },
+    {
+      "word": "Every",
+      "startMs": 9841,
+      "endMs": 10111
+    },
+    {
+      "word": "first-generation",
+      "startMs": 10123,
+      "endMs": 10993
+    },
+    {
+      "word": "child",
+      "startMs": 11005,
+      "endMs": 11324
+    },
+    {
+      "word": "was",
+      "startMs": 11336,
+      "endMs": 11483
+    },
+    {
+      "word": "yellow",
+      "startMs": 11495,
+      "endMs": 11801
+    },
+    {
+      "word": "and",
+      "startMs": 11814,
+      "endMs": 11924
+    },
+    {
+      "word": "round",
+      "startMs": 11936,
+      "endMs": 12389
+    },
+    {
+      "word": "But",
+      "startMs": 13235,
+      "endMs": 13394
+    },
+    {
+      "word": "the",
+      "startMs": 13407,
+      "endMs": 13493
+    },
+    {
+      "word": "green",
+      "startMs": 13505,
+      "endMs": 13799
+    },
+    {
+      "word": "trait",
+      "startMs": 13811,
+      "endMs": 14130
+    },
+    {
+      "word": "didn’t",
+      "startMs": 14142,
+      "endMs": 14375
+    },
+    {
+      "word": "vanish",
+      "startMs": 14387,
+      "endMs": 14877
+    },
+    {
+      "word": "it",
+      "startMs": 15074,
+      "endMs": 15148
+    },
+    {
+      "word": "was",
+      "startMs": 15159,
+      "endMs": 15306
+    },
+    {
+      "word": "hiding",
+      "startMs": 15319,
+      "endMs": 15858
+    },
+    {
+      "word": "In",
+      "startMs": 16703,
+      "endMs": 16838
+    },
+    {
+      "word": "the",
+      "startMs": 16850,
+      "endMs": 16924
+    },
+    {
+      "word": "F2",
+      "startMs": 16936,
+      "endMs": 17316
+    },
+    {
+      "word": "generation",
+      "startMs": 17328,
+      "endMs": 18051
+    },
+    {
+      "word": "alleles",
+      "startMs": 18174,
+      "endMs": 18542
+    },
+    {
+      "word": "recombined",
+      "startMs": 18554,
+      "endMs": 19142
+    },
+    {
+      "word": "into",
+      "startMs": 19154,
+      "endMs": 19350
+    },
+    {
+      "word": "a",
+      "startMs": 19363,
+      "endMs": 19424
+    },
+    {
+      "word": "sixteen-cell",
+      "startMs": 19436,
+      "endMs": 20147
+    },
+    {
+      "word": "matrix",
+      "startMs": 20159,
+      "endMs": 20858
+    },
+    {
+      "word": "Nine",
+      "startMs": 21703,
+      "endMs": 22009
+    },
+    {
+      "word": "yellow",
+      "startMs": 22022,
+      "endMs": 22304
+    },
+    {
+      "word": "round",
+      "startMs": 22316,
+      "endMs": 22671
+    },
+    {
+      "word": "three",
+      "startMs": 22819,
+      "endMs": 23027
+    },
+    {
+      "word": "green",
+      "startMs": 23039,
+      "endMs": 23345
+    },
+    {
+      "word": "round",
+      "startMs": 23358,
+      "endMs": 23701
+    },
+    {
+      "word": "three",
+      "startMs": 23860,
+      "endMs": 24056
+    },
+    {
+      "word": "yellow",
+      "startMs": 24069,
+      "endMs": 24363
+    },
+    {
+      "word": "wrinkled",
+      "startMs": 24375,
+      "endMs": 24841
+    },
+    {
+      "word": "and",
+      "startMs": 25024,
+      "endMs": 25171
+    },
+    {
+      "word": "one",
+      "startMs": 25184,
+      "endMs": 25441
+    },
+    {
+      "word": "lone",
+      "startMs": 25453,
+      "endMs": 25649
+    },
+    {
+      "word": "green",
+      "startMs": 25662,
+      "endMs": 25956
+    },
+    {
+      "word": "wrinkled",
+      "startMs": 25968,
+      "endMs": 26287
+    },
+    {
+      "word": "pea",
+      "startMs": 26299,
+      "endMs": 26654
+    },
+    {
+      "word": "That",
+      "startMs": 27500,
+      "endMs": 27733
+    },
+    {
+      "word": "nine-to-three-to-three-to-one",
+      "startMs": 27745,
+      "endMs": 28872
+    },
+    {
+      "word": "ratio",
+      "startMs": 28885,
+      "endMs": 29326
+    },
+    {
+      "word": "proved",
+      "startMs": 29338,
+      "endMs": 29669
+    },
+    {
+      "word": "genes",
+      "startMs": 29681,
+      "endMs": 29987
+    },
+    {
+      "word": "sort",
+      "startMs": 30000,
+      "endMs": 30257
+    },
+    {
+      "word": "independently",
+      "startMs": 30270,
+      "endMs": 31128
+    }
+  ]
+}

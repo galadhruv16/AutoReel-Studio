@@ -1,0 +1,345 @@
+{
+  "id": "reel_kubernetes",
+  "voice": "en-US-BrianMultilingualNeural",
+  "text": "Containers do not exist. There is no tiny virtual machine inside your server. A container is just a normal Linux process, isolated by cgroups and namespaces. When two containers must share memory or localhost, single containers fail. That is why Kubernetes created the Pod. A Pod wraps containers inside the exact same network namespace, letting them talk at lightspeed over localhost. Never deploy bare containers. Deploy Pods.",
+  "wordCount": 67,
+  "totalDurationMs": 29529,
+  "totalDurationSeconds": 29.53,
+  "wordTimestamps": [
+    {
+      "word": "Containers",
+      "startMs": 61,
+      "endMs": 698
+    },
+    {
+      "word": "do",
+      "startMs": 711,
+      "endMs": 846
+    },
+    {
+      "word": "not",
+      "startMs": 858,
+      "endMs": 1128
+    },
+    {
+      "word": "exist",
+      "startMs": 1140,
+      "endMs": 1777
+    },
+    {
+      "word": "There",
+      "startMs": 2145,
+      "endMs": 2292
+    },
+    {
+      "word": "is",
+      "startMs": 2304,
+      "endMs": 2439
+    },
+    {
+      "word": "no",
+      "startMs": 2451,
+      "endMs": 2684
+    },
+    {
+      "word": "tiny",
+      "startMs": 2696,
+      "endMs": 3113
+    },
+    {
+      "word": "virtual",
+      "startMs": 3125,
+      "endMs": 3542
+    },
+    {
+      "word": "machine",
+      "startMs": 3554,
+      "endMs": 4069
+    },
+    {
+      "word": "inside",
+      "startMs": 4093,
+      "endMs": 4534
+    },
+    {
+      "word": "your",
+      "startMs": 4547,
+      "endMs": 4670
+    },
+    {
+      "word": "server",
+      "startMs": 4681,
+      "endMs": 5183
+    },
+    {
+      "word": "A",
+      "startMs": 5540,
+      "endMs": 5638
+    },
+    {
+      "word": "container",
+      "startMs": 5650,
+      "endMs": 6152
+    },
+    {
+      "word": "is",
+      "startMs": 6165,
+      "endMs": 6312
+    },
+    {
+      "word": "just",
+      "startMs": 6324,
+      "endMs": 6557
+    },
+    {
+      "word": "a",
+      "startMs": 6570,
+      "endMs": 6619
+    },
+    {
+      "word": "normal",
+      "startMs": 6631,
+      "endMs": 7060
+    },
+    {
+      "word": "Linux",
+      "startMs": 7072,
+      "endMs": 7378
+    },
+    {
+      "word": "process",
+      "startMs": 7391,
+      "endMs": 8016
+    },
+    {
+      "word": "isolated",
+      "startMs": 8518,
+      "endMs": 9082
+    },
+    {
+      "word": "by",
+      "startMs": 9094,
+      "endMs": 9253
+    },
+    {
+      "word": "cgroups",
+      "startMs": 9266,
+      "endMs": 9793
+    },
+    {
+      "word": "and",
+      "startMs": 9805,
+      "endMs": 9977
+    },
+    {
+      "word": "namespaces",
+      "startMs": 9989,
+      "endMs": 10822
+    },
+    {
+      "word": "When",
+      "startMs": 11213,
+      "endMs": 11348
+    },
+    {
+      "word": "two",
+      "startMs": 11360,
+      "endMs": 11556
+    },
+    {
+      "word": "containers",
+      "startMs": 11569,
+      "endMs": 12157
+    },
+    {
+      "word": "must",
+      "startMs": 12169,
+      "endMs": 12402
+    },
+    {
+      "word": "share",
+      "startMs": 12414,
+      "endMs": 12733
+    },
+    {
+      "word": "memory",
+      "startMs": 12745,
+      "endMs": 13198
+    },
+    {
+      "word": "or",
+      "startMs": 13211,
+      "endMs": 13383
+    },
+    {
+      "word": "localhost",
+      "startMs": 13395,
+      "endMs": 14118
+    },
+    {
+      "word": "single",
+      "startMs": 14559,
+      "endMs": 14951
+    },
+    {
+      "word": "containers",
+      "startMs": 14963,
+      "endMs": 15490
+    },
+    {
+      "word": "fail",
+      "startMs": 15502,
+      "endMs": 15919
+    },
+    {
+      "word": "That",
+      "startMs": 16299,
+      "endMs": 16507
+    },
+    {
+      "word": "is",
+      "startMs": 16520,
+      "endMs": 16679
+    },
+    {
+      "word": "why",
+      "startMs": 16691,
+      "endMs": 16973
+    },
+    {
+      "word": "Kubernetes",
+      "startMs": 16985,
+      "endMs": 17671
+    },
+    {
+      "word": "created",
+      "startMs": 17684,
+      "endMs": 18088
+    },
+    {
+      "word": "the",
+      "startMs": 18100,
+      "endMs": 18186
+    },
+    {
+      "word": "Pod",
+      "startMs": 18199,
+      "endMs": 18640
+    },
+    {
+      "word": "A",
+      "startMs": 19007,
+      "endMs": 19068
+    },
+    {
+      "word": "Pod",
+      "startMs": 19081,
+      "endMs": 19351
+    },
+    {
+      "word": "wraps",
+      "startMs": 19363,
+      "endMs": 19657
+    },
+    {
+      "word": "containers",
+      "startMs": 19669,
+      "endMs": 20257
+    },
+    {
+      "word": "inside",
+      "startMs": 20270,
+      "endMs": 20748
+    },
+    {
+      "word": "the",
+      "startMs": 20760,
+      "endMs": 20809
+    },
+    {
+      "word": "exact",
+      "startMs": 20821,
+      "endMs": 21262
+    },
+    {
+      "word": "same",
+      "startMs": 21274,
+      "endMs": 21544
+    },
+    {
+      "word": "network",
+      "startMs": 21556,
+      "endMs": 21924
+    },
+    {
+      "word": "namespace",
+      "startMs": 21936,
+      "endMs": 22635
+    },
+    {
+      "word": "letting",
+      "startMs": 23199,
+      "endMs": 23481
+    },
+    {
+      "word": "them",
+      "startMs": 23493,
+      "endMs": 23640
+    },
+    {
+      "word": "talk",
+      "startMs": 23652,
+      "endMs": 23971
+    },
+    {
+      "word": "at",
+      "startMs": 23983,
+      "endMs": 24106
+    },
+    {
+      "word": "lightspeed",
+      "startMs": 24118,
+      "endMs": 24669
+    },
+    {
+      "word": "over",
+      "startMs": 24681,
+      "endMs": 24914
+    },
+    {
+      "word": "localhost",
+      "startMs": 24926,
+      "endMs": 25686
+    },
+    {
+      "word": "Never",
+      "startMs": 26066,
+      "endMs": 26397
+    },
+    {
+      "word": "deploy",
+      "startMs": 26409,
+      "endMs": 26838
+    },
+    {
+      "word": "bare",
+      "startMs": 26850,
+      "endMs": 27132
+    },
+    {
+      "word": "containers",
+      "startMs": 27145,
+      "endMs": 27868
+    },
+    {
+      "word": "Deploy",
+      "startMs": 28235,
+      "endMs": 28615
+    },
+    {
+      "word": "Pods",
+      "startMs": 28627,
+      "endMs": 29129
+    }
+  ]
+}

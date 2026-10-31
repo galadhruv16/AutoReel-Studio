@@ -1,0 +1,69 @@
+{
+  "text": "If you think Kubernetes runs Docker containers directly, you've been lied to.",
+  "voice": "en-US-ChristopherNeural",
+  "audioFile": "spike_test.mp3",
+  "totalDurationMs": 4262,
+  "wordCount": 12,
+  "wordTimestamps": [
+    {
+      "word": "If",
+      "startMs": 100,
+      "endMs": 262
+    },
+    {
+      "word": "you",
+      "startMs": 275,
+      "endMs": 387
+    },
+    {
+      "word": "think",
+      "startMs": 400,
+      "endMs": 638
+    },
+    {
+      "word": "Kubernetes",
+      "startMs": 650,
+      "endMs": 1262
+    },
+    {
+      "word": "runs",
+      "startMs": 1275,
+      "endMs": 1563
+    },
+    {
+      "word": "Docker",
+      "startMs": 1575,
+      "endMs": 1913
+    },
+    {
+      "word": "containers",
+      "startMs": 1925,
+      "endMs": 2450
+    },
+    {
+      "word": "directly",
+      "startMs": 2462,
+      "endMs": 2987
+    },
+    {
+      "word": "you've",
+      "startMs": 3250,
+      "endMs": 3362
+    },
+    {
+      "word": "been",
+      "startMs": 3375,
+      "endMs": 3525
+    },
+    {
+      "word": "lied",
+      "startMs": 3538,
+      "endMs": 3800
+    },
+    {
+      "word": "to",
+      "startMs": 3812,
+      "endMs": 4062
+    }
+  ]
+}
