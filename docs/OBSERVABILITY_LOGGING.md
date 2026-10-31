@@ -133,3 +133,10 @@ All development updates will be tracked in this section as each phase executes:
   - Added `.gitignore` to securely exclude `.env` credentials, `node_modules`, `.next`, and build caches.
   - Added `.env.example` template and comprehensive `README.md`.
   - Pushed initial project baseline commit (`0f32ad1`) to **`https://github.com/galadhruv16/AutoReel-Studio.git`** (`branch 'main' -> 'origin/main'`). All code, documentation, Remotion compositions, and assets published.
+- **[2026-10-31 16:45] Video Asset Delivery & Vercel Deployment Diagnostics:**
+  - Unignored `public/videos/` in `.gitignore` to allow static showcase video assets in repository.
+  - Pushed all 3 rendered MP4 binaries (`reel_genetics.mp4` 8.04 MB, `reel_kubernetes.mp4` 8.98 MB, `reel_saraighat.mp4` 7.86 MB) to GitHub `main` branch (commits `0bddbfd`, `b537469`, `712541c`). Verified all 3 MP4s and PNG posters are present on `origin/main`.
+  - Investigated Vercel production endpoint (`https://autoreelprod.vercel.app`):
+    - Confirmed CSS (`/_next/static/css/c21321c9850604cc.css`, 24.2 KB) and posters (`/videos/poster_genetics.png`, 1.52 MB) return HTTP 200 OK.
+    - Verified video requests (`/videos/reel_*.mp4`) return 404 because the active deployment on Vercel is serving an earlier build snapshot (`0f32ad1`) deployed prior to the MP4 pushes.
+    - Queried GitHub API (`check-runs` and `statuses`); confirmed 0 webhook triggers, indicating Vercel requires a manual "Redeploy" on the Vercel dashboard to fetch the latest commit `712541c`.
