@@ -13,6 +13,16 @@ export interface VoiceOption {
   sampleAudio: string;
 }
 
+export type VisualArchetype =
+  | 'kinetic_text'
+  | 'vector_schematic'
+  | 'crosshair_target'
+  | 'split_comparison'
+  | 'process_flow'
+  | 'dynamic_chart'
+  | 'timeline'
+  | 'step_sequence';
+
 export interface StudioScene {
   id: string;
   index: number;
@@ -21,7 +31,7 @@ export interface StudioScene {
   duration: number; // in seconds
   narration: string;
   visualDirection: string;
-  visualType: 'kinetic_text' | 'vector_schematic' | 'crosshair_target' | 'split_comparison' | 'process_flow';
+  visualType: VisualArchetype;
   highlightWords?: string[];
   audioUrl?: string;
 }

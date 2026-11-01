@@ -440,6 +440,9 @@ export const Stage03Review: React.FC = () => {
                     <option value="crosshair_target">Crosshair Target</option>
                     <option value="split_comparison">Split Comparison</option>
                     <option value="process_flow">Process Flow</option>
+                    <option value="dynamic_chart">Dynamic Metric Chart</option>
+                    <option value="timeline">Chronological Timeline</option>
+                    <option value="step_sequence">Step Sequence Takeaways</option>
                   </select>
                 </div>
 

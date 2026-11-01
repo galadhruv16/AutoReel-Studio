@@ -39,9 +39,17 @@ CRITICAL DIRECTIVE RULES:
    - Every scene represents a single spoken beat that lasts strictly between 2.2s and 5.0s.
    - Target total video duration: exactly ${targetSec} seconds (~${targetWords} spoken words across ${minScenes} to ${maxScenes} scenes).
    - Tone: ${tone}.
-4. MOTIVATED VISUAL DIRECTION:
-   - For every beat, describe a unique, high-contrast 9:16 vertical visual scene tailored specifically to the words spoken in that beat (e.g. animated bank vault ledger, double-helix cleavage, currency freefall gauge, geographic troop movements).
-   - Assign the most fitting visualType: "kinetic_text" | "vector_schematic" | "crosshair_target" | "split_comparison" | "process_flow".
+4. MOTIVATED VISUAL DIRECTION & ALL 8 ARCHETYPES:
+   - For every beat, describe a unique, high-contrast 9:16 vertical visual scene tailored specifically to the words spoken in that beat.
+   - Assign the most fitting visualType from the 8 motion graphics patterns:
+     * "dynamic_chart": For metrics, statistics, percentages, benchmarks, or growth comparisons.
+     * "timeline": For historical progression, chronological milestones, or phases over time.
+     * "step_sequence": For 1-2-3 takeaways, principles, rules, framework steps, or key takeaways.
+     * "split_comparison": For contrasting two opposing approaches, Old vs New, or Problem vs Solution.
+     * "vector_schematic": For technical architecture, anatomical structure, blueprint, or mechanical schematics.
+     * "process_flow": For multi-stage pipelines, workflows, or chain reactions.
+     * "crosshair_target": For pinpointing a critical vulnerability, focus target, or laser precision fact.
+     * "kinetic_text": For bold typographic hooks, punchy opening statements, or climactic thesis lines.
 
 ${
   scriptMode === 'own_script' && customScript.trim().length > 10
@@ -105,7 +113,16 @@ Respond STRICTLY with valid JSON (no markdown formatting, no code blocks):
                       duration: Number(dur.toFixed(1)),
                       narration: String(s.narration || ''),
                       visualDirection: String(s.visualDirection || 'Dynamic animated visual sequence'),
-                      visualType: (['kinetic_text', 'vector_schematic', 'crosshair_target', 'split_comparison', 'process_flow'].includes(s.visualType)
+                      visualType: ([
+                        'kinetic_text',
+                        'vector_schematic',
+                        'crosshair_target',
+                        'split_comparison',
+                        'process_flow',
+                        'dynamic_chart',
+                        'timeline',
+                        'step_sequence',
+                      ].includes(s.visualType)
                         ? s.visualType
                         : 'kinetic_text') as any,
                       highlightWords: Array.isArray(s.highlightWords) ? s.highlightWords : [],
@@ -193,7 +210,16 @@ function generateHeuristicScenes(
         time += dur;
         const end = Number(time.toFixed(1));
 
-        const visualTypes = ['kinetic_text', 'vector_schematic', 'crosshair_target', 'process_flow', 'split_comparison'] as const;
+        const visualTypes = [
+          'kinetic_text',
+          'vector_schematic',
+          'crosshair_target',
+          'process_flow',
+          'split_comparison',
+          'dynamic_chart',
+          'timeline',
+          'step_sequence',
+        ] as const;
         const vType = visualTypes[idx % visualTypes.length];
 
         return {

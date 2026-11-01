@@ -106,7 +106,7 @@ const KineticTextScene: React.FC<{
             boxShadow: `0 0 25px ${accentColor}30`,
           }}
         >
-          {scene.visualDirection.split(':')[0].slice(0, 24) || 'KEY CONCEPT'}
+          {(scene.visualDirection || 'KEY CONCEPT').split(':')[0].slice(0, 24) || 'KEY CONCEPT'}
         </div>
 
         <h1
@@ -264,7 +264,7 @@ const VectorSchematicScene: React.FC<{
             marginBottom: 12,
           }}
         >
-          {scene.visualDirection.split(':')[0] || 'ARCHITECTURAL SCHEMATIC'}
+          {(scene.visualDirection || 'ARCHITECTURAL SCHEMATIC').split(':')[0] || 'ARCHITECTURAL SCHEMATIC'}
         </span>
         <h2
           style={{
@@ -767,7 +767,7 @@ const ProcessFlowScene: React.FC<{
             marginBottom: 16,
           }}
         >
-          {scene.visualDirection.split(':')[0] || 'SEQUENTIAL EXECUTION PIPELINE'}
+          {(scene.visualDirection || 'SEQUENTIAL EXECUTION PIPELINE').split(':')[0] || 'SEQUENTIAL EXECUTION PIPELINE'}
         </span>
         <h2
           style={{
@@ -780,6 +780,473 @@ const ProcessFlowScene: React.FC<{
         >
           {scene.narration}
         </h2>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// =========================================================================
+// SUB-COMPONENT: DYNAMIC METRIC & BAR CHART SCENE
+// =========================================================================
+const DynamicChartScene: React.FC<{
+  scene: StudioScene;
+  accentColor: string;
+}> = ({ scene, accentColor }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const grow = spring({ frame, fps, config: { damping: 12, mass: 0.6, stiffness: 100 } });
+  const count1 = Math.round(interpolate(frame, [0, 25], [0, 84], { extrapolateRight: 'clamp' }));
+  const count2 = Math.round(interpolate(frame, [0, 30], [0, 310], { extrapolateRight: 'clamp' }));
+
+  return (
+    <AbsoluteFill
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '0 80px',
+      }}
+    >
+      {/* Background Metric Glow */}
+      <div
+        style={{
+          position: 'absolute',
+          width: 600,
+          height: 600,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${accentColor}20 0%, transparent 70%)`,
+          filter: 'blur(50px)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Main Chart Card */}
+      <div
+        style={{
+          width: 760,
+          backgroundColor: '#14161F',
+          border: '1px solid #232634',
+          borderRadius: 36,
+          padding: '48px 40px',
+          boxShadow: '0 30px 60px rgba(0,0,0,0.8)',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Top Metric Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 40 }}>
+          <div>
+            <span
+              style={{
+                fontSize: 18,
+                fontFamily: 'monospace',
+                color: accentColor,
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                display: 'block',
+                marginBottom: 8,
+              }}
+            >
+              {(scene.visualDirection || 'METRIC ANALYSIS').split(':')[0].slice(0, 24)}
+            </span>
+            <div style={{ fontSize: 56, fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.03em' }}>
+              +{count2}% <span style={{ fontSize: 24, fontWeight: 700, color: '#10B981' }}>IMPACT</span>
+            </div>
+          </div>
+          <div
+            style={{
+              backgroundColor: '#08090A',
+              border: `1px solid ${accentColor}40`,
+              borderRadius: 14,
+              padding: '8px 16px',
+              color: accentColor,
+              fontFamily: 'monospace',
+              fontSize: 16,
+              fontWeight: 700,
+            }}
+          >
+            INDEX // 0{scene.index}
+          </div>
+        </div>
+
+        {/* Animated Bar Chart SVG */}
+        <div style={{ height: 260, position: 'relative', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '0 20px 20px 20px' }}>
+          {/* Baseline Gridlines */}
+          <div style={{ position: 'absolute', left: 0, right: 0, top: 40, borderTop: '1px dashed #232634' }} />
+          <div style={{ position: 'absolute', left: 0, right: 0, top: 120, borderTop: '1px dashed #232634' }} />
+          <div style={{ position: 'absolute', left: 0, right: 0, bottom: 20, borderTop: '2px solid #33384B' }} />
+
+          {/* Bar 1: Baseline */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10, width: 140 }}>
+            <span style={{ fontSize: 20, fontFamily: 'monospace', color: '#94A3B8', marginBottom: 12, fontWeight: 700 }}>
+              {Math.round(24 * grow)}%
+            </span>
+            <div
+              style={{
+                width: 100,
+                height: 180 * 0.28 * grow,
+                backgroundColor: '#232634',
+                borderRadius: '12px 12px 0 0',
+                border: '1px solid #33384B',
+              }}
+            />
+            <span style={{ fontSize: 16, fontFamily: 'monospace', color: '#64748B', marginTop: 14 }}>BASELINE</span>
+          </div>
+
+          {/* Bar 2: Midpoint */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10, width: 140 }}>
+            <span style={{ fontSize: 20, fontFamily: 'monospace', color: '#EDEDED', marginBottom: 12, fontWeight: 700 }}>
+              {Math.round(58 * grow)}%
+            </span>
+            <div
+              style={{
+                width: 100,
+                height: 180 * 0.62 * grow,
+                backgroundColor: '#38BDF8',
+                borderRadius: '12px 12px 0 0',
+                boxShadow: '0 0 20px rgba(56, 189, 248, 0.4)',
+              }}
+            />
+            <span style={{ fontSize: 16, fontFamily: 'monospace', color: '#94A3B8', marginTop: 14 }}>ADOPTION</span>
+          </div>
+
+          {/* Bar 3: Peak Metric */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10, width: 140 }}>
+            <span style={{ fontSize: 22, fontFamily: 'monospace', color: accentColor, marginBottom: 12, fontWeight: 900 }}>
+              {count1}%
+            </span>
+            <div
+              style={{
+                width: 100,
+                height: 180 * 0.95 * grow,
+                backgroundColor: accentColor,
+                borderRadius: '12px 12px 0 0',
+                boxShadow: `0 0 35px ${accentColor}70`,
+              }}
+            />
+            <span style={{ fontSize: 16, fontFamily: 'monospace', color: accentColor, marginTop: 14, fontWeight: 800 }}>RESULT</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Narrative Subtext */}
+      <div style={{ marginTop: 44, textAlign: 'center', maxWidth: 850 }}>
+        <h2
+          style={{
+            fontSize: 50,
+            fontWeight: 800,
+            color: '#FFFFFF',
+            lineHeight: 1.25,
+            margin: 0,
+            textShadow: '0 6px 25px rgba(0,0,0,0.9)',
+          }}
+        >
+          {scene.narration}
+        </h2>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// =========================================================================
+// SUB-COMPONENT: CHRONOLOGICAL TIMELINE SCENE
+// =========================================================================
+const TimelineScene: React.FC<{
+  scene: StudioScene;
+  accentColor: string;
+}> = ({ scene, accentColor }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const progress = interpolate(frame, [0, 45], [0, 1], { extrapolateRight: 'clamp' });
+  const activeMilestone = frame > 40 ? 2 : frame > 20 ? 1 : 0;
+
+  return (
+    <AbsoluteFill
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '0 80px',
+      }}
+    >
+      {/* Background Atmosphere */}
+      <div
+        style={{
+          position: 'absolute',
+          width: 700,
+          height: 700,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${accentColor}18 0%, transparent 70%)`,
+          filter: 'blur(60px)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Timeline Eyebrow Badge */}
+      <div
+        style={{
+          backgroundColor: '#14161F',
+          border: `1px solid ${accentColor}60`,
+          borderRadius: 9999,
+          padding: '10px 24px',
+          marginBottom: 44,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 12,
+        }}
+      >
+        <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: accentColor, boxShadow: `0 0 10px ${accentColor}` }} />
+        <span style={{ fontSize: 20, fontFamily: 'monospace', color: '#EDEDED', letterSpacing: '0.1em' }}>
+          CHRONOLOGICAL TIMELINE // EVENT 0{scene.index}
+        </span>
+      </div>
+
+      {/* Horizontal Milestone Track */}
+      <div
+        style={{
+          width: 780,
+          backgroundColor: '#14161F',
+          border: '1px solid #232634',
+          borderRadius: 36,
+          padding: '48px 36px',
+          position: 'relative',
+          boxShadow: '0 30px 60px rgba(0,0,0,0.8)',
+        }}
+      >
+        {/* Background Track Line */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 96,
+            left: 70,
+            right: 70,
+            height: 4,
+            backgroundColor: '#232634',
+          }}
+        />
+
+        {/* Active Laser Progress Line */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 96,
+            left: 70,
+            width: (780 - 140) * progress,
+            height: 4,
+            backgroundColor: accentColor,
+            boxShadow: `0 0 20px ${accentColor}`,
+          }}
+        />
+
+        {/* 3 Chronological Nodes */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 10 }}>
+          {[
+            { tag: 'GENESIS', label: 'Initial State' },
+            { tag: 'TURNING POINT', label: 'Catalyst' },
+            { tag: 'OUTCOME', label: 'Current Impact' },
+          ].map((milestone, mIdx) => {
+            const isReached = mIdx <= activeMilestone;
+            const isCurrent = mIdx === activeMilestone;
+
+            return (
+              <div key={mIdx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 180 }}>
+                {/* Node Ring */}
+                <div
+                  style={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: '50%',
+                    backgroundColor: isCurrent ? accentColor : isReached ? '#14161F' : '#08090A',
+                    border: `3px solid ${isReached ? accentColor : '#33384B'}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 22,
+                    fontWeight: 900,
+                    color: isCurrent ? '#FFFFFF' : isReached ? accentColor : '#64748B',
+                    boxShadow: isCurrent ? `0 0 30px ${accentColor}` : 'none',
+                    marginBottom: 20,
+                  }}
+                >
+                  0{mIdx + 1}
+                </div>
+
+                {/* Milestone Metadata */}
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontFamily: 'monospace',
+                    color: isReached ? accentColor : '#64748B',
+                    fontWeight: 800,
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    marginBottom: 6,
+                  }}
+                >
+                  {milestone.tag}
+                </span>
+                <span
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 700,
+                    color: isReached ? '#FFFFFF' : '#64748B',
+                    textAlign: 'center',
+                  }}
+                >
+                  {milestone.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Main Narrative Explanation */}
+      <div style={{ marginTop: 44, textAlign: 'center', maxWidth: 850 }}>
+        <h2
+          style={{
+            fontSize: 50,
+            fontWeight: 800,
+            color: '#FFFFFF',
+            lineHeight: 1.25,
+            margin: 0,
+            textShadow: '0 6px 25px rgba(0,0,0,0.9)',
+          }}
+        >
+          {scene.narration}
+        </h2>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// =========================================================================
+// SUB-COMPONENT: STEP SEQUENCE (CASCADING TAKEAWAYS)
+// =========================================================================
+const StepSequenceScene: React.FC<{
+  scene: StudioScene;
+  accentColor: string;
+}> = ({ scene, accentColor }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const words = (scene.narration || '').split(' ');
+  const chunk1 = words.slice(0, 4).join(' ');
+  const chunk2 = words.slice(4, 8).join(' ');
+  const chunk3 = words.slice(8).join(' ') || words.slice(0, 3).join(' ');
+
+  const steps = [
+    { num: '01', text: chunk1 || 'First Core Principle' },
+    { num: '02', text: chunk2 || 'Action & Execution' },
+    { num: '03', text: chunk3 || 'Key Structural Takeaway' },
+  ];
+
+  return (
+    <AbsoluteFill
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '0 80px',
+      }}
+    >
+      {/* Background Energy Glow */}
+      <div
+        style={{
+          position: 'absolute',
+          width: 700,
+          height: 700,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${accentColor}18 0%, transparent 70%)`,
+          filter: 'blur(50px)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Header Eyebrow */}
+      <div
+        style={{
+          fontSize: 22,
+          fontFamily: 'monospace',
+          color: accentColor,
+          letterSpacing: '0.15em',
+          textTransform: 'uppercase',
+          marginBottom: 36,
+          textAlign: 'center',
+        }}
+      >
+        {(scene.visualDirection || 'STEP SEQUENCE').split(':')[0].slice(0, 28)}
+      </div>
+
+      {/* 3 Cascading Stack Cards */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, width: 780 }}>
+        {steps.map((step, sIdx) => {
+          const delay = sIdx * 8;
+          const enter = spring({ frame: frame - delay, fps, config: { damping: 14, stiffness: 120 } });
+          const cardX = interpolate(enter, [0, 1], [60, 0], { extrapolateRight: 'clamp' });
+          const cardOpacity = interpolate(enter, [0, 1], [0, 1], { extrapolateRight: 'clamp' });
+          const isFinal = sIdx === 2;
+
+          return (
+            <div
+              key={sIdx}
+              style={{
+                transform: `translateX(${cardX}px)`,
+                opacity: cardOpacity,
+                backgroundColor: isFinal ? '#191C28' : '#14161F',
+                border: `1.5px solid ${isFinal ? accentColor : '#232634'}`,
+                borderRadius: 24,
+                padding: '24px 32px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 24,
+                boxShadow: isFinal ? `0 15px 40px ${accentColor}25` : '0 10px 30px rgba(0,0,0,0.6)',
+              }}
+            >
+              <div
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 16,
+                  backgroundColor: isFinal ? accentColor : '#08090A',
+                  border: `2px solid ${isFinal ? '#FFFFFF' : accentColor}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 24,
+                  fontWeight: 900,
+                  color: isFinal ? '#FFFFFF' : accentColor,
+                  flexShrink: 0,
+                }}
+              >
+                {step.num}
+              </div>
+              <p
+                style={{
+                  fontSize: 32,
+                  fontWeight: isFinal ? 800 : 700,
+                  color: '#FFFFFF',
+                  margin: 0,
+                  lineHeight: 1.25,
+                }}
+              >
+                {step.text}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Bottom Main Statement */}
+      <div style={{ marginTop: 36, textAlign: 'center', maxWidth: 850 }}>
+        <span style={{ fontSize: 24, fontWeight: 700, color: '#94A3B8' }}>
+          SCENE 0{scene.index} // SYSTEM TAKEAWAY
+        </span>
       </div>
     </AbsoluteFill>
   );
@@ -937,6 +1404,12 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
               <SplitComparisonScene scene={scene} accentColor={accentColor} />
             ) : scene.visualType === 'process_flow' ? (
               <ProcessFlowScene scene={scene} accentColor={accentColor} />
+            ) : scene.visualType === 'dynamic_chart' ? (
+              <DynamicChartScene scene={scene} accentColor={accentColor} />
+            ) : scene.visualType === 'timeline' ? (
+              <TimelineScene scene={scene} accentColor={accentColor} />
+            ) : scene.visualType === 'step_sequence' ? (
+              <StepSequenceScene scene={scene} accentColor={accentColor} />
             ) : (
               <KineticTextScene scene={scene} accentColor={accentColor} topic={topic} />
             )}

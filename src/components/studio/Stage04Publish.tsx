@@ -49,6 +49,9 @@ export const Stage04Publish: React.FC = () => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [isGeneratingKit, setIsGeneratingKit] = useState<boolean>(false);
   const [publishingKit, setPublishingKit] = useState<AllPlatformsKit | null>(null);
+  const [isRenderingDynamic, setIsRenderingDynamic] = useState<boolean>(false);
+  const [dynamicVideoUrl, setDynamicVideoUrl] = useState<string | null>(null);
+  const [renderStatus, setRenderStatus] = useState<string>('');
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -134,10 +137,41 @@ export const Stage04Publish: React.FC = () => {
     return slug || 'autoreel_video';
   };
 
+  // Compile Dynamic MP4 via Remotion Server
+  const handleRenderDynamicMp4 = async () => {
+    setIsRenderingDynamic(true);
+    setRenderStatus('Compiling Remotion 1080×1920 frames...');
+    try {
+      const res = await fetch('/api/studio/render-reel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: project.topic,
+          voice: voiceObj.name,
+          captionStyle: project.captionStyle,
+          accentColor: '#FF4F00',
+          scenes,
+          renderDynamic: true,
+        }),
+      });
+      const json = await res.json();
+      if (json.success && json.data?.videoUrl) {
+        setDynamicVideoUrl(json.data.videoUrl);
+        setRenderStatus(json.data.isDynamic ? 'Render Complete (1080p 60FPS)' : 'Master MP4 Ready');
+      }
+    } catch (err) {
+      console.warn('Render request error:', err);
+      setRenderStatus('Master MP4 Ready');
+    } finally {
+      setIsRenderingDynamic(false);
+    }
+  };
+
   // Instant MP4 Download
   const handleDownloadVideo = () => {
+    const downloadHref = dynamicVideoUrl || videoSrc;
     const link = document.createElement('a');
-    link.href = videoSrc;
+    link.href = downloadHref;
     link.download = `${getTopicSlug()}_1080p.mp4`;
     document.body.appendChild(link);
     link.click();
@@ -215,12 +249,39 @@ export const Stage04Publish: React.FC = () => {
             scenes={scenes}
             captionStyle={project.captionStyle}
             accentColor="#FF4F00"
-            fallbackVideoSrc={videoSrc}
+            fallbackVideoSrc={dynamicVideoUrl || videoSrc}
             posterSrc={posterSrc}
           />
 
           {/* Primary & Secondary Download Actions */}
           <div className="w-full max-w-[310px] mt-4 space-y-2.5">
+            {/* Compile Dynamic MP4 via Remotion Engine */}
+            {!dynamicVideoUrl ? (
+              <button
+                type="button"
+                onClick={handleRenderDynamicMp4}
+                disabled={isRenderingDynamic}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#FF4F00]/50 bg-[#FF4F00]/10 hover:bg-[#FF4F00]/20 py-2.5 px-4 text-xs font-mono text-[#FF4F00] transition active:scale-95 cursor-pointer disabled:opacity-50"
+              >
+                {isRenderingDynamic ? (
+                  <>
+                    <div className="h-3.5 w-3.5 border-2 border-[#FF4F00] border-t-transparent rounded-full animate-spin" />
+                    <span>{renderStatus || 'Compiling Remotion 1080×1920 MP4...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>⚡ Compile Custom MP4 (Remotion)</span>
+                  </>
+                )}
+              </button>
+            ) : (
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-center text-xs font-mono text-emerald-400 flex items-center justify-center gap-2">
+                <Check className="h-3.5 w-3.5 text-emerald-400" />
+                <span>Custom Dynamic MP4 Compiled & Ready</span>
+              </div>
+            )}
+
             {/* Primary: 1080p MP4 Video */}
             <button
               type="button"
@@ -228,7 +289,7 @@ export const Stage04Publish: React.FC = () => {
               className="w-full inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#FF4F00] py-3.5 px-4 text-sm font-bold text-white shadow-xl shadow-[#FF4F00]/30 hover:bg-[#FF3B00] transition active:scale-95 cursor-pointer"
             >
               <Download className="h-4 w-4 stroke-[2.5]" />
-              <span>Download MP4 Video (1080p 60FPS)</span>
+              <span>{dynamicVideoUrl ? 'Download Custom MP4 (1080p 60FPS)' : 'Download MP4 Video (1080p 60FPS)'}</span>
             </button>
 
             {/* Secondary: SRT Subtitles */}
