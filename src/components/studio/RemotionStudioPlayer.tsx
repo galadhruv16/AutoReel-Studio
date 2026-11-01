@@ -13,13 +13,40 @@ const Player = dynamic(
     ssr: false,
     loading: () => (
       <div className="w-full h-full flex flex-col items-center justify-center bg-[#08090A] text-[#94A3B8] p-6 text-center">
-        <div className="h-10 w-10 border-2 border-[#FF4F00] border-t-transparent rounded-full animate-spin mb-3" />
-        <span className="text-xs font-mono text-[#EDEDED]">INITIALIZING REMOTION ENGINE</span>
-        <span className="text-[10px] font-mono text-[#64748B] mt-1">Mounting 1080×1920 60FPS Canvas...</span>
+        <div className="h-8 w-8 border-2 border-[#FF4F00] border-t-transparent rounded-full animate-spin mb-3" />
+        <span className="text-xs font-mono text-[#EDEDED]">INITIALIZING REMOTION CANVAS</span>
+        <span className="text-[10px] font-mono text-[#64748B] mt-1">1080×1920 • 60FPS</span>
       </div>
     ),
   }
 );
+
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback: React.ReactNode;
+}
+
+class PlayerErrorBoundary extends React.Component<ErrorBoundaryProps, { hasError: boolean }> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: any) {
+    console.warn('Remotion canvas error caught by boundary:', error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
 
 interface RemotionStudioPlayerProps {
   topic: string;
@@ -42,9 +69,14 @@ export const RemotionStudioPlayer: React.FC<RemotionStudioPlayerProps> = ({
   onTimeUpdate,
   onSceneIndexChange,
 }) => {
+  const [isMounted, setIsMounted] = useState<boolean>(false);
   const [renderMode, setRenderMode] = useState<'remotion' | 'master'>('remotion');
   const [isPlayingFallback, setIsPlayingFallback] = useState<boolean>(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const fps = 30;
   const totalDurationSec = scenes.reduce((acc, s) => acc + s.duration, 0) || 30;
@@ -128,28 +160,51 @@ export const RemotionStudioPlayer: React.FC<RemotionStudioPlayerProps> = ({
       {/* Viewport Content */}
       <div className="w-full h-full relative">
         {renderMode === 'remotion' ? (
-          /* Live Remotion React Vector Canvas */
+          /* Live Remotion React Vector Canvas with ErrorBoundary */
           <div className="w-full h-full bg-[#08090A] flex items-center justify-center">
-            <Player
-              component={DynamicStoryReel as any}
-              inputProps={{
-                topic,
-                scenes: safeScenes,
-                captionStyle,
-                accentColor,
-              }}
-              durationInFrames={durationInFrames}
-              fps={fps}
-              compositionWidth={1080}
-              compositionHeight={1920}
-              style={{
-                width: '100%',
-                height: '100%',
-              }}
-              controls
-              loop
-              autoPlay={false}
-            />
+            {isMounted ? (
+              <PlayerErrorBoundary
+                fallback={
+                  <div className="w-full h-full relative">
+                    <video
+                      src={fallbackVideoSrc}
+                      poster={posterSrc}
+                      playsInline
+                      loop
+                      autoPlay
+                      muted
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                }
+              >
+                <Player
+                  component={DynamicStoryReel as any}
+                  inputProps={{
+                    topic,
+                    scenes: safeScenes,
+                    captionStyle,
+                    accentColor,
+                  }}
+                  durationInFrames={durationInFrames}
+                  fps={fps}
+                  compositionWidth={1080}
+                  compositionHeight={1920}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                  }}
+                  controls
+                  loop
+                  autoPlay={false}
+                />
+              </PlayerErrorBoundary>
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center bg-[#08090A] text-[#94A3B8] p-6 text-center">
+                <div className="h-8 w-8 border-2 border-[#FF4F00] border-t-transparent rounded-full animate-spin mb-3" />
+                <span className="text-xs font-mono text-[#EDEDED]">INITIALIZING CANVAS</span>
+              </div>
+            )}
           </div>
         ) : (
           /* Pre-rendered Master Video Player */

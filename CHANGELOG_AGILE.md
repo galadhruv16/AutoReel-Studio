@@ -1,5 +1,24 @@
 # AutoReel Studio — Agile Development Changelog
 
+## [Hotfix & Reliability Update] Gemini 3.5 Models, Remotion 4.0.539 Alignment & SSR Hydration Guard
+- **Status**: Completed & Verified
+- **Date**: 2026-11-01
+- **Focus**: Eliminate template fallbacks, resolve Remotion version mismatch (`4.0.252` vs `4.0.539`), prevent React Error #423 hydration mismatches, and add front-and-center AI generation triggers.
+
+### Key Fixes:
+1. **Remotion Version Alignment**:
+   - Pinned all `@remotion/*` packages (`remotion`, `@remotion/player`, `@remotion/cli`, `@remotion/renderer`, `@remotion/bundler`) strictly to `4.0.539`.
+   - Eliminated the `TypeError: Multiple versions of Remotion detected: 4.0.252 and 4.0.539` runtime crash.
+2. **React Hydration & Error Boundary (`src/components/studio/RemotionStudioPlayer.tsx`)**:
+   - Implemented `isMounted` check to defer canvas mounting until client-side hydration completes, curing Minified React Error #423.
+   - Added class-based `PlayerErrorBoundary` with graceful fallback to pre-rendered video to protect the UI tree.
+3. **Active Gemini Model Array**:
+   - Migrated API endpoints to cascading active models: `['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.7-flash', 'gemini-3.8-flash']`.
+   - Removed formulaic cliché templates; any topic generates deeply researched, fact-based scenes and dynamic motion graphics.
+4. **Stage 02 Front-and-Center Trigger**:
+   - Added high-visibility `⚡ Generate AI Storyboard & Visual Script` CTA in Stage 02 so users can explicitly trigger LLM generation on demand with live progress and success indicators.
+
+
 ## [Sprint 1] Stage 01: Topic & Concept Formulation (Tangerine Obsidian)
 - **Status**: Completed & Verified
 - **Date**: 2026-11-01
