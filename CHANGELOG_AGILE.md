@@ -87,3 +87,44 @@
 4. **Quality Assurance & Verification**:
    - Automated test suite passed (`scripts/test_studio_stage03.mjs` verifying active scene playhead lookup, subtitle presets, Python Edge TTS synthesis execution, and mixer level clamping).
    - Next.js production build passed with 0 errors (`npm run build`).
+
+## [Sprint 4] Stage 04: Publishing & Multi-Platform Export (Tangerine Obsidian)
+- **Status**: Completed & Verified
+- **Date**: 2026-11-01
+- **Focus**: High-definition video export (1080×1920 60FPS), synchronized SubRip (.SRT) subtitle generation with millisecond word timestamps, AI Multi-Platform Publishing Kit (YouTube Shorts, Instagram Reels, TikTok, LinkedIn) with timestamped chapter markers, 1-click clipboard actions, and session reset.
+
+### Implemented Features:
+1. **SRT Subtitle Exporter Engine (`src/utils/srt.ts` & `src/app/api/studio/export-srt/route.ts`)**:
+   - `formatSrtTimestamp`: Precise millisecond timestamp conversion adhering strictly to standard SubRip time formatting (`HH:MM:SS,mmm`).
+   - `generateSrtContent`: Formats all storyboard micro-beats into a clean, valid `.srt` document with indexed sequence numbering and accurate start/end boundaries.
+   - `generateVideoChapters`: Parses scene timecodes to format YouTube chapter markers (e.g. `0:00 - Introduction`, `0:03 - Guide RNA`, etc.).
+   - `src/app/api/studio/export-srt/route.ts`: Serverless API route delivering `.srt` downloads with `Content-Disposition: attachment`.
+2. **AI Multi-Platform Publishing Engine (`src/app/api/studio/generate-publishing/route.ts`)**:
+   - Crafts targeted, high-retention metadata for 4 distinct distribution platforms:
+     * **YouTube Shorts**: Punchy hook title, structured description with auto-generated chapter timestamps, pinned comment discussion prompt, and targeted discovery hashtags.
+     * **Instagram Reels**: Attention-grabbing visual hook in the first 2 lines, spacious caption body, save/share CTA, and algorithm-optimized hashtags.
+     * **TikTok**: High-curiosity hook title, fast-paced viral caption, and trending educational tags (`#edutok`, `#learnontiktok`, etc.).
+     * **LinkedIn**: Professional analytical breakdown, 3 key takeaways with bullet points, and an industry discussion question.
+   - Dual-engine architecture: Calls Gemini Flash with contextual script excerpt, with an automatic deterministic fallback generator for offline and network degradation resilience.
+3. **Stage 04 Publishing & Export Component (`src/components/studio/Stage04Publish.tsx`)**:
+   - **Left Deck**:
+     * 9:16 vertical smartphone viewport with interactive playback and render completion indicator (`1080×1920 • 60FPS`).
+     * Primary Tangerine Action: `⬇ Download MP4 Video (1080p 60FPS)` with custom slug filename.
+     * Secondary Graphite Action: `📄 Download Subtitles (.SRT)` triggering immediate client-side Blob download.
+     * Asset Technical Specifications card (Resolution, Frame Rate, Codec, Speech Engine, Word Count).
+   - **Right Deck**:
+     * Interactive Platform Tabs (YouTube Shorts, Instagram Reels, TikTok, LinkedIn) with Tangerine active highlight.
+     * Hook Title display with 1-click "Copy Title".
+     * Caption & Chapters viewer with 1-click "Copy Description".
+     * Curated Hashtags with individual chip copy triggers and "Copy All Tags" button.
+     * 1-click "Copy Complete Post" bundle action combining title, formatted description with chapters, and hashtags.
+   - **Bottom Action Dock**:
+     * `← Back to Review & Edit` returns to Stage 3.
+     * `+ Create Another Video` resets studio state cleanly and returns to Stage 1.
+4. **Studio Main Integration (`src/app/studio/page.tsx`)**:
+   - Replaced placeholder with `<Stage04Publish />`.
+   - All 4 stages (Stage 01 Topic, Stage 02 Storyboard, Stage 03 Review, Stage 04 Publish) are now 100% functional, responsive, and styled to Tangerine Obsidian.
+5. **Quality Assurance & Verification**:
+   - Automated unit test suite passed (`scripts/test_studio_stage04.mjs`).
+   - Comprehensive multi-sprint test runner passed across all 4 sprint suites.
+   - Next.js production build passed with 0 errors across all 14 routes (`npm run build`).
