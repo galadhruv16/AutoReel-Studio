@@ -57,3 +57,33 @@
 3. **Quality Assurance & Verification**:
    - Automated unit & flow tests passed (`scripts/test_studio_stage02.mjs`).
    - Next.js production build passed with 0 errors (`npm run build`).
+
+## [Sprint 3] Stage 03: Video Review & Surgical Revision (Tangerine Obsidian)
+- **Status**: Completed & Verified
+- **Date**: 2026-11-01
+- **Focus**: 9:16 vertical video player preview, synchronized live subtitle overlay, frame-accurate transport controls, surgical scene narration editing with real Edge TTS audio re-synthesis, visual direction customization, subtitle presets, and audio mixer.
+
+### Implemented Features:
+1. **Edge TTS Synthesis Engine (`scripts/synthesize_scene.py` & `src/app/api/studio/synthesize-scene/route.ts`)**:
+   - Integrated Python script utilizing `edge-tts` (v7.3.1) with async word-boundary event streaming.
+   - Outputs millisecond-accurate word timestamps (`startMs`, `endMs`) and high-fidelity base64 MP3 audio.
+   - Serverless API route with fallback speech timing model ensuring continuous operation across local and cloud environments.
+2. **Stage 03 Video Review & Surgical Revision Component (`src/components/studio/Stage03Review.tsx`)**:
+   - **Split-Screen Ergonomics**:
+     * **Left Deck**: 9:16 vertical smartphone frame (310px width), looping dynamic video preview, interactive transport controls (play/pause overlay, seek bar slider, -5s rewind, +5s fast-forward, mute toggle, 0.8x/1.0x/1.2x playback speed toggle), and interactive multi-scene timeline buttons (`S01`, `S02`, etc.).
+     * **Live Subtitle Overlay**: Renders in-sync captions over the video player with 3 selectable presets:
+       - `Kinetic Highlight`: Word-by-word electric orange keyword glow pop (`#FF4F00`).
+       - `Clean Minimal`: Low-profile translucent card with crisp typography.
+       - `Editorial Bold`: Full-width punchy high-contrast block text.
+     * **Right Deck (Surgical Revision Inspector)**:
+       - Active scene header with scene index, timecode span, and quick jump selector.
+       - Narration text editor with real-time `⚡ Re-synthesize Voice (Edge TTS)` trigger that generates audio on demand and updates duration and audio URL.
+       - Visual Composition editor: Artistic prompt input, motion archetype dropdown (`Kinetic Typography`, `Vector Schematic`, `Crosshair Target`, `Split Comparison`, `Process Flow`), and visual re-generation trigger.
+       - Subtitle staging preset selector.
+       - Audio mixer with independent sliders for voiceover volume and ambient sub-bed background audio.
+3. **Studio Main Orchestration (`src/app/studio/page.tsx`)**:
+   - Replaced Stage 03 placeholder with the fully integrated `<Stage03Review />`.
+   - Wired bidirectional navigation: `← Back to Storyboard` (returns to Stage 2) and `Approve & Go to Export →` (advances to Stage 4).
+4. **Quality Assurance & Verification**:
+   - Automated test suite passed (`scripts/test_studio_stage03.mjs` verifying active scene playhead lookup, subtitle presets, Python Edge TTS synthesis execution, and mixer level clamping).
+   - Next.js production build passed with 0 errors (`npm run build`).
