@@ -24,6 +24,7 @@ import {
 import { useStudio } from '../../context/StudioContext';
 import { VOICES, StudioScene } from '../../types/studio';
 import { generateSrtContent, generateVideoChapters } from '../../utils/srt';
+import { RemotionStudioPlayer } from './RemotionStudioPlayer';
 
 type PlatformKey = 'youtube' | 'instagram' | 'tiktok' | 'linkedin';
 
@@ -208,49 +209,15 @@ export const Stage04Publish: React.FC = () => {
             LEFT COLUMN: FINAL 9:16 VIDEO PLAYER & DOWNLOAD ACTIONS
            ======================================================== */}
         <div className="lg:col-span-5 flex flex-col items-center">
-          {/* Vertical Reel Viewport Card */}
-          <div className="relative w-full max-w-[310px] aspect-[9/16] rounded-3xl overflow-hidden border-2 border-[#232634] bg-[#000000] shadow-2xl shadow-black/80 flex flex-col justify-between group">
-            {/* Top Reel Overlay */}
-            <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-3.5 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
-              <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/20 backdrop-blur-md px-2.5 py-1 text-[11px] font-mono text-emerald-300 border border-emerald-500/30">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                <span>RENDER MASTER</span>
-              </div>
-              <span className="rounded-full bg-[#14161F]/80 backdrop-blur-md px-2 py-0.5 text-[10px] font-mono text-[#FF4F00] border border-[#FF4F00]/30">
-                1080×1920 • 60FPS
-              </span>
-            </div>
-
-            {/* Video Element */}
-            <video
-              ref={videoRef}
-              src={videoSrc}
-              poster={posterSrc}
-              playsInline
-              loop
-              onClick={handlePlayPause}
-              className="w-full h-full object-cover cursor-pointer"
-            />
-
-            {/* Overlay Play Trigger on Pause */}
-            {!isPlaying && (
-              <button
-                type="button"
-                onClick={handlePlayPause}
-                className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-[2px] transition group-hover:bg-black/30"
-              >
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#FF4F00] text-white shadow-xl shadow-[#FF4F00]/40 transition transform group-hover:scale-105 active:scale-95">
-                  <Play className="h-7 w-7 translate-x-0.5" />
-                </div>
-              </button>
-            )}
-
-            {/* Bottom Duration Tag */}
-            <div className="absolute bottom-3.5 left-3.5 right-3.5 z-30 flex items-center justify-between pointer-events-none text-xs font-mono text-white/90 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
-              <span className="truncate max-w-[180px]">{project.topic || 'AutoReel Video'}</span>
-              <span className="text-[#FF4F00] font-bold">{totalDuration.toFixed(1)}s</span>
-            </div>
-          </div>
+          {/* Remotion 9:16 Vertical Master Viewport */}
+          <RemotionStudioPlayer
+            topic={project.topic}
+            scenes={scenes}
+            captionStyle={project.captionStyle}
+            accentColor="#FF4F00"
+            fallbackVideoSrc={videoSrc}
+            posterSrc={posterSrc}
+          />
 
           {/* Primary & Secondary Download Actions */}
           <div className="w-full max-w-[310px] mt-4 space-y-2.5">

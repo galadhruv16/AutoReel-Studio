@@ -5,6 +5,7 @@ import { MainReel } from './compositions/MainReel';
 import { GeneticsReel } from './compositions/GeneticsReel';
 import { KubernetesReel } from './compositions/KubernetesReel';
 import { SaraighatReel } from './compositions/SaraighatReel';
+import { DynamicStoryReel } from './compositions/DynamicStoryReel';
 
 import spikeAudioData from '../../public/audio/spike_test.json';
 import geneticsData from '../../public/audio/reel_genetics.json';
@@ -44,6 +45,22 @@ export const RemotionRoot: React.FC = () => {
         fps={fps}
         width={1080}
         height={1920}
+      />
+
+      {/* 4. Universal AI Dynamic Storyboard Reel */}
+      <Composition
+        id="DynamicStoryReel"
+        component={DynamicStoryReel as any}
+        durationInFrames={30 * 60}
+        fps={fps}
+        width={1080}
+        height={1920}
+        defaultProps={{
+          topic: 'AutoReel Motion Explainer',
+          scenes: [],
+          captionStyle: 'kinetic' as const,
+          accentColor: '#FF4F00',
+        }}
       />
 
       {/* Backward-compatible Spike Reel */}

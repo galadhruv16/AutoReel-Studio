@@ -128,3 +128,29 @@
    - Automated unit test suite passed (`scripts/test_studio_stage04.mjs`).
    - Comprehensive multi-sprint test runner passed across all 4 sprint suites.
    - Next.js production build passed with 0 errors across all 14 routes (`npm run build`).
+
+## [Feature Release] Dynamic Remotion Visual Engine for Stage 03 & 04
+- **Status**: Completed & Verified
+- **Date**: 2026-11-01
+- **Focus**: Replacing generic static MP4 video loops with real, interactive, 60 FPS Remotion React vector compositions that render distinct motion graphics for every storyboard scene.
+
+### Implemented Features:
+1. **Universal Dynamic Storyboard Composition (`src/remotion/compositions/DynamicStoryReel.tsx`)**:
+   - Created `DynamicStoryReel` Remotion composition supporting any arbitrary topic.
+   - Scene-by-scene `<Sequence>` scheduling using accurate millisecond start/duration thresholds.
+   - **Archetype Scene Graphics**:
+     * `kinetic_text`: Dynamic spring physics typography punch, radial energy field, and keyword glow.
+     * `vector_schematic`: Concentric rotating tech rings, animated polygon borders, central pulsing core, and telemetry coordinate readout.
+     * `crosshair_target`: Sweeping radar arc, four corner brackets locking in via spring physics, and targeting coordinates.
+     * `split_comparison`: Side-by-side comparative cards (Thesis vs Resolution) with center VS laser indicator.
+     * `process_flow`: Multi-stage pipeline with active node indicators and traveling energy pulse packet.
+   - Built-in synchronized subtitle overlay with live preset support (`Kinetic Highlight`, `Clean Minimal`, `Editorial Bold`).
+2. **Interactive Remotion Studio Player (`src/components/studio/RemotionStudioPlayer.tsx`)**:
+   - Integrated `@remotion/player` with client-side Next.js dynamic mounting.
+   - Added instant view switcher: `[ ⚡ AI Canvas ]` (Live Remotion React Canvas at 60 FPS) vs `[ 🎬 Master MP4 ]`.
+   - Wired live updates: editing any line of narration or changing visual archetypes in Stage 03 updates the live canvas in real time.
+3. **Stage 03 & 04 Integration**:
+   - Mounted `RemotionStudioPlayer` in both `<Stage03Review />` and `<Stage04Publish />`.
+4. **Quality Assurance & Build**:
+   - All 4 sprint test suites verified (`test_studio_stage01.mjs` through `test_studio_stage04.mjs`).
+   - Next.js production build passed with 0 errors across all 14 routes (`npm run build`).

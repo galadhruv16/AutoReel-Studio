@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useStudio } from '../../context/StudioContext';
 import { StudioScene, VOICES } from '../../types/studio';
+import { RemotionStudioPlayer } from './RemotionStudioPlayer';
 
 export const Stage03Review: React.FC = () => {
   const { project, setStage, updateProject } = useStudio();
@@ -212,87 +213,17 @@ export const Stage03Review: React.FC = () => {
             LEFT COLUMN: 9:16 VERTICAL VIDEO PLAYER & TRANSPORT DECK
            ======================================================== */}
         <div className="lg:col-span-5 flex flex-col items-center">
-          {/* Vertical Reel Viewport */}
-          <div className="relative w-full max-w-[310px] aspect-[9/16] rounded-3xl overflow-hidden border-2 border-[#232634] bg-[#000000] shadow-2xl shadow-black/80 flex flex-col justify-between group">
-            {/* Top Reel Overlay */}
-            <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-3.5 bg-gradient-to-b from-black/70 to-transparent pointer-events-none">
-              <div className="flex items-center gap-1.5 rounded-full bg-[#14161F]/80 backdrop-blur-md px-2.5 py-1 text-[11px] font-mono text-[#EDEDED] border border-[#232634]">
-                <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
-                <span>REC PREVIEW</span>
-              </div>
-              <span className="rounded-full bg-[#14161F]/80 backdrop-blur-md px-2 py-0.5 text-[10px] font-mono text-[#FF4F00] border border-[#FF4F00]/30">
-                1080×1920 • 60FPS
-              </span>
-            </div>
-
-            {/* Video Element */}
-            <video
-              ref={videoRef}
-              src={videoSrc}
-              poster={posterSrc}
-              playsInline
-              loop
-              onTimeUpdate={handleTimeUpdate}
-              onClick={handlePlayPause}
-              className="w-full h-full object-cover cursor-pointer"
-            />
-
-            {/* Overlay Play Trigger on Pause */}
-            {!isPlaying && (
-              <button
-                type="button"
-                onClick={handlePlayPause}
-                className="absolute inset-0 z-20 flex items-center justify-center bg-black/30 backdrop-blur-[2px] transition group-hover:bg-black/20"
-              >
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#FF4F00] text-white shadow-xl shadow-[#FF4F00]/40 transition transform group-hover:scale-105 active:scale-95">
-                  <Play className="h-7 w-7 translate-x-0.5" />
-                </div>
-              </button>
-            )}
-
-            {/* Live Synchronized Subtitle Overlay */}
-            <div className="absolute bottom-6 left-3 right-3 z-30 pointer-events-none text-center">
-              {project.captionStyle === 'kinetic' && (
-                <div className="inline-block rounded-xl bg-black/80 backdrop-blur-md px-4 py-2 border border-[#232634] shadow-lg">
-                  <p className="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-white leading-snug">
-                    {selectedScene.narration.split(' ').map((word, wIdx) => {
-                      const isHighlighted = (selectedScene.highlightWords || []).some(
-                        (hw) => hw.toLowerCase().includes(word.toLowerCase().replace(/[.,!]/g, ''))
-                      );
-                      return (
-                        <span
-                          key={wIdx}
-                          className={`inline-block mx-0.5 ${
-                            isHighlighted
-                              ? 'text-[#FF4F00] underline decoration-[#FF4F00] underline-offset-2'
-                              : 'text-white'
-                          }`}
-                        >
-                          {word}
-                        </span>
-                      );
-                    })}
-                  </p>
-                </div>
-              )}
-
-              {project.captionStyle === 'minimal' && (
-                <div className="inline-block px-3 py-1 bg-black/60 backdrop-blur-sm rounded-lg">
-                  <p className="text-xs text-[#EDEDED] font-medium leading-relaxed drop-shadow-md">
-                    {selectedScene.narration}
-                  </p>
-                </div>
-              )}
-
-              {project.captionStyle === 'bold' && (
-                <div className="inline-block w-full bg-[#FF4F00] px-3 py-2 rounded-lg shadow-xl shadow-[#FF4F00]/25">
-                  <p className="text-sm font-black uppercase tracking-tight text-white leading-tight">
-                    {selectedScene.narration}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+          {/* Remotion 9:16 Vertical Studio Viewport */}
+          <RemotionStudioPlayer
+            topic={project.topic}
+            scenes={scenes}
+            captionStyle={project.captionStyle}
+            accentColor="#FF4F00"
+            fallbackVideoSrc={videoSrc}
+            posterSrc={posterSrc}
+            onTimeUpdate={(t) => setCurrentTime(t)}
+            onSceneIndexChange={(idx) => setSelectedSceneIndex(idx)}
+          />
 
           {/* Transport Controls Deck */}
           <div className="w-full max-w-[310px] mt-4 rounded-2xl border border-[#232634] bg-[#14161F] p-3.5 space-y-3">
