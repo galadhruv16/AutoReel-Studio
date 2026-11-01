@@ -103,7 +103,7 @@ Return STRICTLY valid JSON with no markdown formatting:
   }
 }`;
 
-        const models = ['gemini-2.5-flash', 'gemini-1.5-flash'];
+        const models = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.7-flash', 'gemini-3.8-flash'];
         for (const model of models) {
           try {
             const res = await fetch(

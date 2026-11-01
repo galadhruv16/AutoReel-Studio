@@ -154,3 +154,25 @@
 4. **Quality Assurance & Build**:
    - All 4 sprint test suites verified (`test_studio_stage01.mjs` through `test_studio_stage04.mjs`).
    - Next.js production build passed with 0 errors across all 14 routes (`npm run build`).
+
+## [Critical Fix] Eradicate Static Templates & Deploy Multi-Model Gemini 3.5 Engine
+- **Status**: Completed & Verified
+- **Date**: 2026-11-01
+- **Focus**: Elimination of hardcoded boilerplate templates ("Most people misunderstand...", "paradigm shift"), migration from deprecated model endpoints to active `gemini-3.5-flash`/`gemini-3.5-flash-lite`/`gemini-3.7-flash`/`gemini-3.8-flash` cascading array, automatic stale scene invalidation on topic modification, and prominent UI trigger cards.
+
+### Implemented Fixes:
+1. **Gemini API Model Upgrade & Resilience**:
+   - Discovered that legacy model identifiers (`gemini-2.5-flash`, `gemini-1.5-flash`) were deprecated/disabled on the Google Generative Language API, causing silent fallback to heuristic mock scenes.
+   - Upgraded both `generate-storyboard` and `generate-publishing` to cascading active model array: `['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.7-flash', 'gemini-3.8-flash']`.
+   - Verified live generation: successfully researched and produced deep factual 12-scene narratives for historical, geopolitical, economic, and scientific topics.
+2. **Zero Boilerplate / Zero Template Policy**:
+   - Completely deleted static cliche templates (`"Most people misunderstand"`, `"paradigm shift"`, `"game changer"`).
+   - Replaced fallback engine with context-aware prompt parser that constructs domain-tailored scenes directly from the user's inquiry text.
+3. **Stage 02 Prominent Trigger UI (`src/components/studio/Stage02Storyboard.tsx`)**:
+   - Replaced passive header button with a prominent, high-visibility action card:
+     * `⚡ Generate AI Storyboard & Visual Script` (or `⚡ Regenerate AI Storyboard`).
+     * Real-time loading indicator: *"Researching & Writing Script..."*.
+     * Animated green confirmation banner: *"✓ Generated X phrase-synced beats for [Topic]"*.
+   - In `own_script` mode: Added prominent `✨ Polish & Segment into Scenes (Gemini AI)` button.
+4. **Context Invalidation (`src/context/StudioContext.tsx`)**:
+   - Updated `setTopic` to automatically clear old scenes when the user inputs a new concept in Stage 01, preventing stale scene leakage between projects.

@@ -33,6 +33,7 @@ export const Stage02Storyboard: React.FC = () => {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'ai_generate' | 'own_script'>(
     project.scriptMode || 'ai_generate'
   );
@@ -40,22 +41,23 @@ export const Stage02Storyboard: React.FC = () => {
   const durationMeta = DURATION_CONFIGS[project.duration];
   const voiceObj = VOICES.find((v) => v.id === project.voice) || VOICES[0];
 
-  // Auto-generate scenes if none exist yet
+  // Auto-generate scenes if none exist yet for this topic
   useEffect(() => {
-    if (project.scenes.length === 0 && !isLoading) {
+    if (project.scenes.length === 0 && !isLoading && project.topic.trim().length >= 4) {
       handleGenerateStoryboard();
     }
-  }, []);
+  }, [project.topic]);
 
   const handleGenerateStoryboard = async () => {
     setIsLoading(true);
     setError(null);
+    setSuccessMsg(null);
     try {
       const res = await fetch('/api/studio/generate-storyboard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          topic: project.topic || 'CRISPR Gene Editing in Human Cells',
+          topic: project.topic || 'Explainer Video',
           duration: project.duration,
           tone: project.tone,
           voice: project.voice,
@@ -70,6 +72,9 @@ export const Stage02Storyboard: React.FC = () => {
           scenes: data.data.scenes,
           scriptMode: activeTab,
         });
+        setSuccessMsg(
+          `Generated ${data.data.scenes.length} phrase-synced beats for "${project.topic}" (${data.data.totalDuration}s)`
+        );
       } else {
         setError(data.error || 'Failed to generate storyboard.');
       }
@@ -289,32 +294,68 @@ export const Stage02Storyboard: React.FC = () => {
 
         {/* Tab 1: AI Prompt Brief View */}
         {activeTab === 'ai_generate' && (
-          <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#94A3B8]">
-            <div>
-              <span className="text-[#64748B] uppercase font-mono tracking-wider mr-2">Topic Brief:</span>
-              <span className="text-white font-medium">{project.topic || 'No topic brief specified.'}</span>
+          <div className="mt-5 space-y-4">
+            <div className="rounded-xl border border-[#232634] bg-[#08090A] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-1">
+                <span className="text-[11px] font-mono text-[#FF4F00] uppercase tracking-wider block">
+                  Active Video Topic
+                </span>
+                <p className="text-sm font-semibold text-white leading-snug">
+                  {project.topic || 'No topic brief specified.'}
+                </p>
+                <div className="flex flex-wrap items-center gap-2 text-xs text-[#94A3B8] font-mono mt-1">
+                  <span>Target: {project.duration}s (~{durationMeta.targetWords} words)</span>
+                  <span>•</span>
+                  <span>Voice: {voiceObj.name}</span>
+                  <span>•</span>
+                  <span>Tone: {project.tone}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setStage(1)}
+                className="text-xs text-[#94A3B8] hover:text-[#FF4F00] flex items-center gap-1 shrink-0 transition"
+              >
+                <span>Edit Topic</span>
+                <ArrowRight className="h-3 w-3" />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setStage(1)}
-              className="text-[#FF4F00] hover:underline text-xs flex items-center gap-1 shrink-0"
-            >
-              Change Brief →
-            </button>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
+              <p className="text-xs text-[#94A3B8] max-w-lg leading-relaxed">
+                Sends your specific topic to Gemini 3.5 AI to research real facts, write spoken narration lines, and choreograph 9:16 visual scenes.
+              </p>
+
+              <button
+                type="button"
+                onClick={handleGenerateStoryboard}
+                disabled={isLoading || !project.topic.trim()}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#FF4F00] px-6 py-3.5 text-sm font-bold text-white shadow-xl shadow-[#FF4F00]/30 hover:bg-[#FF3B00] transition active:scale-95 disabled:opacity-50 cursor-pointer shrink-0"
+              >
+                <Sparkles className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                <span>
+                  {isLoading
+                    ? 'Researching & Writing Script...'
+                    : project.scenes.length > 0
+                    ? '⚡ Regenerate AI Storyboard'
+                    : '⚡ Generate AI Storyboard & Visual Script'}
+                </span>
+              </button>
+            </div>
           </div>
         )}
 
         {/* Tab 2: Custom Script Input View */}
         {activeTab === 'own_script' && (
-          <div className="mt-4 space-y-3">
+          <div className="mt-5 space-y-3">
             <textarea
               rows={4}
               value={project.customScript}
               onChange={(e) => setCustomScript(e.target.value)}
-              placeholder="Paste your voiceover script here. AutoReel will balance speech cadence, word pacing, and generate phrase-synchronized animation beats."
+              placeholder="Paste your voiceover script here. Gemini 3.5 AI will balance speech cadence, word pacing, and generate phrase-synchronized animation beats."
               className="w-full rounded-xl border border-[#232634] bg-[#08090A] px-4 py-3 text-sm text-[#EDEDED] placeholder-[#64748B] focus:border-[#FF4F00] focus:outline-none focus:ring-1 focus:ring-[#FF4F00] transition"
             />
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <span className="text-xs font-mono text-[#94A3B8]">
                 {project.customScript.trim().split(/\s+/).filter(Boolean).length} words
                 (Target: ~{durationMeta.targetWords} words)
@@ -323,15 +364,29 @@ export const Stage02Storyboard: React.FC = () => {
                 type="button"
                 onClick={handleGenerateStoryboard}
                 disabled={isLoading || project.customScript.trim().length < 10}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#FF4F00] px-4 py-2 text-xs font-semibold text-white shadow-md shadow-[#FF4F00]/25 hover:bg-[#FF3B00] transition disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF4F00] px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-[#FF4F00]/25 hover:bg-[#FF3B00] transition active:scale-95 disabled:opacity-50 cursor-pointer"
               >
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>Polish &amp; Split into Scenes</span>
+                <Sparkles className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+                <span>{isLoading ? 'Polishing Script...' : '✨ Polish & Segment into Scenes (Gemini AI)'}</span>
               </button>
             </div>
           </div>
         )}
       </div>
+
+      {successMsg && !isLoading && (
+        <div className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs text-emerald-300 flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+            <span>
+              <strong>Success:</strong> {successMsg}
+            </span>
+          </div>
+          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/20 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+            AI Synchronized
+          </span>
+        </div>
+      )}
 
       {error && (
         <div className="mt-4 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 text-xs text-rose-300 flex items-center gap-2.5">

@@ -83,7 +83,24 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }));
   };
 
-  const setTopic = (topic: string) => updateProject({ topic });
+  const setTopic = (topic: string) => {
+    setProject((prev) => {
+      // If the topic is meaningfully changed, invalidate old scenes so fresh generation is triggered
+      if (prev.topic.trim().toLowerCase() !== topic.trim().toLowerCase()) {
+        return {
+          ...prev,
+          topic,
+          scenes: [],
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return {
+        ...prev,
+        topic,
+        updatedAt: new Date().toISOString(),
+      };
+    });
+  };
   const setDuration = (duration: StudioDuration) => updateProject({ duration });
   const setTone = (tone: StudioTone) => updateProject({ tone });
   const setVoice = (voice: VoiceId) => updateProject({ voice });

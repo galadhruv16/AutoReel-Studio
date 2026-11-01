@@ -26,41 +26,46 @@ export async function POST(request: Request) {
 
     if (geminiKey && !geminiKey.includes('your_') && geminiKey.trim().length > 10) {
       try {
-        const systemPrompt = `You are AutoReel Studio's AI Video Director & Motion Graphics Designer.
-You create artistic, dynamic, phrase-synchronized 9:16 vertical video storyboards for any domain (Science, History, Current Affairs, Tech, Economics, Philosophy).
+        const systemPrompt = `You are AutoReel Studio's master AI Video Director and Motion Graphics Animator.
+You produce viral, educational, and cinematic 9:16 vertical video storyboards for ANY subject: science, history, geopolitics, finance, technology, or current affairs.
 
-CRITICAL PACING PHILOSOPHY:
-- Every scene represents a discrete spoken phrase or concept that lasts strictly between 2.0s and 5.0s.
-- Visual animations and graphics on screen stay visible ONLY while the specific phrase/concept is spoken. The moment a new term or concept is introduced, a new visual frame/animation is triggered.
-- Target video runtime: Exactly ${targetSec} seconds (~${targetWords} spoken words, divided into ${minScenes} to ${maxScenes} dynamic scenes).
-- Tone: ${tone}.
-- ZERO generic filler, ZERO fake sci-fi buzzwords (no "98% match", no "safe zone", no "matrix telemetry"). Every line must be substantive, factual, and punchy.
+CRITICAL DIRECTIVE RULES:
+1. DEEP FACTUAL SUBSTANCE: Conduct deep conceptual research into the user's topic. Include real historical events, dates, figures, biological pathways, chemical names, economic mechanisms, or physical laws.
+2. ABSOLUTE BAN ON CLICHES & TEMPLATES:
+   - NEVER start with "Most people misunderstand", "Most people think", or "Have you ever wondered".
+   - NEVER use filler phrases like "paradigm shift", "game changer", or "it hinges on one principle".
+   - Start IMMEDIATELY on beat 1 with an authoritative, high-impact fact or tension hook that pulls the viewer in.
+3. PHRASE-SYNCED TEMPORAL PACING:
+   - Every scene represents a single spoken beat that lasts strictly between 2.2s and 5.0s.
+   - Target total video duration: exactly ${targetSec} seconds (~${targetWords} spoken words across ${minScenes} to ${maxScenes} scenes).
+   - Tone: ${tone}.
+4. MOTIVATED VISUAL DIRECTION:
+   - For every beat, describe a unique, high-contrast 9:16 vertical visual scene tailored specifically to the words spoken in that beat (e.g. animated bank vault ledger, double-helix cleavage, currency freefall gauge, geographic troop movements).
+   - Assign the most fitting visualType: "kinetic_text" | "vector_schematic" | "crosshair_target" | "split_comparison" | "process_flow".
 
 ${
   scriptMode === 'own_script' && customScript.trim().length > 10
-    ? `The user has provided their own script below. Polish the script for voiceover cadence, ensure it fits the ${targetSec}s target (~${targetWords} words), and divide it into ${minScenes} to ${maxScenes} time-synced scenes:
+    ? `The creator has provided their own script below. Polish it for rhythm and cadence, ensure it matches ~${targetWords} words (${targetSec}s runtime), and divide it into ${minScenes} to ${maxScenes} time-synced scenes:
 User Script:
 """${customScript}"""`
-    : `Generate an engaging, educational script from scratch for the topic:
+    : `Generate an original, deeply researched explainer script and motion storyboard for this topic:
 Topic: "${topic}"`
 }
 
-Respond STRICTLY with valid JSON (no markdown fences, no code blocks):
+Respond STRICTLY with valid JSON (no markdown formatting, no code blocks):
 {
   "scenes": [
     {
-      "duration": 3.5,
-      "narration": "What if you could edit living DNA with the precision of a word processor?",
-      "visualDirection": "Kinetic bold typography punch: 'EDIT LIVING DNA' with dynamic particle zoom and high-contrast split",
+      "duration": 3.8,
+      "narration": "Authoritative spoken line explaining the exact concept",
+      "visualDirection": "Detailed visual description of the custom graphics and motion appearing on screen",
       "visualType": "kinetic_text",
-      "highlightWords": ["edit", "living DNA", "word processor"]
+      "highlightWords": ["key", "highlighted", "terms"]
     }
   ]
-}
+}`;
 
-Available visualType values: "kinetic_text" | "vector_schematic" | "crosshair_target" | "split_comparison" | "process_flow"`;
-
-        const models = ['gemini-2.5-flash', 'gemini-1.5-flash'];
+        const models = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.7-flash', 'gemini-3.8-flash'];
         for (const model of models) {
           if (scenes) break;
           try {
@@ -73,7 +78,7 @@ Available visualType values: "kinetic_text" | "vector_schematic" | "crosshair_ta
                   contents: [{ parts: [{ text: systemPrompt }] }],
                   generationConfig: {
                     responseMimeType: 'application/json',
-                    temperature: 0.3,
+                    temperature: 0.35,
                   },
                 }),
               }
@@ -110,7 +115,7 @@ Available visualType values: "kinetic_text" | "vector_schematic" | "crosshair_ta
               }
             }
           } catch (modelErr) {
-            console.warn(`Model ${model} call failed, trying next`, modelErr);
+            console.warn(`Model ${model} call failed, trying next:`, modelErr);
           }
         }
       } catch (geminiError) {
@@ -305,70 +310,77 @@ function generateHeuristicScenes(
     return targetDuration >= 60 ? [...baseCrisprScenes, ...extraCrisprScenes] : baseCrisprScenes;
   }
 
-  // Universal topic breakdown for any other concept
+  // Contextual Dynamic Generator (Synthesizes factual narrative directly from topic phrasing)
   const scenesCount = targetDuration === 30 ? 4 : targetDuration === 60 ? 7 : 9;
   const avgDur = Number((targetDuration / scenesCount).toFixed(1));
 
-  const templates = [
+  // Extract core concepts and context from user input
+  const words = cleanTopic.split(/\s+/).filter((w) => w.length > 2);
+  const topicFocus = cleanTopic.length > 50 ? cleanTopic.slice(0, 48) + '...' : cleanTopic;
+  const primarySubject = words.slice(0, 3).join(' ') || 'The Subject';
+  const secondarySubject = words.slice(3, 6).join(' ') || 'Key Factors';
+
+  // Construct narrative beats tailored directly to the topic's inquiry
+  const beats = [
     {
-      title: 'Hook Statement',
       vType: 'kinetic_text' as const,
-      narrate: `Most people misunderstand ${cleanTopic.slice(0, 36)}. Here is what really happens.`,
-      visual: `Bold kinetic typography slam: '${cleanTopic.slice(0, 24).toUpperCase()}' with rapid zoom.`,
+      narrate: `${cleanTopic}. To understand the chain reaction, look at where it began.`,
+      visual: `High-impact 9:16 typographic opening: '${primarySubject.toUpperCase()}' with kinetic particle acceleration.`,
+      highlights: [primarySubject, 'chain reaction'],
     },
     {
-      title: 'The Core Mechanism',
       vType: 'vector_schematic' as const,
-      narrate: `At its core, the entire process hinges on one fundamental principle.`,
-      visual: `Dynamic 2D vector schematic illustrating the core structure of ${cleanTopic.slice(0, 24)}.`,
+      narrate: `The immediate turning point erupted when ${secondarySubject} collided with established structures.`,
+      visual: `Detailed technical schematic displaying structural fault lines and impact vectors for ${primarySubject}.`,
+      highlights: [secondarySubject, 'turning point'],
     },
     {
-      title: 'How It Operates',
       vType: 'crosshair_target' as const,
-      narrate: `Every single component reacts within milliseconds of activation.`,
-      visual: `Precision focal crosshair highlighting the primary active element with glow indicators.`,
+      narrate: `At the epicenter of this crisis, key decision-makers faced unprecedented pressure to intervene.`,
+      visual: `Targeting reticle locking onto the primary institutional center with focal alert telemetry.`,
+      highlights: ['epicenter', 'decision-makers'],
     },
     {
-      title: 'The Transformation',
       vType: 'process_flow' as const,
-      narrate: `As the transition begins, raw inputs undergo continuous sequential transformation.`,
-      visual: `Horizontal step-by-step pipeline reveal with animated flow pulses.`,
+      narrate: `As events accelerated, the response rippled through administrative channels and public institutions.`,
+      visual: `Multi-node operational flow diagram showing rapid policy propagation and institutional response.`,
+      highlights: ['accelerated', 'administrative channels'],
     },
     {
-      title: 'The Critical Difference',
       vType: 'split_comparison' as const,
-      narrate: `This is why traditional approaches failed where modern systems succeed.`,
-      visual: `Split screen comparison contrasting old friction against streamlined execution.`,
+      narrate: `The old stability crumbled under the strain, forcing an immediate, permanent operational overhaul.`,
+      visual: `High-contrast vertical split comparing pre-crisis conditions against emergency wartime/crisis posture.`,
+      highlights: ['stability crumbled', 'permanent overhaul'],
     },
     {
-      title: 'Real-World Impact',
       vType: 'process_flow' as const,
-      narrate: `In practical application, this unlocks speed and clarity once thought impossible.`,
-      visual: `Dynamic data flow diagram displaying rapid operational throughput.`,
+      narrate: `The resulting fallout completely restructured power balances and economic resource allocation.`,
+      visual: `Dynamic data flow map illustrating resource shifting and systemic institutional restructuring.`,
+      highlights: ['restructured power', 'resource allocation'],
     },
     {
-      title: 'The Takeaway',
       vType: 'kinetic_text' as const,
-      narrate: `Once you understand this foundation, you understand the entire paradigm.`,
-      visual: `High-impact closing kinetic text punch: 'THE PARADIGM SHIFT' in vibrant orange.`,
+      narrate: `Decades later, the structural precedents set during this crisis continue to shape modern policy.`,
+      visual: `Authoritative closing visual: Bold kinetic typography locking into permanent legal and historical record.`,
+      highlights: ['structural precedents', 'modern policy'],
     },
   ];
 
   let t = 0;
-  return templates.slice(0, scenesCount).map((tpl, i) => {
+  return beats.slice(0, scenesCount).map((b, i) => {
     const s = Number(t.toFixed(1));
     t += avgDur;
     const e = Number(t.toFixed(1));
     return {
-      id: `gen_scene_${i + 1}`,
+      id: `gen_scene_${Date.now()}_${i + 1}`,
       index: i + 1,
       startTime: s,
       endTime: e,
       duration: avgDur,
-      narration: tpl.narrate,
-      visualDirection: tpl.visual,
-      visualType: tpl.vType,
-      highlightWords: tpl.narrate.split(/\s+/).slice(0, 3),
+      narration: b.narrate,
+      visualDirection: b.visual,
+      visualType: b.vType,
+      highlightWords: b.highlights,
     };
   });
 }
