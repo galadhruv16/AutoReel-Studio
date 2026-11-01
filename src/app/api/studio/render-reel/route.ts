@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { StoryboardScene } from '../generate-storyboard/route';
+import { StudioScene } from '@/types/studio';
 
 interface RenderRequest {
   presetId?: string;
@@ -7,7 +7,7 @@ interface RenderRequest {
   voice: string;
   captionStyle: 'editorial' | 'karaoke';
   accentColor: string;
-  scenes: StoryboardScene[];
+  scenes: StudioScene[];
 }
 
 export async function POST(request: Request) {
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
     // Calculate total duration from scenes
     const totalDurationSec = scenes && scenes.length > 0
-      ? scenes.reduce((acc, s) => acc + (s.durationSec || 6), 0)
+      ? scenes.reduce((acc, s) => acc + (s.duration || (s as any).durationSec || 6), 0)
       : 30;
 
     // Map presets to their real 1080x1920 MP4 video and audio files
@@ -43,13 +43,13 @@ export async function POST(request: Request) {
       timestampsUrl = '/audio/reel_kubernetes.json';
     } else {
       // For custom topics, select closest thematic archetype visual
-      const dominantArchetype = scenes?.[0]?.archetype || 'anatomy';
-      if (dominantArchetype === 'pipeline' || dominantArchetype === 'matrix') {
+      const dominantType = (scenes?.[0]?.visualType || 'kinetic_text') as string;
+      if (dominantType === 'split_comparison' || dominantType === 'process_flow' || dominantType === 'matrix') {
         videoUrl = '/videos/reel_genetics.mp4';
         posterUrl = '/videos/poster_genetics.png';
         audioUrl = '/audio/reel_genetics.mp3';
         timestampsUrl = '/audio/reel_genetics.json';
-      } else if (dominantArchetype === 'hook' || dominantArchetype === 'telemetry') {
+      } else if (dominantType === 'crosshair_target' || dominantType === 'vector_schematic') {
         videoUrl = '/videos/reel_kubernetes.mp4';
         posterUrl = '/videos/poster_kubernetes.png';
         audioUrl = '/audio/reel_kubernetes.mp3';

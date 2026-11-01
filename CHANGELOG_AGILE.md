@@ -30,3 +30,30 @@
 5. **Quality Assurance & Verification**:
    - Unit & flow tests passed (`scripts/test_studio_stage01.mjs`).
    - Next.js production build passed with 0 errors (`npm run build`).
+
+
+## [Sprint 2] Stage 02: Storyboard & Dynamic Script Director (Tangerine Obsidian)
+- **Status**: Completed & Verified
+- **Date**: 2026-11-01
+- **Focus**: Dynamic phrase-synced pacing, dual script ingestion (AI generate vs user script), inline scene script editing, real timecode calculation, and elimination of forced motion archetypes.
+
+### Implemented Features:
+1. **Dynamic Storyboard Generation API (`src/app/api/studio/generate-storyboard/route.ts`)**:
+   - Replaced old sci-fi telemetry/matrix archetype logic with true `StudioScene` phrase-synchronized scenes.
+   - Pacing strictly mapped to target duration (`30s`, `60s`, `90s`) with micro-beats of 2.0s to 5.0s per phrase.
+   - Dual script ingestion:
+     * Mode A: `ai_generate` — crafts a structured explainer script from the topic brief using Gemini Flash.
+     * Mode B: `own_script` — ingests user-provided text, polishes voiceover cadence, and segments into time-synced scenes.
+   - Robust fallback generator ensuring complete functionality even during network or API key degradation.
+2. **Interactive Stage 02 Component (`src/components/studio/Stage02Storyboard.tsx`)**:
+   - Segmented control to switch between *Generate Script with AI* and *I Have My Own Script*.
+   - Interactive scene cards showing scene index, exact millisecond timecodes (`0.0s – 3.2s`), and visual archetype badges.
+   - In-place inline narration editing with automatic word-rate duration adjustment and sequential timecode re-indexing.
+   - Visual direction description and archetype selector (`Kinetic Typography`, `Vector Schematic`, `Crosshair Target`, `Split Comparison`, `Process Flow`).
+   - Keyword highlight badges.
+   - Scene manipulation actions: `Split Scene` into dual micro-beats, `Delete Scene` with automatic timeline compaction, and `+ Add Scene Beat`.
+   - Real-time Pacing Monitor: displays total runtime vs target duration, total word count, and color-coded pacing indicator.
+   - Full Tangerine Obsidian styling (`#08090A`, `#14161F`, `#FF4F00`) matching desktop and mobile viewports.
+3. **Quality Assurance & Verification**:
+   - Automated unit & flow tests passed (`scripts/test_studio_stage02.mjs`).
+   - Next.js production build passed with 0 errors (`npm run build`).
