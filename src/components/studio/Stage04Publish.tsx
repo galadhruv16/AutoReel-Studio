@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Download,
   FileText,
@@ -8,18 +8,11 @@ import {
   Check,
   RotateCcw,
   Sparkles,
-  Play,
-  Pause,
   ArrowLeft,
-  Share2,
   CheckCircle2,
-  Film,
-  Sliders,
   Clock,
-  Mic,
   Tag,
   Hash,
-  ExternalLink,
 } from 'lucide-react';
 import { useStudio } from '../../context/StudioContext';
 import { VOICES, StudioScene } from '../../types/studio';
@@ -45,7 +38,6 @@ export const Stage04Publish: React.FC = () => {
   const { project, setStage, resetProject } = useStudio();
 
   const [activePlatform, setActivePlatform] = useState<PlatformKey>('youtube');
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [isGeneratingKit, setIsGeneratingKit] = useState<boolean>(false);
   const [publishingKit, setPublishingKit] = useState<AllPlatformsKit | null>(null);
@@ -53,17 +45,9 @@ export const Stage04Publish: React.FC = () => {
   const [dynamicVideoUrl, setDynamicVideoUrl] = useState<string | null>(null);
   const [renderStatus, setRenderStatus] = useState<string>('');
 
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-
-  // Pick suitable base video asset based on project topic
-  const lowerTopic = (project.topic || '').toLowerCase();
-  const videoSrc = lowerTopic.includes('crispr') || lowerTopic.includes('gene') || lowerTopic.includes('dna') || lowerTopic.includes('biology')
-    ? '/videos/reel_genetics.mp4'
-    : lowerTopic.includes('saraighat') || lowerTopic.includes('war') || lowerTopic.includes('history') || lowerTopic.includes('battle')
-    ? '/videos/reel_saraighat.mp4'
-    : '/videos/reel_kubernetes.mp4';
-
-  const posterSrc = videoSrc.replace('.mp4', '.png').replace('/videos/reel_', '/videos/poster_');
+  // Master video asset (only populated when an actual MP4 render has been compiled)
+  const videoSrc = project.videoUrl || undefined;
+  const posterSrc = project.videoUrl ? project.videoUrl.replace('.mp4', '.png') : undefined;
   const voiceObj = VOICES.find((v) => v.id === project.voice) || VOICES[0];
 
   const scenes = project.scenes.length > 0 ? project.scenes : [
@@ -119,17 +103,6 @@ export const Stage04Publish: React.FC = () => {
     };
   }, [project.topic, project.scenes, totalDuration, project.tone]);
 
-  // Video play/pause toggle
-  const handlePlayPause = () => {
-    if (!videoRef.current) return;
-    if (isPlaying) {
-      videoRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      videoRef.current.play().then(() => setIsPlaying(true)).catch((e) => console.warn(e));
-    }
-  };
-
   // Safe file slug generator
   const getTopicSlug = () => {
     const raw = (project.topic || 'AutoReel').trim().toLowerCase();
@@ -170,6 +143,10 @@ export const Stage04Publish: React.FC = () => {
   // Instant MP4 Download
   const handleDownloadVideo = () => {
     const downloadHref = dynamicVideoUrl || videoSrc;
+    if (!downloadHref) {
+      handleRenderDynamicMp4();
+      return;
+    }
     const link = document.createElement('a');
     link.href = downloadHref;
     link.download = `${getTopicSlug()}_1080p.mp4`;

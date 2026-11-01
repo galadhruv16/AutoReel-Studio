@@ -41,7 +41,8 @@ export function generateVideoChapters(scenes: StudioScene[]): string {
       const secs = Math.floor(s.startTime % 60);
       const pad = (n: number) => String(n).padStart(2, '0');
       // Create concise 2-4 word label from visual direction or narration
-      const label = s.visualDirection.split(':')[0].replace(/kinetic|vector|crosshair|split|process/gi, '').trim() || `Scene ${s.index}`;
+      const rawDirection = s.visualDirection || '';
+      const label = rawDirection.split(':')[0].replace(/kinetic|vector|crosshair|split|process/gi, '').trim() || `Scene ${s.index}`;
       return `${mins}:${pad(secs)} - ${label}`;
     })
     .join('\n');

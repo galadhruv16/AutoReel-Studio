@@ -46,34 +46,37 @@ interface StudioContextType {
 const StudioContext = createContext<StudioContextType | undefined>(undefined);
 
 export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [project, setProject] = useState<StudioProject>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          // Ensure structure validity
-          return {
-            ...DEFAULT_PROJECT,
-            ...parsed,
-            duration: [30, 60, 90].includes(parsed.duration) ? parsed.duration : 60,
-          };
-        }
-      } catch (e) {
-        console.warn('Failed to load studio project from localStorage', e);
-      }
-    }
-    return DEFAULT_PROJECT;
-  });
+  const [project, setProject] = useState<StudioProject>(DEFAULT_PROJECT);
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  // Save to localStorage on changes
+  // Load from localStorage safely after client mount to prevent SSR hydration mismatch
   useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setProject({
+          ...DEFAULT_PROJECT,
+          ...parsed,
+          duration: [30, 60, 90].includes(parsed.duration) ? parsed.duration : 60,
+        });
+      }
+    } catch (e) {
+      console.warn('Failed to load studio project from localStorage', e);
+    } finally {
+      setIsHydrated(true);
+    }
+  }, []);
+
+  // Save to localStorage on changes (only after initial client hydration)
+  useEffect(() => {
+    if (!isHydrated) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(project));
     } catch (e) {
       console.warn('Failed to persist studio project', e);
     }
-  }, [project]);
+  }, [project, isHydrated]);
 
   const updateProject = (updates: Partial<StudioProject>) => {
     setProject((prev) => ({
@@ -85,23 +88,29 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const setTopic = (topic: string) => {
     setProject((prev) => {
-      // If the topic is meaningfully changed, invalidate old scenes so fresh generation is triggered
-      if (prev.topic.trim().toLowerCase() !== topic.trim().toLowerCase()) {
-        return {
-          ...prev,
-          topic,
-          scenes: [],
-          updatedAt: new Date().toISOString(),
-        };
-      }
+      const topicChanged = prev.topic.trim().toLowerCase() !== topic.trim().toLowerCase();
       return {
         ...prev,
         topic,
+        scenes: topicChanged ? [] : prev.scenes,
+        videoUrl: topicChanged ? null : prev.videoUrl,
+        srtUrl: topicChanged ? null : prev.srtUrl,
         updatedAt: new Date().toISOString(),
       };
     });
   };
-  const setDuration = (duration: StudioDuration) => updateProject({ duration });
+  const setDuration = (duration: StudioDuration) => {
+    setProject((prev) => {
+      const durationChanged = prev.duration !== duration;
+      return {
+        ...prev,
+        duration,
+        scenes: durationChanged ? [] : prev.scenes,
+        videoUrl: durationChanged ? null : prev.videoUrl,
+        updatedAt: new Date().toISOString(),
+      };
+    });
+  };
   const setTone = (tone: StudioTone) => updateProject({ tone });
   const setVoice = (voice: VoiceId) => updateProject({ voice });
   const setStage = (stage: 1 | 2 | 3 | 4) => updateProject({ stage });

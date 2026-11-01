@@ -31,6 +31,10 @@ export interface DynamicGraphicData {
   statLabel?: string;
   leftItem?: { title: string; desc: string };
   rightItem?: { title: string; desc: string };
+  comparison?: {
+    left: { heading: string; points: string[] };
+    right: { heading: string; points: string[] };
+  };
   steps?: Array<{ num: string; title: string; desc?: string }>;
   milestones?: Array<{ date: string; title: string }>;
   keyTags?: string[];
@@ -46,6 +50,10 @@ export interface StudioScene {
   visualDirection: string;
   visualType: VisualArchetype;
   highlightWords?: string[];
+  cue?: string; // Exact verbatim substring of narration that triggers visual reveal
+  cueFrame?: number; // Exact Remotion frame when cue is spoken (relative to scene start)
+  decisionCue?: string; // Secondary verbatim substring for state transition / comparison
+  decisionFrame?: number;
   graphicData?: DynamicGraphicData;
   audioUrl?: string;
 }

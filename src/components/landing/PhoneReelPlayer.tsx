@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, RotateCcw, Sparkles } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Play, Pause, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 
 interface PhoneReelPlayerProps {
-  id: string;
+  id?: string;
   title: string;
   category: string;
   videoSrc: string;
@@ -19,6 +19,7 @@ interface PhoneReelPlayerProps {
 }
 
 export const PhoneReelPlayer: React.FC<PhoneReelPlayerProps> = ({
+  id,
   title,
   category,
   videoSrc,

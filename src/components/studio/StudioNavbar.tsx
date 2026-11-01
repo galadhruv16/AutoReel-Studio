@@ -1,13 +1,25 @@
 'use client';
 
-import React from 'react';
-import { Aperture, LogOut, Check, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Aperture, LogOut, Check } from 'lucide-react';
 import { useStudio } from '../../context/StudioContext';
 import { useRouter } from 'next/navigation';
 
 export const StudioNavbar: React.FC = () => {
   const { project, setStage } = useStudio();
   const router = useRouter();
+  const [userEmail, setUserEmail] = useState<string>('Insider Admin');
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.email) {
+          setUserEmail(data.email);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -92,8 +104,8 @@ export const StudioNavbar: React.FC = () => {
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2 rounded-full border border-[#232634] bg-[#14161F] px-3 py-1 text-xs text-[#EDEDED]">
             <span className="h-2 w-2 rounded-full bg-[#10B981]" />
-            <span className="font-mono text-[11px] text-[#94A3B8] truncate max-w-[140px]">
-              galadhruv1611@gmail.com
+            <span className="font-mono text-[11px] text-[#94A3B8] truncate max-w-[140px]" title={userEmail}>
+              {userEmail}
             </span>
           </div>
 

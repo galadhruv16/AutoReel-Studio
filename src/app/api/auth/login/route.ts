@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { createSessionToken, SESSION_COOKIE_NAME } from '@/lib/auth';
 
 export async function POST(request: Request) {
@@ -16,14 +17,18 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check credentials (case-insensitive email, exact password)
-    const isValid =
-      email &&
-      password &&
-      email.trim().toLowerCase() === adminEmail.trim().toLowerCase() &&
-      password === adminPassword;
+    // Constant-time check for password and safe email validation
+    const isEmailValid =
+      typeof email === 'string' &&
+      email.trim().toLowerCase() === adminEmail.trim().toLowerCase();
 
-    if (!isValid) {
+    const userPassBuffer = Buffer.from(String(password || ''));
+    const adminPassBuffer = Buffer.from(adminPassword);
+    const isPasswordValid =
+      userPassBuffer.length === adminPassBuffer.length &&
+      crypto.timingSafeEqual(userPassBuffer, adminPassBuffer);
+
+    if (!isEmailValid || !isPasswordValid) {
       return NextResponse.json(
         { success: false, error: 'Invalid insider credentials. Access denied.' },
         { status: 401 }

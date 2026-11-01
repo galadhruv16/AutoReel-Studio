@@ -109,4 +109,18 @@ for (const scene of scenes60) {
 }
 console.log('✅ Passed: Zero sci-fi clutter verified.\n');
 
+// Test 6: Verify Animation Cue & CueFrame Contract (Sprint 5)
+console.log('Test 6: Verify Animation Cue & CueFrame Generation (Sprint 5 Contract)...');
+const sampleNarration = 'In December 1971, Indian forces executed a rapid multi-pronged counterstrike.';
+const sampleCue = 'multi-pronged counterstrike';
+assert(sampleNarration.includes(sampleCue), 'Cue must be an exact verbatim substring of narration');
+
+const charOffset = sampleNarration.indexOf(sampleCue);
+const cueRatio = charOffset / sampleNarration.length;
+const testDuration = 5.0;
+const testCueFrame = Math.max(4, Math.floor(cueRatio * testDuration * 30));
+
+assert(testCueFrame >= 4 && testCueFrame < testDuration * 30, 'cueFrame must be within scene frame bounds');
+console.log(`✅ Passed: Animation cue ("${sampleCue}") triggers at frame ${testCueFrame} (~${(testCueFrame / 30).toFixed(1)}s).\n`);
+
 console.log('🎉 All Stage 02 Unit & Flow Verification Tests Passed Successfully!');

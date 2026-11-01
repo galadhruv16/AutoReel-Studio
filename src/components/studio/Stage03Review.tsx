@@ -1,16 +1,13 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Play,
   Pause,
-  RotateCcw,
   Volume2,
   VolumeX,
-  Maximize2,
   ArrowRight,
   ArrowLeft,
-  Sparkles,
   Layers,
   Clock,
   Mic,
@@ -24,7 +21,7 @@ import {
 } from 'lucide-react';
 import { useStudio } from '../../context/StudioContext';
 import { StudioScene, VOICES } from '../../types/studio';
-import { RemotionStudioPlayer } from './RemotionStudioPlayer';
+import { RemotionStudioPlayer, RemotionStudioPlayerHandle } from './RemotionStudioPlayer';
 
 export const Stage03Review: React.FC = () => {
   const { project, setStage, updateProject } = useStudio();
@@ -40,18 +37,12 @@ export const Stage03Review: React.FC = () => {
   const [voiceVolume, setVoiceVolume] = useState<number>(100);
   const [ambientVolume, setAmbientVolume] = useState<number>(25);
 
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const playerHandleRef = useRef<RemotionStudioPlayerHandle | null>(null);
   const sceneAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Pick suitable base video asset based on project topic
-  const lowerTopic = (project.topic || '').toLowerCase();
-  const videoSrc = lowerTopic.includes('crispr') || lowerTopic.includes('gene') || lowerTopic.includes('dna') || lowerTopic.includes('biology')
-    ? '/videos/reel_genetics.mp4'
-    : lowerTopic.includes('saraighat') || lowerTopic.includes('war') || lowerTopic.includes('history') || lowerTopic.includes('battle')
-    ? '/videos/reel_saraighat.mp4'
-    : '/videos/reel_kubernetes.mp4';
-
-  const posterSrc = videoSrc.replace('.mp4', '.png').replace('/videos/reel_', '/videos/poster_');
+  // Master video asset (only populated when an actual MP4 render has been compiled)
+  const videoSrc = project.videoUrl || undefined;
+  const posterSrc = project.videoUrl ? project.videoUrl.replace('.mp4', '.png') : undefined;
   const voiceObj = VOICES.find((v) => v.id === project.voice) || VOICES[0];
 
   const scenes = project.scenes.length > 0 ? project.scenes : [
@@ -71,10 +62,65 @@ export const Stage03Review: React.FC = () => {
   const selectedScene = scenes[selectedSceneIndex] || scenes[0];
   const totalDuration = scenes.reduce((acc, s) => acc + s.duration, 0) || project.duration;
 
+  // Automatic Background Neural Voiceover Synthesis for all scenes
+  React.useEffect(() => {
+    let isCancelled = false;
+    const unvoicedScenes = scenes.filter((s) => !s.audioUrl && s.narration);
+    if (unvoicedScenes.length === 0) return;
+
+    setIsSynthesizing(true);
+    setSynthSuccess(`Synthesizing neural voice for ${unvoicedScenes.length} scenes...`);
+
+    const synthesizeBatch = async () => {
+      const updatedScenes = [...scenes];
+      let synthCount = 0;
+
+      for (let i = 0; i < updatedScenes.length; i++) {
+        if (isCancelled) break;
+        const sc = updatedScenes[i];
+        if (!sc.audioUrl && sc.narration) {
+          try {
+            const res = await fetch('/api/studio/synthesize-scene', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                text: sc.narration,
+                voice: project.voice,
+                sceneIndex: sc.index,
+              }),
+            });
+            const data = await res.json();
+            if (data.success && data.data?.audioUrl) {
+              updatedScenes[i] = {
+                ...updatedScenes[i],
+                audioUrl: data.data.audioUrl,
+              };
+              synthCount++;
+            }
+          } catch (err) {
+            console.warn(`Failed to synthesize scene ${sc.index}`, err);
+          }
+        }
+      }
+
+      if (!isCancelled && synthCount > 0) {
+        updateProject({ scenes: updatedScenes });
+        setSynthSuccess(`All ${synthCount} scenes synchronized with neural voice.`);
+      }
+      if (!isCancelled) {
+        setIsSynthesizing(false);
+      }
+    };
+
+    synthesizeBatch();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [project.voice, scenes.length]);
+
   // Video time tracking
-  const handleTimeUpdate = () => {
-    if (!videoRef.current) return;
-    const cur = videoRef.current.currentTime;
+  const handleTimeUpdate = (cur: number) => {
     setCurrentTime(cur);
 
     // Sync active scene index based on playback time
@@ -85,42 +131,47 @@ export const Stage03Review: React.FC = () => {
   };
 
   const handlePlayPause = () => {
-    if (!videoRef.current) return;
     if (isPlaying) {
-      videoRef.current.pause();
+      playerHandleRef.current?.pause();
       setIsPlaying(false);
     } else {
-      videoRef.current.play().then(() => setIsPlaying(true)).catch((e) => console.warn(e));
+      playerHandleRef.current?.play();
+      setIsPlaying(true);
     }
   };
 
   const handleSeek = (newTime: number) => {
-    if (!videoRef.current) return;
-    videoRef.current.currentTime = Math.max(0, Math.min(totalDuration, newTime));
-    setCurrentTime(newTime);
+    const clamped = Math.max(0, Math.min(totalDuration, newTime));
+    playerHandleRef.current?.seek(clamped);
+    setCurrentTime(clamped);
   };
 
   const handleJumpToScene = (index: number) => {
     setSelectedSceneIndex(index);
     const targetScene = scenes[index];
-    if (targetScene && videoRef.current) {
-      videoRef.current.currentTime = targetScene.startTime;
+    if (targetScene) {
+      playerHandleRef.current?.seek(targetScene.startTime);
       setCurrentTime(targetScene.startTime);
     }
   };
 
   const handleSpeedChange = (speed: number) => {
     setPlaybackSpeed(speed);
-    if (videoRef.current) {
-      videoRef.current.playbackRate = speed;
-    }
+    playerHandleRef.current?.setPlaybackRate(speed);
   };
 
   const handleToggleMute = () => {
-    if (!videoRef.current) return;
-    const newMuted = !isMuted;
-    videoRef.current.muted = newMuted;
-    setIsMuted(newMuted);
+    if (playerHandleRef.current) {
+      const nextMuted = playerHandleRef.current.toggleMute();
+      setIsMuted(nextMuted);
+    } else {
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const handleVoiceVolumeChange = (vol: number) => {
+    setVoiceVolume(vol);
+    playerHandleRef.current?.setVolume(vol / 100);
   };
 
   const handleUpdateSceneData = (updates: Partial<StudioScene>) => {
@@ -215,14 +266,16 @@ export const Stage03Review: React.FC = () => {
         <div className="lg:col-span-5 flex flex-col items-center">
           {/* Remotion 9:16 Vertical Studio Viewport */}
           <RemotionStudioPlayer
+            ref={playerHandleRef}
             topic={project.topic}
             scenes={scenes}
             captionStyle={project.captionStyle}
             accentColor="#FF4F00"
             fallbackVideoSrc={videoSrc}
             posterSrc={posterSrc}
-            onTimeUpdate={(t) => setCurrentTime(t)}
+            onTimeUpdate={handleTimeUpdate}
             onSceneIndexChange={(idx) => setSelectedSceneIndex(idx)}
+            onPlayStateChange={(playing) => setIsPlaying(playing)}
           />
 
           {/* Transport Controls Deck */}
@@ -517,7 +570,7 @@ export const Stage03Review: React.FC = () => {
                   min="0"
                   max="100"
                   value={voiceVolume}
-                  onChange={(e) => setVoiceVolume(parseInt(e.target.value, 10))}
+                  onChange={(e) => handleVoiceVolumeChange(parseInt(e.target.value, 10))}
                   className="w-full h-1.5 bg-[#08090A] rounded-lg appearance-none cursor-pointer accent-[#FF4F00]"
                 />
               </div>

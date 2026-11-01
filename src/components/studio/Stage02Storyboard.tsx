@@ -15,9 +15,6 @@ import {
   FileText,
   AlertCircle,
   CheckCircle2,
-  Sliders,
-  Play,
-  Volume2,
 } from 'lucide-react';
 import { useStudio } from '../../context/StudioContext';
 import { StudioScene, DURATION_CONFIGS, VOICES } from '../../types/studio';
@@ -32,6 +29,7 @@ export const Stage02Storyboard: React.FC = () => {
   } = useStudio();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSynthesizingVoices, setIsSynthesizingVoices] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'ai_generate' | 'own_script'>(
@@ -187,9 +185,16 @@ export const Stage02Storyboard: React.FC = () => {
       endTime: Number((start + 3.5).toFixed(1)),
       duration: 3.5,
       narration: 'New spoken phrase introducing the next critical concept.',
+      cue: 'critical concept',
+      cueFrame: 15,
       visualDirection: 'Dynamic visual sequence: Kinetic focal reveal matching narration.',
       visualType: 'kinetic_text',
       highlightWords: ['critical concept'],
+      graphicData: {
+        badge: 'NEW CONCEPT BEAT',
+        headline: 'CRITICAL CONCEPT',
+        subtext: 'New spoken phrase introducing the next critical concept.',
+      },
     };
     updateProject({ scenes: [...project.scenes, newScene] });
   };
@@ -218,14 +223,54 @@ export const Stage02Storyboard: React.FC = () => {
       const start = Number(currentTime.toFixed(1));
       currentTime += dur;
       const end = Number(currentTime.toFixed(1));
+      const cueRatio = (s.cueFrame && s.duration) ? (s.cueFrame / (s.duration * 30)) : 0.25;
+      const cueFrame = Math.max(4, Math.floor(cueRatio * dur * 30));
+
       return {
         ...s,
         duration: dur,
         startTime: start,
         endTime: end,
+        cueFrame,
       };
     });
     updateProject({ scenes: updatedScenes });
+  };
+
+  const handleProceedToReview = async () => {
+    const unvoiced = project.scenes.filter((s) => !s.audioUrl && s.narration);
+    if (unvoiced.length > 0) {
+      setIsSynthesizingVoices(true);
+      const updatedScenes = [...project.scenes];
+      for (let i = 0; i < updatedScenes.length; i++) {
+        const sc = updatedScenes[i];
+        if (!sc.audioUrl && sc.narration) {
+          try {
+            const res = await fetch('/api/studio/synthesize-scene', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                text: sc.narration,
+                voice: project.voice,
+                sceneIndex: sc.index,
+              }),
+            });
+            const data = await res.json();
+            if (data.success && data.data?.audioUrl) {
+              updatedScenes[i] = {
+                ...updatedScenes[i],
+                audioUrl: data.data.audioUrl,
+              };
+            }
+          } catch (e) {
+            console.warn(`Could not synthesize scene ${sc.index}:`, e);
+          }
+        }
+      }
+      updateProject({ scenes: updatedScenes });
+      setIsSynthesizingVoices(false);
+    }
+    setStage(3);
   };
 
   return (
@@ -551,9 +596,24 @@ export const Stage02Storyboard: React.FC = () => {
                 </div>
               </div>
 
+              {/* Animation Cue Trigger Row */}
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 bg-[#08090A] p-2.5 rounded-xl border border-[#1C1E26]">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono uppercase text-[#FF4F00] bg-[#FF4F00]/15 px-2 py-0.5 rounded border border-[#FF4F00]/30 font-bold">
+                    Animation Cue
+                  </span>
+                  <span className="text-xs text-[#EDEDED] font-mono">
+                    "{scene.cue || scene.highlightWords?.[0] || 'Direct Reveal'}"
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-[11px] font-mono text-[#94A3B8]">
+                  <span>Triggers at: <strong className="text-white">Frame {scene.cueFrame || 6}</strong> (~{((scene.cueFrame || 6) / 30).toFixed(1)}s)</span>
+                </div>
+              </div>
+
               {/* Highlight Words Chips */}
               {scene.highlightWords && scene.highlightWords.length > 0 && (
-                <div className="mt-3 flex items-center gap-1.5 flex-wrap">
+                <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
                   <span className="text-[10px] font-mono text-[#64748B] uppercase">Keywords:</span>
                   {scene.highlightWords.map((kw, kwIdx) => (
                     <span
@@ -652,12 +712,21 @@ export const Stage02Storyboard: React.FC = () => {
         <div className="w-full sm:w-auto flex items-center justify-end">
           <button
             type="button"
-            onClick={() => setStage(3)}
-            disabled={project.scenes.length === 0}
+            onClick={handleProceedToReview}
+            disabled={project.scenes.length === 0 || isSynthesizingVoices}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF4F00] px-6 py-3.5 text-sm font-semibold text-white shadow-xl shadow-[#FF4F00]/25 transition hover:bg-[#FF3B00] active:scale-95 disabled:opacity-50 cursor-pointer"
           >
-            <span>Proceed to Video Review</span>
-            <ArrowRight className="h-4 w-4" />
+            {isSynthesizingVoices ? (
+              <>
+                <RefreshCw className="h-4 w-4 animate-spin text-white" />
+                <span>Synthesizing Voiceovers (Edge TTS)...</span>
+              </>
+            ) : (
+              <>
+                <span>Proceed to Video Review</span>
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
           </button>
         </div>
       </div>

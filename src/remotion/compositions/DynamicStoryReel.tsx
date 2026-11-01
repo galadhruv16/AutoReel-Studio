@@ -6,6 +6,8 @@ import {
   useCurrentFrame,
   useVideoConfig,
   Sequence,
+  Audio,
+  staticFile,
 } from 'remotion';
 import { StudioScene } from '../../types/studio';
 
@@ -170,7 +172,7 @@ const KineticTextScene: React.FC<{
 };
 
 // =========================================================================
-// SUB-COMPONENT: VECTOR SCHEMATIC SCENE
+// SUB-COMPONENT: SYSTEM SCHEMATIC / MECHANISM ARCHITECTURE SCENE
 // =========================================================================
 const VectorSchematicScene: React.FC<{
   scene: StudioScene;
@@ -179,9 +181,17 @@ const VectorSchematicScene: React.FC<{
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const scale = spring({ frame, fps, config: { damping: 14, stiffness: 100 } });
-  const rotation = frame * 0.4;
-  const strokeDash = interpolate(frame, [0, 45], [600, 0], { extrapolateRight: 'clamp' });
+  const cueFrame = scene.cueFrame || Math.floor(fps * 0.4);
+  const isCueReached = frame >= cueFrame;
+  const cueProgress = interpolate(frame, [cueFrame, cueFrame + 12], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+
+  const enterSpring = spring({ frame, fps, config: { damping: 14, stiffness: 110 } });
+
+  const inputTag = scene.graphicData?.keyTags?.[0] || 'PRIMARY INPUT';
+  const outputTag = scene.graphicData?.keyTags?.[1] || 'FINAL OUTCOME';
 
   return (
     <AbsoluteFill
@@ -193,132 +203,161 @@ const VectorSchematicScene: React.FC<{
         padding: '0 60px',
       }}
     >
-      {/* Center SVG Schematic Animation */}
-      <svg
-        width="650"
-        height="650"
-        viewBox="0 0 600 600"
-        style={{
-          transform: `scale(${scale})`,
-          overflow: 'visible',
-          filter: `drop-shadow(0 0 30px ${accentColor}35)`,
-        }}
-      >
-        {/* Outer Orbit Ring */}
-        <circle
-          cx="300"
-          cy="300"
-          r="260"
-          fill="none"
-          stroke={`${accentColor}30`}
-          strokeWidth="2"
-          strokeDasharray="8 8"
-          transform={`rotate(${rotation} 300 300)`}
-        />
-
-        {/* Outer Hexagon Boundary */}
-        <polygon
-          points="300,70 490,180 490,420 300,530 110,420 110,180"
-          fill="none"
-          stroke={accentColor}
-          strokeWidth="3"
-          strokeDasharray="1200"
-          strokeDashoffset={strokeDash}
-        />
-
-        {/* Inner Tech Ring with Ticks */}
-        <circle
-          cx="300"
-          cy="300"
-          r="160"
-          fill="none"
-          stroke="#EDEDED"
-          strokeWidth="2"
-          strokeDasharray="4 20"
-          transform={`rotate(${-rotation * 1.5} 300 300)`}
-        />
-
-        {/* Central Pulsing Core */}
-        <circle
-          cx="300"
-          cy="300"
-          r="60"
-          fill={`${accentColor}20`}
-          stroke={accentColor}
-          strokeWidth="4"
-        />
-        <circle
-          cx="300"
-          cy="300"
-          r={25 + Math.sin(frame * 0.15) * 5}
-          fill={accentColor}
-        />
-
-        {/* Diagonal Vector Ray Lines */}
-        <line x1="110" y1="180" x2="490" y2="420" stroke={`${accentColor}40`} strokeWidth="1.5" />
-        <line x1="490" y1="180" x2="110" y2="420" stroke={`${accentColor}40`} strokeWidth="1.5" />
-
-        {/* Telemetry Corner Accents */}
-        <text x="130" y="160" fill="#94A3B8" fontSize="16" fontFamily="monospace">
-          {scene.graphicData?.keyTags?.[0] || `SCHEMATIC // 0${scene.index}`}
-        </text>
-        <text x="320" y="460" fill={accentColor} fontSize="16" fontFamily="monospace">
-          {scene.graphicData?.keyTags?.[1] || 'CORE DOCTRINE'}
-        </text>
-      </svg>
-
-      {/* Schematic Headline Label */}
+      {/* Background Subtle Depth */}
       <div
         style={{
-          marginTop: 40,
-          textAlign: 'center',
-          maxWidth: 850,
+          position: 'absolute',
+          width: 700,
+          height: 700,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${accentColor}18 0%, transparent 70%)`,
+          filter: 'blur(50px)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Structural Editorial Flowchart Diagram */}
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 880,
+          backgroundColor: '#14161F',
+          border: `1.5px solid ${isCueReached ? accentColor : '#232634'}`,
+          borderRadius: 36,
+          padding: '48px 40px',
+          boxShadow: isCueReached ? `0 25px 60px ${accentColor}25` : '0 20px 50px rgba(0,0,0,0.7)',
+          transform: `scale(${enterSpring})`,
+          transition: 'border-color 0.4s ease, box-shadow 0.4s ease',
+          marginBottom: 36,
         }}
       >
-        <span
-          style={{
-            fontSize: 22,
-            fontFamily: 'monospace',
-            color: accentColor,
-            letterSpacing: '0.2em',
-            textTransform: 'uppercase',
-            display: 'block',
-            marginBottom: 12,
-          }}
-        >
-          {scene.graphicData?.badge || (scene.visualDirection || 'ARCHITECTURAL SCHEMATIC').split(':')[0]}
-        </span>
+        {/* Top Header Badge */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 36 }}>
+          <span
+            style={{
+              fontSize: 18,
+              fontFamily: 'monospace',
+              color: accentColor,
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              fontWeight: 700,
+            }}
+          >
+            {scene.graphicData?.badge || 'SYSTEM MECHANISM'}
+          </span>
+          <span
+            style={{
+              backgroundColor: '#08090A',
+              border: '1px solid #232634',
+              borderRadius: 9999,
+              padding: '6px 16px',
+              fontSize: 14,
+              fontFamily: 'monospace',
+              color: isCueReached ? accentColor : '#64748B',
+              fontWeight: 700,
+            }}
+          >
+            {isCueReached ? 'ACTIVE BEAT' : 'INITIALIZING'}
+          </span>
+        </div>
+
+        {/* 3-Tier Connected Flow Nodes */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1.4fr auto 1fr', alignItems: 'center', gap: 14 }}>
+          {/* Node 1: Input / Origin */}
+          <div
+            style={{
+              backgroundColor: '#08090A',
+              border: '1.5px solid #232634',
+              borderRadius: 20,
+              padding: '20px 16px',
+              textAlign: 'center',
+            }}
+          >
+            <span style={{ fontSize: 13, fontFamily: 'monospace', color: '#64748B', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+              CATALYST
+            </span>
+            <span style={{ fontSize: 20, fontWeight: 700, color: '#EDEDED', lineHeight: 1.2 }}>
+              {inputTag}
+            </span>
+          </div>
+
+          {/* Connecting Arrow */}
+          <span style={{ fontSize: 28, color: accentColor, fontWeight: 900 }}>→</span>
+
+          {/* Node 2: Central Mechanism */}
+          <div
+            style={{
+              backgroundColor: isCueReached ? `${accentColor}18` : '#191C28',
+              border: `2px solid ${isCueReached ? accentColor : '#3D445C'}`,
+              borderRadius: 24,
+              padding: '24px 20px',
+              textAlign: 'center',
+              boxShadow: isCueReached ? `0 0 30px ${accentColor}30` : 'none',
+              transform: isCueReached ? `scale(${1 + cueProgress * 0.04})` : 'scale(1)',
+              transition: 'all 0.3s ease',
+            }}
+          >
+            <span style={{ fontSize: 13, fontFamily: 'monospace', color: accentColor, textTransform: 'uppercase', display: 'block', marginBottom: 6, fontWeight: 700 }}>
+              OPERATIONAL CORE
+            </span>
+            <span style={{ fontSize: 24, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.25 }}>
+              {scene.graphicData?.headline || 'CORE MECHANISM'}
+            </span>
+          </div>
+
+          {/* Connecting Arrow */}
+          <span style={{ fontSize: 28, color: isCueReached ? accentColor : '#33384B', fontWeight: 900 }}>→</span>
+
+          {/* Node 3: Result / Outcome */}
+          <div
+            style={{
+              backgroundColor: '#08090A',
+              border: `1.5px solid ${isCueReached ? '#10B981' : '#232634'}`,
+              borderRadius: 20,
+              padding: '20px 16px',
+              textAlign: 'center',
+            }}
+          >
+            <span style={{ fontSize: 13, fontFamily: 'monospace', color: isCueReached ? '#10B981' : '#64748B', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+              OUTCOME
+            </span>
+            <span style={{ fontSize: 20, fontWeight: 700, color: '#EDEDED', lineHeight: 1.2 }}>
+              {outputTag}
+            </span>
+          </div>
+        </div>
+
+        {/* Bottom Context Line */}
+        {scene.graphicData?.subtext && (
+          <div style={{ marginTop: 28, borderTop: '1px solid #1C1E26', paddingTop: 20, textAlign: 'center' }}>
+            <p style={{ fontSize: 22, color: '#94A3B8', margin: 0, fontWeight: 500, lineHeight: 1.35 }}>
+              {scene.graphicData.subtext}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Main Narrative Explanation */}
+      <div style={{ textAlign: 'center', maxWidth: 880 }}>
         <h2
           style={{
-            fontSize: 52,
+            fontSize: 50,
             fontWeight: 800,
             color: '#FFFFFF',
-            lineHeight: 1.2,
-            margin: '0 0 12px 0',
+            lineHeight: 1.25,
+            margin: '0 0 10px 0',
             textShadow: '0 6px 25px rgba(0,0,0,0.9)',
           }}
         >
-          {scene.graphicData?.headline || scene.narration}
+          {scene.narration}
         </h2>
-        {scene.graphicData?.subtext && (
-          <p
-            style={{
-              fontSize: 24,
-              color: '#94A3B8',
-              fontWeight: 500,
-              margin: 0,
-            }}
-          >
-            {scene.graphicData.subtext}
-          </p>
-        )}
       </div>
     </AbsoluteFill>
   );
 };
 
 // =========================================================================
-// SUB-COMPONENT: CROSSHAIR TARGETING SCENE
+// SUB-COMPONENT: FOCAL SPOTLIGHT CARD SCENE (NO SCI-FI RADAR)
 // =========================================================================
 const CrosshairTargetScene: React.FC<{
   scene: StudioScene;
@@ -327,9 +366,15 @@ const CrosshairTargetScene: React.FC<{
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const lockProgress = spring({ frame, fps, config: { damping: 10, mass: 0.5, stiffness: 140 } });
-  const bracketSpread = interpolate(lockProgress, [0, 1], [180, 80]);
-  const radarAngle = (frame * 3) % 360;
+  const cueFrame = scene.cueFrame || Math.floor(fps * 0.4);
+  const isCueReached = frame >= cueFrame;
+  const cueSpring = spring({
+    frame: frame - cueFrame,
+    fps,
+    config: { damping: 12, stiffness: 130 },
+  });
+
+  const pulse = Math.sin(frame * 0.12) * 6;
 
   return (
     <AbsoluteFill
@@ -338,151 +383,63 @@ const CrosshairTargetScene: React.FC<{
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '0 70px',
+        padding: '0 60px',
       }}
     >
-      {/* Target Reticle Viewport */}
+      {/* Expanding Soft Spotlight Aura */}
       <div
         style={{
-          position: 'relative',
-          width: 550,
-          height: 550,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          position: 'absolute',
+          width: 580 + pulse * 12,
+          height: 580 + pulse * 12,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${accentColor}25 0%, transparent 70%)`,
+          filter: 'blur(50px)',
+          pointerEvents: 'none',
         }}
-      >
-        {/* Radar Sweep Arc */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 20,
-            borderRadius: '50%',
-            background: `conic-gradient(from ${radarAngle}deg, ${accentColor}40 0deg, transparent 60deg)`,
-            border: `2px solid ${accentColor}30`,
-          }}
-        />
+      />
 
-        {/* Concentric Calibration Rings */}
-        <div
-          style={{
-            position: 'absolute',
-            width: 320,
-            height: 320,
-            borderRadius: '50%',
-            border: '1px solid rgba(255,255,255,0.15)',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            width: 160,
-            height: 160,
-            borderRadius: '50%',
-            border: `2px solid ${accentColor}50`,
-          }}
-        />
-
-        {/* Center Target Point */}
-        <div
-          style={{
-            width: 24,
-            height: 24,
-            borderRadius: '50%',
-            backgroundColor: accentColor,
-            boxShadow: `0 0 25px ${accentColor}`,
-          }}
-        />
-
-        {/* 4 Precision Corner Brackets (Locking In) */}
-        {/* Top-Left */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 275 - bracketSpread,
-            left: 275 - bracketSpread,
-            width: 40,
-            height: 40,
-            borderTop: `4px solid ${accentColor}`,
-            borderLeft: `4px solid ${accentColor}`,
-          }}
-        />
-        {/* Top-Right */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 275 - bracketSpread,
-            right: 275 - bracketSpread,
-            width: 40,
-            height: 40,
-            borderTop: `4px solid ${accentColor}`,
-            borderRight: `4px solid ${accentColor}`,
-          }}
-        />
-        {/* Bottom-Left */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 275 - bracketSpread,
-            left: 275 - bracketSpread,
-            width: 40,
-            height: 40,
-            borderBottom: `4px solid ${accentColor}`,
-            borderLeft: `4px solid ${accentColor}`,
-          }}
-        />
-        {/* Bottom-Right */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 275 - bracketSpread,
-            right: 275 - bracketSpread,
-            width: 40,
-            height: 40,
-            borderBottom: `4px solid ${accentColor}`,
-            borderRight: `4px solid ${accentColor}`,
-          }}
-        />
-
-        {/* Crosshair Horizontal & Vertical Laser Lines */}
-        <div
-          style={{
-            position: 'absolute',
-            left: 40,
-            right: 40,
-            height: 1.5,
-            backgroundColor: `${accentColor}40`,
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: 40,
-            bottom: 40,
-            width: 1.5,
-            backgroundColor: `${accentColor}40`,
-          }}
-        />
-      </div>
-
-      {/* Target Status readout */}
+      {/* Editorial Spotlight Focus Card */}
       <div
         style={{
-          marginTop: 40,
+          width: '100%',
+          maxWidth: 860,
+          backgroundColor: '#14161F',
+          border: `2px solid ${isCueReached ? accentColor : '#232634'}`,
+          borderRadius: 40,
+          padding: '52px 48px',
+          boxShadow: isCueReached ? `0 30px 80px ${accentColor}30` : '0 25px 60px rgba(0,0,0,0.8)',
           textAlign: 'center',
-          maxWidth: 850,
+          position: 'relative',
+          overflow: 'hidden',
+          marginBottom: 40,
+          transform: isCueReached ? `scale(${1 + cueSpring * 0.03})` : 'scale(1)',
+          transition: 'all 0.3s ease',
         }}
       >
+        {/* Accent Top Ribbon */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 6,
+            backgroundColor: isCueReached ? accentColor : '#3D445C',
+          }}
+        />
+
+        {/* Editorial Pill Eyebrow */}
         <div
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 12,
-            backgroundColor: '#14161F',
-            border: `1px solid ${accentColor}60`,
-            padding: '8px 20px',
+            gap: 10,
+            backgroundColor: '#08090A',
+            border: `1px solid ${isCueReached ? accentColor : '#232634'}`,
+            padding: '8px 24px',
             borderRadius: 9999,
-            marginBottom: 20,
+            marginBottom: 28,
           }}
         >
           <div
@@ -490,38 +447,84 @@ const CrosshairTargetScene: React.FC<{
               width: 10,
               height: 10,
               borderRadius: '50%',
-              backgroundColor: '#10B981',
-              boxShadow: '0 0 10px #10B981',
+              backgroundColor: isCueReached ? accentColor : '#64748B',
+              boxShadow: isCueReached ? `0 0 12px ${accentColor}` : 'none',
             }}
           />
-          <span style={{ fontSize: 18, fontFamily: 'monospace', color: '#EDEDED' }}>
-            {scene.graphicData?.badge || `TACTICAL FOCUS // POINT 0${scene.index}`}
+          <span
+            style={{
+              fontSize: 18,
+              fontFamily: 'monospace',
+              color: isCueReached ? '#FFFFFF' : '#94A3B8',
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              fontWeight: 700,
+            }}
+          >
+            {scene.graphicData?.badge || 'CRITICAL ENTITY SPOTLIGHT'}
           </span>
         </div>
 
-        <h2
+        {/* Primary Factual Entity Headline */}
+        <h1
           style={{
-            fontSize: 50,
-            fontWeight: 800,
+            fontSize: 66,
+            fontWeight: 900,
             color: '#FFFFFF',
-            lineHeight: 1.25,
-            margin: '0 0 12px 0',
+            lineHeight: 1.1,
+            letterSpacing: '-0.02em',
+            margin: '0 0 20px 0',
+            textShadow: '0 8px 30px rgba(0,0,0,0.8)',
           }}
         >
           {scene.graphicData?.headline || scene.narration}
-        </h2>
+        </h1>
+
+        {/* Subtext Explanation */}
         {scene.graphicData?.subtext && (
           <p
             style={{
-              fontSize: 24,
-              color: '#94A3B8',
+              fontSize: 28,
+              color: '#EDEDED',
               fontWeight: 500,
-              margin: 0,
+              maxWidth: 720,
+              margin: '0 auto 28px auto',
+              lineHeight: 1.35,
             }}
           >
             {scene.graphicData.subtext}
           </p>
         )}
+
+        {/* Key Entities / Tags Row */}
+        {scene.graphicData?.keyTags && scene.graphicData.keyTags.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
+            {scene.graphicData.keyTags.map((tag, tIdx) => (
+              <span
+                key={tIdx}
+                style={{
+                  backgroundColor: '#08090A',
+                  border: '1px solid #232634',
+                  borderRadius: 12,
+                  padding: '8px 18px',
+                  fontSize: 18,
+                  fontFamily: 'monospace',
+                  color: isCueReached ? accentColor : '#94A3B8',
+                  fontWeight: 600,
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Main Spoken Narration */}
+      <div style={{ textAlign: 'center', maxWidth: 880 }}>
+        <p style={{ fontSize: 32, color: '#94A3B8', margin: 0, fontWeight: 500, lineHeight: 1.3 }}>
+          {scene.narration}
+        </p>
       </div>
     </AbsoluteFill>
   );
@@ -537,14 +540,27 @@ const SplitComparisonScene: React.FC<{
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  const cueFrame = scene.cueFrame || Math.floor(fps * 0.4);
+  const isCueReached = frame >= cueFrame;
+  const cueProgress = interpolate(frame, [cueFrame, cueFrame + 10], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+
   const cardOffset = spring({ frame, fps, config: { damping: 14, stiffness: 100 } });
-  const leftX = interpolate(cardOffset, [0, 1], [-200, 0]);
-  const rightX = interpolate(cardOffset, [0, 1], [200, 0]);
+  const leftX = interpolate(cardOffset, [0, 1], [-140, 0]);
+  const rightX = interpolate(cardOffset, [0, 1], [140, 0]);
 
   const words = scene.narration.split(' ');
   const mid = Math.ceil(words.length / 2);
   const leftText = words.slice(0, mid).join(' ');
   const rightText = words.slice(mid).join(' ');
+
+  const leftHeading = scene.graphicData?.comparison?.left.heading || scene.graphicData?.leftItem?.title || 'PRIOR STATE';
+  const leftPoints = scene.graphicData?.comparison?.left.points || (scene.graphicData?.leftItem?.desc ? [scene.graphicData.leftItem.desc] : [leftText]);
+
+  const rightHeading = scene.graphicData?.comparison?.right.heading || scene.graphicData?.rightItem?.title || 'NEW DOCTRINE';
+  const rightPoints = scene.graphicData?.comparison?.right.points || (scene.graphicData?.rightItem?.desc ? [scene.graphicData.rightItem.desc] : [rightText]);
 
   return (
     <AbsoluteFill
@@ -556,25 +572,46 @@ const SplitComparisonScene: React.FC<{
         padding: '0 50px',
       }}
     >
+      {/* Top Eyebrow Badge */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
+          backgroundColor: '#08090A',
+          border: `1px solid ${isCueReached ? accentColor : '#232634'}`,
+          borderRadius: 9999,
+          padding: '8px 24px',
+          marginBottom: 36,
+          boxShadow: isCueReached ? `0 0 20px ${accentColor}30` : 'none',
+          transition: 'all 0.3s ease',
+        }}
+      >
+        <span style={{ fontSize: 20, fontWeight: 900, color: accentColor }}>VS</span>
+        <span style={{ fontSize: 18, fontFamily: 'monospace', color: '#EDEDED', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          {scene.graphicData?.badge || 'COMPARATIVE ANALYSIS'}
+        </span>
+      </div>
+
       {/* Split Comparison Dual Deck */}
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
-          gap: 30,
+          gap: 28,
           width: '100%',
-          maxWidth: 950,
-          marginBottom: 40,
+          maxWidth: 960,
+          marginBottom: 36,
         }}
       >
-        {/* Left Side: Thesis / Pre-Condition */}
+        {/* Left Side: Conventional / Before State */}
         <div
           style={{
             transform: `translateX(${leftX}px)`,
             backgroundColor: '#14161F',
             border: '2px solid #232634',
             borderRadius: 32,
-            padding: 40,
+            padding: 36,
             boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
             position: 'relative',
             overflow: 'hidden',
@@ -592,40 +629,41 @@ const SplitComparisonScene: React.FC<{
           />
           <span
             style={{
-              fontSize: 20,
+              fontSize: 18,
               fontFamily: 'monospace',
               color: '#94A3B8',
               textTransform: 'uppercase',
               display: 'block',
-              marginBottom: 20,
-            }}
-          >
-            {scene.graphicData?.leftItem?.title || 'STATE A // PRIOR'}
-          </span>
-          <p
-            style={{
-              fontSize: 34,
+              marginBottom: 16,
               fontWeight: 700,
-              color: '#EDEDED',
-              lineHeight: 1.3,
-              margin: 0,
             }}
           >
-            {scene.graphicData?.leftItem?.desc || leftText}
-          </p>
+            {leftHeading}
+          </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {leftPoints.map((pt, pIdx) => (
+              <div key={pIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#64748B', marginTop: 10, flexShrink: 0 }} />
+                <p style={{ fontSize: 26, fontWeight: 600, color: '#EDEDED', lineHeight: 1.3, margin: 0 }}>
+                  {pt}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Right Side: Mechanism / Synthesis */}
+        {/* Right Side: Modern / Outcome / Active Beat */}
         <div
           style={{
-            transform: `translateX(${rightX}px)`,
-            backgroundColor: '#14161F',
-            border: `2px solid ${accentColor}`,
+            transform: `translateX(${rightX}px) scale(${isCueReached ? 1 + cueProgress * 0.02 : 1})`,
+            backgroundColor: isCueReached ? '#191C28' : '#14161F',
+            border: `2px solid ${isCueReached ? accentColor : '#232634'}`,
             borderRadius: 32,
-            padding: 40,
-            boxShadow: `0 20px 50px ${accentColor}25`,
+            padding: 36,
+            boxShadow: isCueReached ? `0 25px 60px ${accentColor}30` : '0 20px 50px rgba(0,0,0,0.6)',
             position: 'relative',
             overflow: 'hidden',
+            transition: 'all 0.3s ease',
           }}
         >
           <div
@@ -640,46 +678,35 @@ const SplitComparisonScene: React.FC<{
           />
           <span
             style={{
-              fontSize: 20,
+              fontSize: 18,
               fontFamily: 'monospace',
-              color: accentColor,
+              color: isCueReached ? accentColor : '#94A3B8',
               textTransform: 'uppercase',
               display: 'block',
-              marginBottom: 20,
-            }}
-          >
-            {scene.graphicData?.rightItem?.title || 'STATE B // OUTCOME'}
-          </span>
-          <p
-            style={{
-              fontSize: 34,
+              marginBottom: 16,
               fontWeight: 700,
-              color: '#FFFFFF',
-              lineHeight: 1.3,
-              margin: 0,
             }}
           >
-            {scene.graphicData?.rightItem?.desc || rightText}
-          </p>
+            {rightHeading}
+          </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {rightPoints.map((pt, pIdx) => (
+              <div key={pIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: accentColor, marginTop: 10, flexShrink: 0 }} />
+                <p style={{ fontSize: 26, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3, margin: 0 }}>
+                  {pt}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Center Dividing Beam Indicator */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 16,
-          backgroundColor: '#08090A',
-          border: `1px solid ${accentColor}40`,
-          borderRadius: 9999,
-          padding: '10px 28px',
-        }}
-      >
-        <span style={{ fontSize: 22, fontWeight: 800, color: accentColor }}>VS</span>
-        <span style={{ fontSize: 18, fontFamily: 'monospace', color: '#94A3B8' }}>
-          {scene.graphicData?.badge || 'COMPARATIVE ANALYSIS'}
-        </span>
+      {/* Main Spoken Narration */}
+      <div style={{ textAlign: 'center', maxWidth: 880 }}>
+        <p style={{ fontSize: 32, color: '#94A3B8', margin: 0, fontWeight: 500, lineHeight: 1.3 }}>
+          {scene.narration}
+        </p>
       </div>
     </AbsoluteFill>
   );
@@ -695,8 +722,8 @@ const ProcessFlowScene: React.FC<{
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const nodeCount = 3;
-  const activeNode = Math.floor((frame / (fps * 1.2)) % nodeCount);
+  const cueFrame = scene.cueFrame || Math.floor(fps * 0.4);
+  const activeNode = frame >= cueFrame ? 1 : 0;
   const pulseX = interpolate(frame % (fps * 1.5), [0, fps * 1.5], [100, 800]);
 
   return (
@@ -853,6 +880,13 @@ const DynamicChartScene: React.FC<{
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  const cueFrame = scene.cueFrame || Math.floor(fps * 0.35);
+  const isCueReached = frame >= cueFrame;
+  const cueProgress = interpolate(frame, [cueFrame, cueFrame + 14], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+
   const grow = spring({ frame, fps, config: { damping: 12, mass: 0.6, stiffness: 100 } });
   const count1 = Math.round(interpolate(frame, [0, 25], [0, 84], { extrapolateRight: 'clamp' }));
   const count2 = Math.round(interpolate(frame, [0, 30], [0, 310], { extrapolateRight: 'clamp' }));
@@ -885,12 +919,13 @@ const DynamicChartScene: React.FC<{
         style={{
           width: 760,
           backgroundColor: '#14161F',
-          border: '1px solid #232634',
+          border: `1.5px solid ${isCueReached ? accentColor : '#232634'}`,
           borderRadius: 36,
           padding: '48px 40px',
-          boxShadow: '0 30px 60px rgba(0,0,0,0.8)',
+          boxShadow: isCueReached ? `0 30px 70px ${accentColor}30` : '0 30px 60px rgba(0,0,0,0.8)',
           position: 'relative',
           overflow: 'hidden',
+          transition: 'all 0.3s ease',
         }}
       >
         {/* Top Metric Header */}
@@ -905,11 +940,21 @@ const DynamicChartScene: React.FC<{
                 textTransform: 'uppercase',
                 display: 'block',
                 marginBottom: 8,
+                fontWeight: 700,
               }}
             >
               {scene.graphicData?.badge || 'METRIC ANALYSIS'}
             </span>
-            <div style={{ fontSize: 56, fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.03em' }}>
+            <div
+              style={{
+                fontSize: 58,
+                fontWeight: 900,
+                color: '#FFFFFF',
+                letterSpacing: '-0.03em',
+                transform: isCueReached ? `scale(${1 + cueProgress * 0.05})` : 'scale(1)',
+                transition: 'all 0.3s ease',
+              }}
+            >
               {scene.graphicData?.statNumber || `+${count2}%`}{' '}
               <span style={{ fontSize: 24, fontWeight: 700, color: '#10B981' }}>
                 {scene.graphicData?.statLabel || 'RECORD'}
@@ -919,16 +964,16 @@ const DynamicChartScene: React.FC<{
           <div
             style={{
               backgroundColor: '#08090A',
-              border: `1px solid ${accentColor}40`,
+              border: `1px solid ${isCueReached ? accentColor : '#232634'}`,
               borderRadius: 14,
               padding: '8px 16px',
-              color: accentColor,
+              color: isCueReached ? accentColor : '#94A3B8',
               fontFamily: 'monospace',
               fontSize: 16,
               fontWeight: 700,
             }}
           >
-            METRIC // 0{scene.index}
+            {isCueReached ? 'VERIFIED METRIC' : `METRIC // 0${scene.index}`}
           </div>
         </div>
 
@@ -1032,8 +1077,9 @@ const TimelineScene: React.FC<{
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const progress = interpolate(frame, [0, 45], [0, 1], { extrapolateRight: 'clamp' });
-  const activeMilestone = frame > 40 ? 2 : frame > 20 ? 1 : 0;
+  const cueFrame = scene.cueFrame || Math.floor(fps * 0.4);
+  const progress = interpolate(frame, [0, Math.max(cueFrame + 10, 45)], [0, 1], { extrapolateRight: 'clamp' });
+  const activeMilestone = frame >= (cueFrame + 18) ? 2 : frame >= cueFrame ? 1 : 0;
 
   return (
     <AbsoluteFill
@@ -1216,6 +1262,9 @@ const StepSequenceScene: React.FC<{
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  const cueFrame = scene.cueFrame || Math.floor(fps * 0.4);
+  const isCueReached = frame >= cueFrame;
+
   const words = (scene.narration || '').split(' ');
   const chunk1 = words.slice(0, 4).join(' ');
   const chunk2 = words.slice(4, 8).join(' ');
@@ -1278,21 +1327,23 @@ const StepSequenceScene: React.FC<{
           const cardX = interpolate(enter, [0, 1], [60, 0], { extrapolateRight: 'clamp' });
           const cardOpacity = interpolate(enter, [0, 1], [0, 1], { extrapolateRight: 'clamp' });
           const isFinal = sIdx === steps.length - 1;
+          const shouldHighlight = isFinal && isCueReached;
 
           return (
             <div
               key={sIdx}
               style={{
-                transform: `translateX(${cardX}px)`,
+                transform: `translateX(${cardX}px) scale(${shouldHighlight ? 1.03 : 1})`,
                 opacity: cardOpacity,
-                backgroundColor: isFinal ? '#191C28' : '#14161F',
-                border: `1.5px solid ${isFinal ? accentColor : '#232634'}`,
+                backgroundColor: shouldHighlight ? '#1A1D2B' : isFinal ? '#191C28' : '#14161F',
+                border: `1.5px solid ${shouldHighlight ? accentColor : isFinal ? `${accentColor}80` : '#232634'}`,
                 borderRadius: 24,
                 padding: '24px 32px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 24,
-                boxShadow: isFinal ? `0 15px 40px ${accentColor}25` : '0 10px 30px rgba(0,0,0,0.6)',
+                boxShadow: shouldHighlight ? `0 20px 50px ${accentColor}40` : isFinal ? `0 15px 40px ${accentColor}25` : '0 10px 30px rgba(0,0,0,0.6)',
+                transition: 'all 0.3s ease',
               }}
             >
               <div
@@ -1361,6 +1412,7 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
   captionStyle = 'kinetic',
   accentColor = '#FF4F00',
   voiceName = 'Alloy',
+  audioUrl,
 }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
@@ -1513,6 +1565,18 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
             ) : (
               <KineticTextScene scene={scene} accentColor={accentColor} topic={topic} />
             )}
+
+            {/* Per-scene synchronized neural voiceover */}
+            {scene.audioUrl && (
+              <Audio
+                src={
+                  scene.audioUrl.startsWith('http') || scene.audioUrl.startsWith('data:')
+                    ? scene.audioUrl
+                    : staticFile(scene.audioUrl.replace(/^\//, ''))
+                }
+                volume={1.0}
+              />
+            )}
           </Sequence>
         );
       })}
@@ -1634,6 +1698,18 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
           </Sequence>
         );
       })}
+
+      {/* 5. Master Composite Audio Track (only if individual scenes do not have audio) */}
+      {audioUrl && !safeScenes.some((s) => s.audioUrl) && (
+        <Audio
+          src={
+            audioUrl.startsWith('http') || audioUrl.startsWith('data:')
+              ? audioUrl
+              : staticFile(audioUrl.replace(/^\//, ''))
+          }
+          volume={1.0}
+        />
+      )}
     </AbsoluteFill>
   );
 };

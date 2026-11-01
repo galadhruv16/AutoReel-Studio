@@ -1,5 +1,5 @@
 import React from 'react';
-import { Aperture, ArrowRight, GitBranch } from 'lucide-react';
+import { Aperture, ArrowRight } from 'lucide-react';
 
 export const LandingFooter: React.FC = () => {
   return (

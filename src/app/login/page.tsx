@@ -7,7 +7,9 @@ import { Aperture, Lock, ArrowRight, ShieldCheck, AlertCircle, Eye, EyeOff } fro
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectPath = searchParams.get('redirect') || '/studio';
+  const rawRedirect = searchParams.get('redirect') || '/studio';
+  // Prevent open redirect: must be a local relative path and not protocol-relative (//)
+  const redirectPath = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/studio';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

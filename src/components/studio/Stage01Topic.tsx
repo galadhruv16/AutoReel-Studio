@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Sparkles,
   ArrowRight,
@@ -10,8 +10,6 @@ import {
   Mic,
   Sliders,
   Check,
-  HelpCircle,
-  Volume2,
 } from 'lucide-react';
 import { useStudio } from '../../context/StudioContext';
 import {
@@ -55,6 +53,16 @@ export const Stage01Topic: React.FC = () => {
   const [playingVoice, setPlayingVoice] = useState<VoiceId | null>(null);
   const [audioError, setAudioError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Clean up any playing audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   const durationMeta = DURATION_CONFIGS[project.duration];
 

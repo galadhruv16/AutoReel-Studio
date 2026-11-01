@@ -2,12 +2,16 @@ import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 
 export const TitleHook: React.FC<{
-  badgeText: string;
-  headline: string;
-  subheadline: string;
-}> = () => {
+  badgeText?: string;
+  headline?: string;
+  subheadline?: string;
+}> = ({
+  badgeText = '// THE ARCHITECTURE MYTH',
+  headline = 'Kubernetes Never Runs Containers',
+  subheadline = 'Why Pods Exist',
+}) => {
   const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
+  const { fps } = useVideoConfig();
 
   // 1. Kinetic Text Staggered Springs
   const textSpring1 = spring({ frame, fps, config: { damping: 12, stiffness: 140 } });
@@ -19,7 +23,6 @@ export const TitleHook: React.FC<{
 
   // Continuous subtle rotation & float
   const floatY = Math.sin((frame / 18) * Math.PI) * 14;
-  const rotateAngle = interpolate(frame, [0, durationInFrames], [0, 18]);
 
   // Animated SVG laser line draw (stroke-dashoffset from 600 to 0)
   const lineDraw = interpolate(frame, [8, 35], [600, 0], {
@@ -66,7 +69,7 @@ export const TitleHook: React.FC<{
             opacity: interpolate(frame, [0, 6], [0, 1], { extrapolateRight: 'clamp' }),
           }}
         >
-          // THE ARCHITECTURE MYTH
+          {badgeText}
         </div>
 
         {/* Big Impact Hook Headline */}
@@ -84,18 +87,25 @@ export const TitleHook: React.FC<{
             textShadow: '0 10px 40px rgba(0, 0, 0, 0.9)',
           }}
         >
-          Kubernetes <br />
-          <span
+          {headline}
+        </div>
+
+        {/* Subheadline Tag */}
+        {subheadline && (
+          <div
             style={{
-              background: 'linear-gradient(90deg, #F43F5E 0%, #FB7185 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              fontSize: 32,
+              fontWeight: 700,
+              fontFamily: 'Inter, system-ui, sans-serif',
+              color: '#94A3B8',
+              marginTop: 14,
+              transform: `translateY(${interpolate(textSpring3, [0, 1], [20, 0])}px)`,
+              opacity: interpolate(frame, [8, 14], [0, 1], { extrapolateRight: 'clamp' }),
             }}
           >
-            Never Runs
-          </span>{' '}
-          Containers
-        </div>
+            {subheadline}
+          </div>
+        )}
       </div>
 
       {/* ========================================================

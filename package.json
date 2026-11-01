@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "remotion:preview": "remotion preview src/remotion/index.ts",
-    "remotion:render": "remotion render src/remotion/index.ts MainReel out/spike_test.mp4"
+    "remotion:render": "remotion render src/remotion/index.ts MainReel out/spike_test.mp4",
+    "test:qa": "node scripts/run_comprehensive_qa.mjs",
+    "test:live": "node scripts/test_live_server_qa.mjs"
   },
   "dependencies": {
     "@remotion/bundler": "4.0.539",

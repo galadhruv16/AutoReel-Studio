@@ -3,11 +3,17 @@
 export const SESSION_COOKIE_NAME = 'autoreel_session';
 
 const getSecretKey = async (): Promise<CryptoKey> => {
-  const secret = process.env.AUTH_SECRET || 'fallback-secret-key-autoreel-development-mode-only';
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Fatal: AUTH_SECRET environment variable must be set in production.');
+    }
+  }
+  const effectiveSecret = secret || 'fallback-secret-key-autoreel-development-mode-only';
   const encoder = new TextEncoder();
   return crypto.subtle.importKey(
     'raw',
-    encoder.encode(secret),
+    encoder.encode(effectiveSecret),
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign', 'verify']

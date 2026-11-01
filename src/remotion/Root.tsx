@@ -1,6 +1,5 @@
 import React from 'react';
 import { Composition } from 'remotion';
-import { SpikeReelProps } from './types';
 import { MainReel } from './compositions/MainReel';
 import { GeneticsReel } from './compositions/GeneticsReel';
 import { KubernetesReel } from './compositions/KubernetesReel';

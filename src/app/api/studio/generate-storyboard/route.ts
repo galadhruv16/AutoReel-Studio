@@ -16,46 +16,55 @@ export async function POST(request: Request) {
     } = body;
 
     const targetSec = [30, 60, 90].includes(duration) ? (duration as StudioDuration) : 60;
-    const targetWords = targetSec === 30 ? 70 : targetSec === 60 ? 140 : 210;
+    // Strict speech cadence word budgets (approx 2.5 - 2.7 words/second for crisp video pacing)
+    const targetWords = targetSec === 30 ? 75 : targetSec === 60 ? 155 : 230;
+    const minWords = targetSec === 30 ? 65 : targetSec === 60 ? 140 : 210;
+    const maxWords = targetSec === 30 ? 85 : targetSec === 60 ? 170 : 250;
     const targetSceneCount = targetSec === 30 ? 6 : targetSec === 60 ? 12 : 18;
 
     const geminiKey = process.env.GEMINI_API_KEY;
 
     let scenes: StudioScene[] | null = null;
+    let usedModel = 'heuristic-engine';
 
     if (geminiKey && !geminiKey.includes('your_') && geminiKey.trim().length > 10) {
       try {
-        const systemPrompt = `You are AutoReel Studio's master AI Video Director, Motion Graphics Designer, and Researcher.
+        const systemPrompt = `You are AutoReel Studio's master AI Video Director, Educational Scriptwriter, and Motion Designer.
 You produce viral, educational, and deeply factual 9:16 vertical video storyboards for ANY subject: history, geopolitics, science, biology, economics, technology, philosophy, or current affairs.
 
 CRITICAL DIRECTIVE RULES:
-1. DEEP FACTUAL SUBSTANCE & REAL ENTITIES:
+1. STRICT SPOKEN WORD CADENCE & EXACT WORD BUDGET:
+   - Target total video duration: EXACTLY ${targetSec} seconds.
+   - Total spoken word budget across ALL scenes combined MUST be between ${minWords} and ${maxWords} words (Target: ~${targetWords} words).
+   - You MUST generate EXACTLY ${targetSceneCount} sequential scenes (each scene between 10 and 15 words, lasting ~${(targetSec / targetSceneCount).toFixed(1)}s).
+   - NEVER output overlong scenes or dense paragraphs. Mobile vertical videos demand punchy, focused phrases.
+2. DEEP FACTUAL SUBSTANCE & REAL ENTITIES:
    - Conduct thorough, accurate factual analysis of the user's specific topic.
-   - Include real historical dates, operations, battles, treaties, names of leaders, institutions, treaties, legislation, scientific mechanisms, or economic statistics.
-   - For example: if the topic is a war and its government impact, mention specific operations (e.g. Operation Chengiz Khan), real dates, real troop numbers (e.g. 93,000 POWs), prime ministers, treaties (e.g. Simla Agreement), and constitutional/geopolitical changes.
-2. ABSOLUTE BAN ON CLICHES & TEMPLATES:
+   - Include real historical dates, operations, battles, treaties, names of leaders, institutions, legislation, scientific mechanisms, or economic statistics.
+   - For example: if the topic is a war and its government impact, mention specific operations (e.g. Operation Chengiz Khan), real dates (Dec 3, 1971), real troop numbers (e.g. 93,000 POWs), prime ministers, treaties (e.g. Simla Agreement), and constitutional/geopolitical changes.
+3. ABSOLUTE BAN ON CLICHES & TEMPLATES:
    - NEVER start with "Most people misunderstand", "Most people think", or "Have you ever wondered".
    - NEVER use filler phrases like "paradigm shift", "game changer", or "it hinges on one principle".
    - Start IMMEDIATELY on beat 1 with an authoritative, high-impact fact or tension hook that pulls the viewer in.
-3. PHRASE-SYNCED TEMPORAL PACING & EXACT DURATION:
-   - Target total video duration: EXACTLY ${targetSec} seconds (~${targetWords} spoken words).
-   - You MUST generate EXACTLY ${targetSceneCount} sequential scenes (each lasting between 4.0s and 5.5s).
-   - The sum of all scene durations MUST equal EXACTLY ${targetSec} seconds.
-   - Tone: ${tone}.
-4. RICH DYNAMIC GRAPHIC SPECIFICATION:
+4. VERBATIM ANIMATION CUES (WORD-LEVEL SYNCHRONIZATION):
+   - For every scene, you MUST specify a "cue": an EXACT, VERBATIM substring of that scene's narration where the visual turning point, metric, or entity is spoken.
+   - The animation and diagram elements will stay dormant until the narrator reaches this exact word!
+   - For comparative scenes, you may also provide a "decisionCue" (a second exact substring where the alternative side is introduced).
+5. RICH EDITORIAL DIAGRAM SPECIFICATION (NOT SCI-FI WALLPAPER):
    - The visual on screen MUST DIRECTLY EXPLAIN AND ILLUSTRATE THE SPOKEN SCRIPT of that beat.
-   - For every single scene, you MUST generate a "graphicData" object containing:
-     * "badge": A high-contrast tag (e.g. "DECEMBER 3, 1971 // PREEMPTIVE ATTACK" or "CONSTITUTIONAL IMPACT").
+   - No generic futuristic telemetry or sci-fi filler (no "TARGET_ACQUIRED", "SCHEMATIC_REF", or fake radar grids).
+   - For every single scene, generate a rich "graphicData" object containing:
+     * "badge": A high-contrast editorial pill (e.g. "DECEMBER 3, 1971 // PREEMPTIVE ATTACK" or "CONSTITUTIONAL REFORM").
      * "headline": The big factual visual anchor on screen (e.g. "OPERATION CHENGIZ KHAN" or "93,000 POWs SURRENDER").
      * "subtext": Explanatory factual context (e.g. "11 frontline airfields targeted across western border").
      * "statNumber": If the scene mentions a number/stat (e.g. "11", "93,000", "10M", "13", "1971", "300%"), provide it here.
-     * "statLabel": Descriptive label for the stat (e.g. "INDIAN AIRBASES STRUCK" or "DAYS OF WAR").
+     * "statLabel": Descriptive label for the stat (e.g. "AIRFIELDS TARGETED" or "DAYS OF WAR").
      * "leftItem": If comparing two sides/policies/states: { "title": "...", "desc": "..." }.
      * "rightItem": If comparing two sides/policies/states: { "title": "...", "desc": "..." }.
      * "steps": If listing principles or phases: [ { "num": "01", "title": "...", "desc": "..." }, ... ].
      * "milestones": If a timeline or chronological turning points: [ { "date": "...", "title": "..." }, ... ].
      * "keyTags": Array of 2-3 specific names, places, or keywords from that scene.
-5. SELECT THE FITTING VISUAL ARCHETYPE:
+6. SELECT THE FITTING VISUAL ARCHETYPE:
    - "dynamic_chart": When presenting metrics, quantities, percentages, or statistics.
    - "timeline": When presenting chronological dates, historical sequence, or turning points.
    - "step_sequence": When listing takeaways, key principles, or progressive phases.
@@ -78,8 +87,9 @@ Respond STRICTLY with valid JSON (no markdown formatting, no code blocks):
 {
   "scenes": [
     {
-      "duration": 5.0,
+      "duration": ${(targetSec / targetSceneCount).toFixed(1)},
       "narration": "Authoritative spoken sentence explaining the exact factual concept.",
+      "cue": "exact verbatim substring from narration",
       "visualDirection": "Description of the visual animation appearing on screen.",
       "visualType": "dynamic_chart",
       "highlightWords": ["key", "highlighted", "words"],
@@ -107,7 +117,7 @@ Respond STRICTLY with valid JSON (no markdown formatting, no code blocks):
   ]
 }`;
 
-        const models = ['gemini-3.5-flash', 'gemini-3.5-flash-lite'];
+        const models = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-1.5-flash'];
         for (const model of models) {
           if (scenes) break;
           try {
@@ -120,7 +130,7 @@ Respond STRICTLY with valid JSON (no markdown formatting, no code blocks):
                   contents: [{ parts: [{ text: systemPrompt }] }],
                   generationConfig: {
                     responseMimeType: 'application/json',
-                    temperature: 0.35,
+                    temperature: 0.3,
                   },
                 }),
               }
@@ -132,15 +142,25 @@ Respond STRICTLY with valid JSON (no markdown formatting, no code blocks):
               if (rawText) {
                 const parsed = JSON.parse(rawText.trim());
                 if (parsed.scenes && Array.isArray(parsed.scenes) && parsed.scenes.length >= 2) {
+                  usedModel = model;
                   scenes = parsed.scenes.map((s: any, idx: number) => {
-                    const dur = Number(s.duration) || 5.0;
+                    const dur = Number(s.duration) || Number((targetSec / targetSceneCount).toFixed(1));
+                    const narrationText = String(s.narration || '');
+                    const rawCue = s.cue && typeof s.cue === 'string' && narrationText.includes(s.cue)
+                      ? s.cue
+                      : (Array.isArray(s.highlightWords) && s.highlightWords.find((w: string) => narrationText.includes(w)))
+                      || narrationText.split(/\s+/).slice(1, 3).join(' ')
+                      || narrationText.slice(0, 15);
+
                     return {
                       id: `scene_${Date.now()}_${idx}`,
                       index: idx + 1,
                       startTime: 0,
                       endTime: dur,
                       duration: dur,
-                      narration: String(s.narration || ''),
+                      narration: narrationText,
+                      cue: rawCue,
+                      decisionCue: s.decisionCue && narrationText.includes(s.decisionCue) ? s.decisionCue : undefined,
                       visualDirection: String(s.visualDirection || 'Dynamic animated visual sequence'),
                       visualType: ([
                         'kinetic_text',
@@ -181,6 +201,7 @@ Respond STRICTLY with valid JSON (no markdown formatting, no code blocks):
     const sceneCount = validScenes.length;
 
     let currentTime = 0;
+    const fps = 30;
     const normalizedScenes = validScenes.map((s, idx) => {
       // Scale duration proportionally
       let dur = Number(((s.duration || 5.0) * scalingFactor).toFixed(1));
@@ -192,6 +213,26 @@ Respond STRICTLY with valid JSON (no markdown formatting, no code blocks):
       currentTime += dur;
       const end = Number(currentTime.toFixed(1));
 
+      const narrationText = s.narration || '';
+      const rawCue = s.cue && narrationText.includes(s.cue)
+        ? s.cue
+        : (s.highlightWords && s.highlightWords.find((w) => narrationText.includes(w)))
+        || narrationText.split(/\s+/).slice(1, 3).join(' ')
+        || narrationText.slice(0, 15);
+
+      const charOffset = narrationText.indexOf(rawCue);
+      const cueRatio = charOffset >= 0
+        ? Math.max(0.12, Math.min(0.8, charOffset / (narrationText.length || 1)))
+        : 0.25;
+      const cueFrame = Math.max(4, Math.floor(cueRatio * dur * fps));
+
+      let decisionFrame: number | undefined;
+      if (s.decisionCue && narrationText.includes(s.decisionCue)) {
+        const decOffset = narrationText.indexOf(s.decisionCue);
+        const decRatio = Math.max(cueRatio + 0.15, Math.min(0.9, decOffset / (narrationText.length || 1)));
+        decisionFrame = Math.max(cueFrame + 8, Math.floor(decRatio * dur * fps));
+      }
+
       return {
         ...s,
         id: s.id || `scene_${idx + 1}`,
@@ -199,6 +240,10 @@ Respond STRICTLY with valid JSON (no markdown formatting, no code blocks):
         duration: dur,
         startTime: start,
         endTime: end,
+        cue: rawCue,
+        cueFrame,
+        decisionCue: s.decisionCue,
+        decisionFrame,
       };
     });
 
@@ -213,6 +258,7 @@ Respond STRICTLY with valid JSON (no markdown formatting, no code blocks):
         targetDuration: targetSec,
         totalDuration,
         wordCount,
+        modelUsed: usedModel,
       },
     });
   } catch (error: any) {
@@ -284,138 +330,128 @@ function generateHeuristicScenes(
 
   // Generate research-driven narrative arcs tailored to user's topic
   const words = cleanTopic.split(/\s+/).filter((w) => w.length > 2);
-  const primarySubject = words.slice(0, 4).join(' ') || cleanTopic;
-  const secondarySubject = words.slice(4, 8).join(' ') || 'The Key Consequences';
-
-  const archetypes = [
-    'kinetic_text',
-    'vector_schematic',
-    'crosshair_target',
-    'dynamic_chart',
-    'split_comparison',
-    'timeline',
-    'process_flow',
-    'step_sequence',
-  ] as const;
+  const primarySubject = words.slice(0, 3).join(' ') || cleanTopic;
+  const secondarySubject = words.slice(3, 6).join(' ') || primarySubject;
 
   const narrativeBeats = [
     {
       vType: 'kinetic_text' as const,
-      narrate: `${cleanTopic}: An event that permanently altered political and institutional structures.`,
+      narrate: `${cleanTopic}: The fundamental mechanism and foundational principles you need to understand.`,
       headline: primarySubject.toUpperCase(),
-      badge: 'HISTORICAL OVERVIEW',
-      subtext: 'Core Catalyst & Background',
-      statNum: '1971',
-      statLbl: 'YEAR OF CATALYST',
+      badge: 'CONCEPT FOUNDATION',
+      subtext: `Deconstructing ${cleanTopic}`,
+      statNum: '01',
+      statLbl: 'CORE PRINCIPLE',
     },
     {
       vType: 'crosshair_target' as const,
-      narrate: `At the heart of the crisis lay intense friction between centralized authority and regional demands.`,
-      headline: 'CENTRALIZED FRICTION',
-      badge: 'ROOT CAUSES',
-      subtext: 'Institutional pressure points and political polarization',
-      statNum: '1',
-      statLbl: 'CORE TRIGGER',
+      narrate: `At the center of this concept lies a critical focal point that determines how the entire system functions.`,
+      headline: 'CRITICAL FOCUS',
+      badge: 'SYSTEM SPOTLIGHT',
+      subtext: `Primary operational node of ${primarySubject}`,
+      statNum: '100%',
+      statLbl: 'SYSTEM COHESION',
+      tags: words.slice(0, 3),
     },
     {
       vType: 'timeline' as const,
-      narrate: `The escalation unfolded rapidly across key dates, catching established channels off guard.`,
-      headline: 'ESCALATION TIMELINE',
-      badge: 'KEY MILESTONES',
-      subtext: 'Rapid sequence of critical turning points',
+      narrate: `To grasp how this works in practice, we trace the sequential progression from inception to full execution.`,
+      headline: 'EXECUTION TIMELINE',
+      badge: 'SEQUENTIAL PHASES',
+      subtext: 'Three key chronological milestones',
       milestones: [
-        { date: 'Phase 1', title: 'Crisis Erupts' },
-        { date: 'Phase 2', title: 'Military Action' },
-        { date: 'Phase 3', title: 'Resolution Reached' },
+        { date: 'Phase 01', title: `Initialize ${primarySubject}` },
+        { date: 'Phase 02', title: `Process ${secondarySubject}` },
+        { date: 'Phase 03', title: 'Target Resolution' },
       ],
     },
     {
       vType: 'dynamic_chart' as const,
-      narrate: `The scale of mobilization and resource expenditure reached unprecedented historical peaks.`,
-      headline: 'MASS MOBILIZATION',
-      badge: 'RESOURCE DATA',
-      subtext: 'Quantitative surge in logistical and troop deployment',
-      statNum: '93K+',
-      statLbl: 'TROOPS & PRISONERS INVOLVED',
+      narrate: `The quantitative impact and efficiency gains produce measurable performance differences across benchmarks.`,
+      headline: 'PERFORMANCE GAINS',
+      badge: 'MEASURED IMPACT',
+      subtext: 'Comparative throughput and efficiency metrics',
+      statNum: '3.4x',
+      statLbl: 'MEASURED EFFICIENCY',
     },
     {
       vType: 'split_comparison' as const,
-      narrate: `On one side stood the pre-crisis status quo, while the other pushed for complete autonomy.`,
-      headline: 'OPPOSING FORCES',
-      badge: 'STRATEGIC ALIGNMENT',
-      subtext: 'Contrasting power doctrines',
-      left: { title: 'Previous Status Quo', desc: 'Centralized Administrative Control' },
-      right: { title: 'Emerging Reality', desc: 'Sovereign Regional Independence' },
+      narrate: `When contrasting conventional approaches against this modern method, the architectural advantage becomes obvious.`,
+      headline: 'SYSTEM CONTRAST',
+      badge: 'DUAL DYNAMICS',
+      subtext: 'Legacy methods vs Modern design',
+      left: { title: 'Conventional Approach', desc: 'Higher friction, isolated state' },
+      right: { title: `${primarySubject} Architecture`, desc: 'Optimized pipeline, deterministic execution' },
     },
     {
       vType: 'vector_schematic' as const,
-      narrate: `Military strategy relied on coordinated land, air, and naval operations across multiple borders.`,
-      headline: 'STRATEGIC ARCHITECTURE',
-      badge: 'OPERATIONAL MANEUVER',
-      subtext: 'Integrated land, sea, and air operational doctrine',
-      tags: ['Command Structure', 'Naval Blockade', 'Border Encirclement'],
+      narrate: `The structural architecture routes information seamlessly through interconnected layers and modular nodes.`,
+      headline: 'ARCHITECTURE BLUEPRINT',
+      badge: 'SYSTEM SCHEMATIC',
+      subtext: 'Internal structural topology and data channels',
+      tags: [primarySubject, secondarySubject, 'Control Layer'],
     },
     {
       vType: 'process_flow' as const,
-      narrate: `As the conflict peaked, emergency governmental powers were invoked to centralize wartime administration.`,
-      headline: 'GOVERNMENT EMERGENCY POWERS',
-      badge: 'EXECUTIVE ACTION',
-      subtext: 'Constitutional re-alignment under emergency provisions',
+      narrate: `Each operational cycle executes through three deterministic phases that eliminate data bottlenecks.`,
+      headline: 'OPERATIONAL PIPELINE',
+      badge: 'PROCESS PIPELINE',
+      subtext: 'End-to-end execution flow',
       steps: [
-        { num: '01', title: 'Cabinet Convened', desc: 'Emergency war cabinet declared' },
-        { num: '02', title: 'Executive Orders', desc: 'Resource commandeering enabled' },
-        { num: '03', title: 'Public Mobilization', desc: 'National consensus unified' },
+        { num: '01', title: 'Ingestion & Validation', desc: `Parse input requirements for ${primarySubject}` },
+        { num: '02', title: 'Transformation Engine', desc: `Apply core logic and constraints` },
+        { num: '03', title: 'Finalized Execution', desc: 'Deliver verified, production-grade output' },
       ],
     },
     {
       vType: 'step_sequence' as const,
-      narrate: `The immediate impact on government yielded three structural transformations that outlasted the conflict.`,
-      headline: 'GOVERNMENT RESTRUCTURING',
-      badge: 'STRUCTURAL IMPACT',
-      subtext: 'Three permanent institutional consequences',
+      narrate: `Mastering this architecture comes down to three non-negotiable structural takeaways.`,
+      headline: 'CORE TAKEAWAYS',
+      badge: 'STRUCTURAL RULES',
+      subtext: 'Three essential principles for implementation',
       steps: [
-        { num: '01', title: 'Intelligence Reorganization', desc: 'Creation of external security apparatus' },
-        { num: '02', title: 'Constitutional Concentration', desc: 'Strengthened prime ministerial dominance' },
-        { num: '03', title: 'New Geopolitical Treaties', desc: 'Long-term bilateral defense accords' },
+        { num: '01', title: 'Establish Deterministic State', desc: 'Eliminate hidden side-effects' },
+        { num: '02', title: 'Decouple Critical Interfaces', desc: 'Enforce clean separation of concerns' },
+        { num: '03', title: 'Verify End-to-End', desc: 'Continuous feedback loops guarantee reliability' },
       ],
     },
     {
       vType: 'crosshair_target' as const,
-      narrate: `Prime ministerial leadership centralized foreign intelligence and strategic decision-making.`,
-      headline: 'EXECUTIVE CENTRALIZATION',
-      badge: 'LEADERSHIP DOCTRINE',
-      subtext: 'Single-node command structure during crisis',
-      tags: ['Executive Office', 'Cabinet Committee', 'Foreign Ministry'],
+      narrate: `By spotlighting this pivotal component, practitioners avoid common systemic pitfalls.`,
+      headline: 'PIVOTAL COMPONENT',
+      badge: 'PRECISION TARGET',
+      subtext: `Precision optimization for ${secondarySubject}`,
+      tags: ['Primary Key', 'Validation', 'Boundary Check'],
     },
     {
       vType: 'dynamic_chart' as const,
-      narrate: `The financial and economic burden required emergency budget allocations and foreign credit recalibration.`,
-      headline: 'ECONOMIC IMPACT',
-      badge: 'BUDGETARY BURDEN',
-      subtext: 'Surge in defense expenditures and refugee support',
-      statNum: '100%',
-      statLbl: 'EMERGENCY REALLOCATION',
+      narrate: `Long-term adoption metrics show sustained reliability and reduced failure rates across implementations.`,
+      headline: 'ADOPTION TRAJECTORY',
+      badge: 'GROWTH METRICS',
+      subtext: 'Quantitative adoption over scale',
+      statNum: '99.9%',
+      statLbl: 'RELIABILITY INDEX',
     },
     {
       vType: 'timeline' as const,
-      narrate: `Post-conflict negotiations culminated in landmark treaties that permanently redrew regional boundaries.`,
-      headline: 'DIPLOMATIC SETTLEMENT',
-      badge: 'TREATY RATIFICATION',
-      subtext: 'Bilateral accords formalizing new territorial realities',
+      narrate: `Looking toward the future, these architectural patterns continue to evolve and define modern standards.`,
+      headline: 'FUTURE EVOLUTION',
+      badge: 'ROADMAP PHASES',
+      subtext: 'Anticipated developmental trajectories',
       milestones: [
-        { date: 'Armistice', title: 'Ceasefire Agreement' },
-        { date: 'Bilateral Talks', title: 'Treaty Summit' },
-        { date: 'Ratification', title: 'New Map Enacted' },
+        { date: 'Current', title: 'Established Core Standard' },
+        { date: 'Near-Term', title: 'Automated Optimization' },
+        { date: 'Horizon', title: 'Autonomous Integration' },
       ],
     },
     {
       vType: 'kinetic_text' as const,
-      narrate: `Decades later, the constitutional and geopolitical precedents created by this event still define governance today.`,
-      headline: 'PERMANENT LEGACY',
-      badge: 'MODERN IMPLICATION',
-      subtext: 'Structural precedents that endure in national security policy',
-      statNum: '50+',
-      statLbl: 'YEARS OF STRATEGIC INFLUENCE',
+      narrate: `In summary, understanding ${cleanTopic} gives you the exact blueprint to build higher-retention, high-impact systems.`,
+      headline: 'THE BOTTOM LINE',
+      badge: 'FINAL VERDICT',
+      subtext: 'Deterministic clarity and enduring principles',
+      statNum: '100%',
+      statLbl: 'CONCEPT CLARITY',
     },
   ];
 
