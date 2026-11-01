@@ -113,14 +113,17 @@ const KineticTextScene: React.FC<{
 
         <h1
           style={{
-            fontSize: 84,
+            fontSize: (scene.graphicData?.headline || '').length > 22 ? 58 : 74,
             fontWeight: 900,
-            lineHeight: 1.05,
-            letterSpacing: '-0.03em',
+            lineHeight: 1.1,
+            letterSpacing: '-0.02em',
             color: '#FFFFFF',
             textTransform: 'uppercase',
             margin: '0 0 24px 0',
             textShadow: '0 10px 40px rgba(0,0,0,0.8)',
+            maxWidth: '100%',
+            wordBreak: 'break-word',
+            overflowWrap: 'break-word',
           }}
         >
           {scene.graphicData?.headline || (
@@ -1404,6 +1407,171 @@ const StepSequenceScene: React.FC<{
 };
 
 // =========================================================================
+// SUB-COMPONENT: SYNCHRONIZED RESPONSIVE CAPTION BAR
+// =========================================================================
+interface SynchronizedCaptionProps {
+  scene: StudioScene;
+  captionStyle: 'kinetic' | 'minimal' | 'bold';
+  accentColor: string;
+  durationFrames: number;
+}
+
+const SynchronizedCaption: React.FC<SynchronizedCaptionProps> = ({
+  scene,
+  captionStyle,
+  accentColor,
+  durationFrames,
+}) => {
+  const frame = useCurrentFrame();
+  const narration = (scene.narration || '').trim();
+  const words = narration ? narration.split(/\s+/).filter(Boolean) : [];
+  const wordCount = words.length;
+
+  if (wordCount === 0) return null;
+
+  // Responsive font scaling: ensures text NEVER overflows the 9:16 safe area
+  // 1-8 words: 32px | 9-13 words: 28px | 14+ words: 24px
+  const fontSize = wordCount > 13 ? 24 : wordCount > 8 ? 28 : 32;
+
+  // Word-by-word kinetic highlight index based on scene playback progress
+  const progress = durationFrames > 0 ? Math.min(1, Math.max(0, frame / durationFrames)) : 0;
+  const currentWordIdx = Math.min(wordCount - 1, Math.floor(progress * wordCount));
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        bottom: 220,
+        left: 48,
+        right: 48,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 50,
+        pointerEvents: 'none',
+        boxSizing: 'border-box',
+      }}
+    >
+      {captionStyle === 'kinetic' && (
+        <div
+          style={{
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+            backgroundColor: 'rgba(8, 9, 10, 0.90)',
+            backdropFilter: 'blur(16px)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: 22,
+            padding: '14px 22px',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.85)',
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '6px 8px',
+          }}
+        >
+          {words.map((word, wIdx) => {
+            const isActive = wIdx === currentWordIdx;
+            const isPast = wIdx < currentWordIdx;
+            const isKeyword = (scene.highlightWords || []).some((hw) =>
+              hw.toLowerCase().includes(word.toLowerCase().replace(/[^a-z0-9]/g, ''))
+            );
+
+            return (
+              <span
+                key={wIdx}
+                style={{
+                  fontSize,
+                  fontWeight: isActive ? 900 : 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.02em',
+                  lineHeight: 1.25,
+                  padding: isActive ? '3px 8px' : '3px 2px',
+                  borderRadius: 8,
+                  backgroundColor: isActive ? accentColor : 'transparent',
+                  color: isActive
+                    ? '#FFFFFF'
+                    : isKeyword
+                    ? accentColor
+                    : isPast
+                    ? '#FFFFFF'
+                    : '#94A3B8',
+                  transform: isActive ? 'scale(1.08)' : 'scale(1)',
+                  boxShadow: isActive ? `0 4px 18px ${accentColor}60` : 'none',
+                  whiteSpace: 'nowrap',
+                  wordBreak: 'break-word',
+                  transition: 'background-color 0.1s ease, transform 0.1s ease',
+                }}
+              >
+                {word}
+              </span>
+            );
+          })}
+        </div>
+      )}
+
+      {captionStyle === 'minimal' && (
+        <div
+          style={{
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid #232634',
+            borderRadius: 18,
+            padding: '12px 24px',
+            boxShadow: '0 15px 30px rgba(0, 0, 0, 0.7)',
+          }}
+        >
+          <p
+            style={{
+              fontSize,
+              fontWeight: 600,
+              color: '#EDEDED',
+              margin: 0,
+              lineHeight: 1.35,
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word',
+            }}
+          >
+            {scene.narration}
+          </p>
+        </div>
+      )}
+
+      {captionStyle === 'bold' && (
+        <div
+          style={{
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+            backgroundColor: accentColor,
+            borderRadius: 20,
+            padding: '16px 24px',
+            boxShadow: `0 15px 40px ${accentColor}40`,
+          }}
+        >
+          <p
+            style={{
+              fontSize,
+              fontWeight: 900,
+              textTransform: 'uppercase',
+              letterSpacing: '0.03em',
+              color: '#FFFFFF',
+              margin: 0,
+              lineHeight: 1.25,
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word',
+            }}
+          >
+            {scene.narration}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// =========================================================================
 // MAIN COMPOSITION: DYNAMIC STORY REEL
 // =========================================================================
 export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
@@ -1569,7 +1737,7 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
         );
       })}
 
-      {/* 4. Live Synchronized Bottom Captions (Safe Zone: bottom 220px) */}
+      {/* 4. Live Synchronized Responsive Bottom Captions (Safe Zone: bottom 220px, zero-overflow flex wrap) */}
       {safeScenes.map((scene, idx) => {
         const fromFrame = Math.round(scene.startTime * fps);
         const durationFrames = Math.max(1, Math.round(scene.duration * fps));
@@ -1580,109 +1748,12 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
             from={fromFrame}
             durationInFrames={durationFrames}
           >
-            <div
-              style={{
-                position: 'absolute',
-                bottom: 240,
-                left: 60,
-                right: 60,
-                display: 'flex',
-                justifyContent: 'center',
-                textAlign: 'center',
-                zIndex: 50,
-                pointerEvents: 'none',
-              }}
-            >
-              {captionStyle === 'kinetic' && (
-                <div
-                  style={{
-                    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                    backdropFilter: 'blur(12px)',
-                    border: '1px solid #232634',
-                    borderRadius: 24,
-                    padding: '18px 36px',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.8)',
-                  }}
-                >
-                  <p
-                    style={{
-                      fontSize: 34,
-                      fontWeight: 900,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.04em',
-                      color: '#FFFFFF',
-                      margin: 0,
-                      lineHeight: 1.3,
-                    }}
-                  >
-                    {scene.narration.split(' ').map((word, wIdx) => {
-                      const isHighlighted = (scene.highlightWords || []).some((hw) =>
-                        hw.toLowerCase().includes(word.toLowerCase().replace(/[.,!]/g, ''))
-                      );
-                      return (
-                        <span
-                          key={wIdx}
-                          style={{
-                            margin: '0 4px',
-                            color: isHighlighted ? accentColor : '#FFFFFF',
-                            textDecoration: isHighlighted ? `underline ${accentColor}` : 'none',
-                          }}
-                        >
-                          {word}
-                        </span>
-                      );
-                    })}
-                  </p>
-                </div>
-              )}
-
-              {captionStyle === 'minimal' && (
-                <div
-                  style={{
-                    backgroundColor: 'rgba(0, 0, 0, 0.65)',
-                    backdropFilter: 'blur(8px)',
-                    borderRadius: 18,
-                    padding: '14px 28px',
-                  }}
-                >
-                  <p
-                    style={{
-                      fontSize: 30,
-                      fontWeight: 600,
-                      color: '#EDEDED',
-                      margin: 0,
-                    }}
-                  >
-                    {scene.narration}
-                  </p>
-                </div>
-              )}
-
-              {captionStyle === 'bold' && (
-                <div
-                  style={{
-                    width: '100%',
-                    backgroundColor: accentColor,
-                    borderRadius: 20,
-                    padding: '20px 24px',
-                    boxShadow: `0 15px 40px ${accentColor}40`,
-                  }}
-                >
-                  <p
-                    style={{
-                      fontSize: 36,
-                      fontWeight: 900,
-                      textTransform: 'uppercase',
-                      color: '#FFFFFF',
-                      margin: 0,
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {scene.narration}
-                  </p>
-                </div>
-              )}
-            </div>
+            <SynchronizedCaption
+              scene={scene}
+              captionStyle={captionStyle}
+              accentColor={accentColor}
+              durationFrames={durationFrames}
+            />
           </Sequence>
         );
       })}
