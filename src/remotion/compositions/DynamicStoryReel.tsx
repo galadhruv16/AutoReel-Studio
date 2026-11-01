@@ -106,7 +106,7 @@ const KineticTextScene: React.FC<{
             boxShadow: `0 0 25px ${accentColor}30`,
           }}
         >
-          {(scene.visualDirection || 'KEY CONCEPT').split(':')[0].slice(0, 24) || 'KEY CONCEPT'}
+          {scene.graphicData?.badge || (scene.visualDirection || 'KEY CONCEPT').split(':')[0].slice(0, 28)}
         </div>
 
         <h1
@@ -121,31 +121,49 @@ const KineticTextScene: React.FC<{
             textShadow: '0 10px 40px rgba(0,0,0,0.8)',
           }}
         >
-          {primaryHeadline}{' '}
-          <span
-            style={{
-              color: accentColor,
-              textDecoration: 'underline',
-              textDecorationColor: accentColor,
-            }}
-          >
-            {secondaryHeadline}
-          </span>
+          {scene.graphicData?.headline || (
+            <>
+              {primaryHeadline}{' '}
+              <span
+                style={{
+                  color: accentColor,
+                  textDecoration: 'underline',
+                  textDecorationColor: accentColor,
+                }}
+              >
+                {secondaryHeadline}
+              </span>
+            </>
+          )}
         </h1>
 
-        {remaining && (
+        {scene.graphicData?.subtext ? (
+          <p
+            style={{
+              fontSize: 36,
+              color: '#EDEDED',
+              fontWeight: 600,
+              maxWidth: 800,
+              margin: '0 auto',
+              lineHeight: 1.3,
+            }}
+          >
+            {scene.graphicData.subtext}
+          </p>
+        ) : remaining ? (
           <p
             style={{
               fontSize: 36,
               color: '#94A3B8',
+              maxWidth: 800,
+              margin: '0 auto',
               lineHeight: 1.4,
               fontWeight: 500,
-              margin: 0,
             }}
           >
             {remaining}
           </p>
-        )}
+        ) : null}
       </div>
     </AbsoluteFill>
   );
@@ -241,14 +259,18 @@ const VectorSchematicScene: React.FC<{
         <line x1="490" y1="180" x2="110" y2="420" stroke={`${accentColor}40`} strokeWidth="1.5" />
 
         {/* Telemetry Corner Accents */}
-        <text x="130" y="160" fill="#94A3B8" fontSize="16" fontFamily="monospace">SCHEMATIC_REF // 0{scene.index}</text>
-        <text x="350" y="460" fill={accentColor} fontSize="16" fontFamily="monospace">VECTOR_ACTIVE: 60FPS</text>
+        <text x="130" y="160" fill="#94A3B8" fontSize="16" fontFamily="monospace">
+          {scene.graphicData?.keyTags?.[0] || `SCHEMATIC // 0${scene.index}`}
+        </text>
+        <text x="320" y="460" fill={accentColor} fontSize="16" fontFamily="monospace">
+          {scene.graphicData?.keyTags?.[1] || 'CORE DOCTRINE'}
+        </text>
       </svg>
 
       {/* Schematic Headline Label */}
       <div
         style={{
-          marginTop: 50,
+          marginTop: 40,
           textAlign: 'center',
           maxWidth: 850,
         }}
@@ -264,7 +286,7 @@ const VectorSchematicScene: React.FC<{
             marginBottom: 12,
           }}
         >
-          {(scene.visualDirection || 'ARCHITECTURAL SCHEMATIC').split(':')[0] || 'ARCHITECTURAL SCHEMATIC'}
+          {scene.graphicData?.badge || (scene.visualDirection || 'ARCHITECTURAL SCHEMATIC').split(':')[0]}
         </span>
         <h2
           style={{
@@ -272,12 +294,24 @@ const VectorSchematicScene: React.FC<{
             fontWeight: 800,
             color: '#FFFFFF',
             lineHeight: 1.2,
-            margin: 0,
+            margin: '0 0 12px 0',
             textShadow: '0 6px 25px rgba(0,0,0,0.9)',
           }}
         >
-          {scene.narration}
+          {scene.graphicData?.headline || scene.narration}
         </h2>
+        {scene.graphicData?.subtext && (
+          <p
+            style={{
+              fontSize: 24,
+              color: '#94A3B8',
+              fontWeight: 500,
+              margin: 0,
+            }}
+          >
+            {scene.graphicData.subtext}
+          </p>
+        )}
       </div>
     </AbsoluteFill>
   );
@@ -461,7 +495,7 @@ const CrosshairTargetScene: React.FC<{
             }}
           />
           <span style={{ fontSize: 18, fontFamily: 'monospace', color: '#EDEDED' }}>
-            TARGET_ACQUIRED // FOCUS POINT 0{scene.index}
+            {scene.graphicData?.badge || `TACTICAL FOCUS // POINT 0${scene.index}`}
           </span>
         </div>
 
@@ -471,11 +505,23 @@ const CrosshairTargetScene: React.FC<{
             fontWeight: 800,
             color: '#FFFFFF',
             lineHeight: 1.25,
-            margin: 0,
+            margin: '0 0 12px 0',
           }}
         >
-          {scene.narration}
+          {scene.graphicData?.headline || scene.narration}
         </h2>
+        {scene.graphicData?.subtext && (
+          <p
+            style={{
+              fontSize: 24,
+              color: '#94A3B8',
+              fontWeight: 500,
+              margin: 0,
+            }}
+          >
+            {scene.graphicData.subtext}
+          </p>
+        )}
       </div>
     </AbsoluteFill>
   );
@@ -554,18 +600,18 @@ const SplitComparisonScene: React.FC<{
               marginBottom: 20,
             }}
           >
-            STATE A // THESIS
+            {scene.graphicData?.leftItem?.title || 'STATE A // PRIOR'}
           </span>
           <p
             style={{
-              fontSize: 38,
+              fontSize: 34,
               fontWeight: 700,
               color: '#EDEDED',
               lineHeight: 1.3,
               margin: 0,
             }}
           >
-            {leftText}
+            {scene.graphicData?.leftItem?.desc || leftText}
           </p>
         </div>
 
@@ -602,18 +648,18 @@ const SplitComparisonScene: React.FC<{
               marginBottom: 20,
             }}
           >
-            STATE B // RESOLUTION
+            {scene.graphicData?.rightItem?.title || 'STATE B // OUTCOME'}
           </span>
           <p
             style={{
-              fontSize: 38,
+              fontSize: 34,
               fontWeight: 700,
               color: '#FFFFFF',
               lineHeight: 1.3,
               margin: 0,
             }}
           >
-            {rightText}
+            {scene.graphicData?.rightItem?.desc || rightText}
           </p>
         </div>
       </div>
@@ -632,7 +678,7 @@ const SplitComparisonScene: React.FC<{
       >
         <span style={{ fontSize: 22, fontWeight: 800, color: accentColor }}>VS</span>
         <span style={{ fontSize: 18, fontFamily: 'monospace', color: '#94A3B8' }}>
-          COMPARATIVE MECHANISM
+          {scene.graphicData?.badge || 'COMPARATIVE ANALYSIS'}
         </span>
       </div>
     </AbsoluteFill>
@@ -704,6 +750,9 @@ const ProcessFlowScene: React.FC<{
         {[0, 1, 2].map((stepIdx) => {
           const isActive = stepIdx <= activeNode;
           const isCurrent = stepIdx === activeNode;
+          const dynamicStep = scene.graphicData?.steps?.[stepIdx];
+          const stepTitle = dynamicStep?.title?.slice(0, 20) || `STAGE 0${stepIdx + 1}`;
+
           return (
             <div
               key={stepIdx}
@@ -712,6 +761,7 @@ const ProcessFlowScene: React.FC<{
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                maxWidth: 220,
               }}
             >
               <div
@@ -731,7 +781,7 @@ const ProcessFlowScene: React.FC<{
                   transition: 'all 0.3s ease',
                 }}
               >
-                0{stepIdx + 1}
+                {dynamicStep?.num || `0${stepIdx + 1}`}
               </div>
               <span
                 style={{
@@ -740,9 +790,11 @@ const ProcessFlowScene: React.FC<{
                   fontFamily: 'monospace',
                   color: isActive ? '#EDEDED' : '#64748B',
                   fontWeight: 600,
+                  textAlign: 'center',
+                  lineHeight: 1.2,
                 }}
               >
-                STAGE 0{stepIdx + 1}
+                {stepTitle}
               </span>
             </div>
           );
@@ -767,19 +819,25 @@ const ProcessFlowScene: React.FC<{
             marginBottom: 16,
           }}
         >
-          {(scene.visualDirection || 'SEQUENTIAL EXECUTION PIPELINE').split(':')[0] || 'SEQUENTIAL EXECUTION PIPELINE'}
+          {scene.graphicData?.badge || (scene.visualDirection || 'PROCESS PIPELINE').split(':')[0]}
         </span>
         <h2
           style={{
-            fontSize: 52,
+            fontSize: 50,
             fontWeight: 800,
             color: '#FFFFFF',
             lineHeight: 1.25,
-            margin: 0,
+            margin: '0 0 12px 0',
+            textShadow: '0 6px 25px rgba(0,0,0,0.9)',
           }}
         >
-          {scene.narration}
+          {scene.graphicData?.headline || scene.narration}
         </h2>
+        {scene.graphicData?.subtext && (
+          <p style={{ fontSize: 24, color: '#94A3B8', margin: 0, fontWeight: 500 }}>
+            {scene.graphicData.subtext}
+          </p>
+        )}
       </div>
     </AbsoluteFill>
   );
@@ -849,10 +907,13 @@ const DynamicChartScene: React.FC<{
                 marginBottom: 8,
               }}
             >
-              {(scene.visualDirection || 'METRIC ANALYSIS').split(':')[0].slice(0, 24)}
+              {scene.graphicData?.badge || 'METRIC ANALYSIS'}
             </span>
             <div style={{ fontSize: 56, fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.03em' }}>
-              +{count2}% <span style={{ fontSize: 24, fontWeight: 700, color: '#10B981' }}>IMPACT</span>
+              {scene.graphicData?.statNumber || `+${count2}%`}{' '}
+              <span style={{ fontSize: 24, fontWeight: 700, color: '#10B981' }}>
+                {scene.graphicData?.statLabel || 'RECORD'}
+              </span>
             </div>
           </div>
           <div
@@ -867,7 +928,7 @@ const DynamicChartScene: React.FC<{
               fontWeight: 700,
             }}
           >
-            INDEX // 0{scene.index}
+            METRIC // 0{scene.index}
           </div>
         </div>
 
@@ -878,10 +939,10 @@ const DynamicChartScene: React.FC<{
           <div style={{ position: 'absolute', left: 0, right: 0, top: 120, borderTop: '1px dashed #232634' }} />
           <div style={{ position: 'absolute', left: 0, right: 0, bottom: 20, borderTop: '2px solid #33384B' }} />
 
-          {/* Bar 1: Baseline */}
+          {/* Bar 1: Baseline / Left Item */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10, width: 140 }}>
-            <span style={{ fontSize: 20, fontFamily: 'monospace', color: '#94A3B8', marginBottom: 12, fontWeight: 700 }}>
-              {Math.round(24 * grow)}%
+            <span style={{ fontSize: 18, fontFamily: 'monospace', color: '#94A3B8', marginBottom: 12, fontWeight: 700 }}>
+              {Math.round(25 * grow)}%
             </span>
             <div
               style={{
@@ -892,13 +953,15 @@ const DynamicChartScene: React.FC<{
                 border: '1px solid #33384B',
               }}
             />
-            <span style={{ fontSize: 16, fontFamily: 'monospace', color: '#64748B', marginTop: 14 }}>BASELINE</span>
+            <span style={{ fontSize: 14, fontFamily: 'monospace', color: '#64748B', marginTop: 14, textAlign: 'center' }}>
+              {scene.graphicData?.leftItem?.title?.slice(0, 14) || 'INITIAL'}
+            </span>
           </div>
 
-          {/* Bar 2: Midpoint */}
+          {/* Bar 2: Midpoint / Right Item */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10, width: 140 }}>
-            <span style={{ fontSize: 20, fontFamily: 'monospace', color: '#EDEDED', marginBottom: 12, fontWeight: 700 }}>
-              {Math.round(58 * grow)}%
+            <span style={{ fontSize: 18, fontFamily: 'monospace', color: '#EDEDED', marginBottom: 12, fontWeight: 700 }}>
+              {Math.round(60 * grow)}%
             </span>
             <div
               style={{
@@ -909,13 +972,15 @@ const DynamicChartScene: React.FC<{
                 boxShadow: '0 0 20px rgba(56, 189, 248, 0.4)',
               }}
             />
-            <span style={{ fontSize: 16, fontFamily: 'monospace', color: '#94A3B8', marginTop: 14 }}>ADOPTION</span>
+            <span style={{ fontSize: 14, fontFamily: 'monospace', color: '#94A3B8', marginTop: 14, textAlign: 'center' }}>
+              {scene.graphicData?.rightItem?.title?.slice(0, 14) || 'MIDPOINT'}
+            </span>
           </div>
 
           {/* Bar 3: Peak Metric */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10, width: 140 }}>
-            <span style={{ fontSize: 22, fontFamily: 'monospace', color: accentColor, marginBottom: 12, fontWeight: 900 }}>
-              {count1}%
+            <span style={{ fontSize: 20, fontFamily: 'monospace', color: accentColor, marginBottom: 12, fontWeight: 900 }}>
+              {scene.graphicData?.statNumber || `${count1}%`}
             </span>
             <div
               style={{
@@ -926,7 +991,9 @@ const DynamicChartScene: React.FC<{
                 boxShadow: `0 0 35px ${accentColor}70`,
               }}
             />
-            <span style={{ fontSize: 16, fontFamily: 'monospace', color: accentColor, marginTop: 14, fontWeight: 800 }}>RESULT</span>
+            <span style={{ fontSize: 14, fontFamily: 'monospace', color: accentColor, marginTop: 14, fontWeight: 800, textAlign: 'center' }}>
+              {scene.graphicData?.statLabel?.slice(0, 14) || 'PEAK'}
+            </span>
           </div>
         </div>
       </div>
@@ -935,16 +1002,21 @@ const DynamicChartScene: React.FC<{
       <div style={{ marginTop: 44, textAlign: 'center', maxWidth: 850 }}>
         <h2
           style={{
-            fontSize: 50,
+            fontSize: 48,
             fontWeight: 800,
             color: '#FFFFFF',
             lineHeight: 1.25,
-            margin: 0,
+            margin: '0 0 10px 0',
             textShadow: '0 6px 25px rgba(0,0,0,0.9)',
           }}
         >
-          {scene.narration}
+          {scene.graphicData?.headline || scene.narration}
         </h2>
+        {scene.graphicData?.subtext && (
+          <p style={{ fontSize: 24, color: '#94A3B8', margin: 0 }}>
+            {scene.graphicData.subtext}
+          </p>
+        )}
       </div>
     </AbsoluteFill>
   );
@@ -1001,7 +1073,7 @@ const TimelineScene: React.FC<{
       >
         <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: accentColor, boxShadow: `0 0 10px ${accentColor}` }} />
         <span style={{ fontSize: 20, fontFamily: 'monospace', color: '#EDEDED', letterSpacing: '0.1em' }}>
-          CHRONOLOGICAL TIMELINE // EVENT 0{scene.index}
+          {scene.graphicData?.badge || `CHRONOLOGICAL RECORD // 0${scene.index}`}
         </span>
       </div>
 
@@ -1044,16 +1116,19 @@ const TimelineScene: React.FC<{
 
         {/* 3 Chronological Nodes */}
         <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 10 }}>
-          {[
-            { tag: 'GENESIS', label: 'Initial State' },
-            { tag: 'TURNING POINT', label: 'Catalyst' },
-            { tag: 'OUTCOME', label: 'Current Impact' },
-          ].map((milestone, mIdx) => {
+          {(scene.graphicData?.milestones && scene.graphicData.milestones.length >= 2
+            ? scene.graphicData.milestones.slice(0, 3).map((m) => ({ tag: m.date, label: m.title }))
+            : [
+                { tag: 'PHASE 1', label: 'Initial Spark' },
+                { tag: 'PHASE 2', label: 'Strategic Turning Point' },
+                { tag: 'PHASE 3', label: 'Long-term Impact' },
+              ]
+          ).map((milestone, mIdx) => {
             const isReached = mIdx <= activeMilestone;
             const isCurrent = mIdx === activeMilestone;
 
             return (
-              <div key={mIdx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 180 }}>
+              <div key={mIdx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 220 }}>
                 {/* Node Ring */}
                 <div
                   style={{
@@ -1085,6 +1160,7 @@ const TimelineScene: React.FC<{
                     letterSpacing: '0.1em',
                     textTransform: 'uppercase',
                     marginBottom: 6,
+                    textAlign: 'center',
                   }}
                 >
                   {milestone.tag}
@@ -1095,6 +1171,7 @@ const TimelineScene: React.FC<{
                     fontWeight: 700,
                     color: isReached ? '#FFFFFF' : '#64748B',
                     textAlign: 'center',
+                    lineHeight: 1.25,
                   }}
                 >
                   {milestone.label}
@@ -1109,16 +1186,21 @@ const TimelineScene: React.FC<{
       <div style={{ marginTop: 44, textAlign: 'center', maxWidth: 850 }}>
         <h2
           style={{
-            fontSize: 50,
+            fontSize: 48,
             fontWeight: 800,
             color: '#FFFFFF',
             lineHeight: 1.25,
-            margin: 0,
+            margin: '0 0 10px 0',
             textShadow: '0 6px 25px rgba(0,0,0,0.9)',
           }}
         >
-          {scene.narration}
+          {scene.graphicData?.headline || scene.narration}
         </h2>
+        {scene.graphicData?.subtext && (
+          <p style={{ fontSize: 24, color: '#94A3B8', margin: 0 }}>
+            {scene.graphicData.subtext}
+          </p>
+        )}
       </div>
     </AbsoluteFill>
   );
@@ -1139,11 +1221,16 @@ const StepSequenceScene: React.FC<{
   const chunk2 = words.slice(4, 8).join(' ');
   const chunk3 = words.slice(8).join(' ') || words.slice(0, 3).join(' ');
 
-  const steps = [
-    { num: '01', text: chunk1 || 'First Core Principle' },
-    { num: '02', text: chunk2 || 'Action & Execution' },
-    { num: '03', text: chunk3 || 'Key Structural Takeaway' },
-  ];
+  const steps = scene.graphicData?.steps && scene.graphicData.steps.length > 0
+    ? scene.graphicData.steps.slice(0, 3).map((st, i) => ({
+        num: st.num || `0${i + 1}`,
+        text: st.desc ? `${st.title}: ${st.desc}` : st.title,
+      }))
+    : [
+        { num: '01', text: chunk1 || 'First Core Principle' },
+        { num: '02', text: chunk2 || 'Action & Execution' },
+        { num: '03', text: chunk3 || 'Key Structural Takeaway' },
+      ];
 
   return (
     <AbsoluteFill
@@ -1180,7 +1267,7 @@ const StepSequenceScene: React.FC<{
           textAlign: 'center',
         }}
       >
-        {(scene.visualDirection || 'STEP SEQUENCE').split(':')[0].slice(0, 28)}
+        {scene.graphicData?.badge || (scene.visualDirection || 'STEP SEQUENCE').split(':')[0].slice(0, 28)}
       </div>
 
       {/* 3 Cascading Stack Cards */}
@@ -1190,7 +1277,7 @@ const StepSequenceScene: React.FC<{
           const enter = spring({ frame: frame - delay, fps, config: { damping: 14, stiffness: 120 } });
           const cardX = interpolate(enter, [0, 1], [60, 0], { extrapolateRight: 'clamp' });
           const cardOpacity = interpolate(enter, [0, 1], [0, 1], { extrapolateRight: 'clamp' });
-          const isFinal = sIdx === 2;
+          const isFinal = sIdx === steps.length - 1;
 
           return (
             <div
@@ -1244,9 +1331,22 @@ const StepSequenceScene: React.FC<{
 
       {/* Bottom Main Statement */}
       <div style={{ marginTop: 36, textAlign: 'center', maxWidth: 850 }}>
-        <span style={{ fontSize: 24, fontWeight: 700, color: '#94A3B8' }}>
-          SCENE 0{scene.index} // SYSTEM TAKEAWAY
-        </span>
+        <h3
+          style={{
+            fontSize: 34,
+            fontWeight: 800,
+            color: '#FFFFFF',
+            margin: '0 0 8px 0',
+            textShadow: '0 4px 20px rgba(0,0,0,0.8)',
+          }}
+        >
+          {scene.graphicData?.headline || `SCENE 0${scene.index} // SYSTEM TAKEAWAY`}
+        </h3>
+        {scene.graphicData?.subtext && (
+          <p style={{ fontSize: 22, color: '#94A3B8', margin: 0, fontWeight: 500 }}>
+            {scene.graphicData.subtext}
+          </p>
+        )}
       </div>
     </AbsoluteFill>
   );

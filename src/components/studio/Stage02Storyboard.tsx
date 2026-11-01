@@ -203,7 +203,30 @@ export const Stage02Storyboard: React.FC = () => {
   );
 
   const durationDiff = Math.abs(totalCalculatedDuration - project.duration);
-  const isPacingOptimal = durationDiff <= 8.0;
+  const isPacingOptimal = durationDiff <= 1.5;
+
+  const handleAutoAlignDuration = () => {
+    if (project.scenes.length === 0) return;
+    const rawTotal = project.scenes.reduce((acc, s) => acc + s.duration, 0) || project.duration;
+    const factor = project.duration / rawTotal;
+    let currentTime = 0;
+    const updatedScenes = project.scenes.map((s, idx) => {
+      let dur = Number((s.duration * factor).toFixed(1));
+      if (idx === project.scenes.length - 1) {
+        dur = Number((project.duration - currentTime).toFixed(1));
+      }
+      const start = Number(currentTime.toFixed(1));
+      currentTime += dur;
+      const end = Number(currentTime.toFixed(1));
+      return {
+        ...s,
+        duration: dur,
+        startTime: start,
+        endTime: end,
+      };
+    });
+    updateProject({ scenes: updatedScenes });
+  };
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
@@ -577,17 +600,27 @@ export const Stage02Storyboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-xs">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
             {isPacingOptimal ? (
-              <span className="inline-flex items-center gap-1.5 text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+              <span className="inline-flex items-center gap-1.5 text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 font-mono">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                <span>Optimal Reel Pacing</span>
+                <span>Exact Target Pacing ({totalCalculatedDuration}s)</span>
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
-                <AlertCircle className="h-3.5 w-3.5" />
-                <span>Runtime differs by {durationDiff.toFixed(1)}s</span>
-              </span>
+              <>
+                <span className="inline-flex items-center gap-1.5 text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 font-mono">
+                  <AlertCircle className="h-3.5 w-3.5" />
+                  <span>Differs by {durationDiff.toFixed(1)}s</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={handleAutoAlignDuration}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FF4F00] text-white text-xs font-semibold shadow-md shadow-[#FF4F00]/25 hover:bg-[#FF3B00] transition active:scale-95 cursor-pointer"
+                >
+                  <Sparkles className="h-3 w-3" />
+                  <span>⚡ Auto-Align to {project.duration}s</span>
+                </button>
+              </>
             )}
           </div>
         </div>

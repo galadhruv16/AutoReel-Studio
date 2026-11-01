@@ -23,6 +23,19 @@ export type VisualArchetype =
   | 'timeline'
   | 'step_sequence';
 
+export interface DynamicGraphicData {
+  badge?: string;
+  headline: string;
+  subtext?: string;
+  statNumber?: string;
+  statLabel?: string;
+  leftItem?: { title: string; desc: string };
+  rightItem?: { title: string; desc: string };
+  steps?: Array<{ num: string; title: string; desc?: string }>;
+  milestones?: Array<{ date: string; title: string }>;
+  keyTags?: string[];
+}
+
 export interface StudioScene {
   id: string;
   index: number;
@@ -33,6 +46,7 @@ export interface StudioScene {
   visualDirection: string;
   visualType: VisualArchetype;
   highlightWords?: string[];
+  graphicData?: DynamicGraphicData;
   audioUrl?: string;
 }
 
