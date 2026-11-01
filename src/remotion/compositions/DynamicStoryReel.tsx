@@ -1565,18 +1565,6 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
             ) : (
               <KineticTextScene scene={scene} accentColor={accentColor} topic={topic} />
             )}
-
-            {/* Per-scene synchronized neural voiceover */}
-            {scene.audioUrl && (
-              <Audio
-                src={
-                  scene.audioUrl.startsWith('http') || scene.audioUrl.startsWith('data:')
-                    ? scene.audioUrl
-                    : staticFile(scene.audioUrl.replace(/^\//, ''))
-                }
-                volume={1.0}
-              />
-            )}
           </Sequence>
         );
       })}
@@ -1699,7 +1687,33 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
         );
       })}
 
-      {/* 5. Master Composite Audio Track (only if individual scenes do not have audio) */}
+      {/* 5. Dedicated Per-Scene Voiceover Sequences (Generous duration padding ensures full sentence completion without cutoffs) */}
+      {safeScenes.map((scene, idx) => {
+        if (!scene.audioUrl) return null;
+        const fromFrame = Math.round(scene.startTime * fps);
+        // Generous audio frame window: allows the full audio waveform + acoustic release to complete cleanly
+        const audioSec = Math.max(scene.audioDuration || 0, scene.duration) + 0.6;
+        const audioFrames = Math.max(1, Math.ceil(audioSec * fps));
+
+        return (
+          <Sequence
+            key={`scene_audio_${scene.id || idx}`}
+            from={fromFrame}
+            durationInFrames={audioFrames}
+          >
+            <Audio
+              src={
+                scene.audioUrl.startsWith('http') || scene.audioUrl.startsWith('data:')
+                  ? scene.audioUrl
+                  : staticFile(scene.audioUrl.replace(/^\//, ''))
+              }
+              volume={1.0}
+            />
+          </Sequence>
+        );
+      })}
+
+      {/* 6. Master Composite Audio Track (only if individual scenes do not have audio) */}
       {audioUrl && !safeScenes.some((s) => s.audioUrl) && (
         <Audio
           src={

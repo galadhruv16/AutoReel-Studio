@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 import assert from 'assert';
 
-const PORT = 3088;
+const PORT = process.env.TEST_PORT || process.env.PORT || 3000;
 const BASE_URL = `http://localhost:${PORT}`;
 
 const BOLD = '\x1b[1m';
@@ -51,23 +51,30 @@ async function runTest(name, fn) {
 }
 
 async function main() {
-  console.log(`Starting Next.js production server on port ${PORT}...`);
-  const server = spawn('npx', ['next', 'start', '-p', String(PORT)], {
-    shell: true,
-    stdio: 'pipe',
-  });
+  let server = null;
+  let alreadyRunning = false;
+  try {
+    const res = await fetch(`${BASE_URL}/login`);
+    if (res.status < 500) {
+      alreadyRunning = true;
+      console.log(`${GREEN}Connected to active server at ${BASE_URL}!${RESET}\n`);
+    }
+  } catch {
+    // not running yet
+  }
 
-  server.stdout.on('data', (d) => {
-    // silence verbose server output or log if needed
-  });
-  server.stderr.on('data', (d) => {
-    // console.error(`[Server Error]: ${d}`);
-  });
+  if (!alreadyRunning) {
+    console.log(`Starting Next.js production server on port ${PORT}...`);
+    server = spawn('npx', ['next', 'start', '-p', String(PORT)], {
+      shell: true,
+      stdio: 'pipe',
+    });
+    console.log('Waiting for HTTP listener...');
+    await waitForServer(`${BASE_URL}/login`, 25000);
+    console.log(`${GREEN}Server is live at ${BASE_URL}!${RESET}\n`);
+  }
 
   try {
-    console.log('Waiting for HTTP listener...');
-    await waitForServer(`${BASE_URL}/login`, 20000);
-    console.log(`${GREEN}Server is live at ${BASE_URL}!${RESET}\n`);
 
     // TEST 1: Landing Page
     await runTest('GET / (Landing Page) returns 200 OK', async () => {
@@ -284,8 +291,10 @@ async function main() {
     });
 
   } finally {
-    console.log('\nShutting down Next.js test server...');
-    server.kill();
+    if (server) {
+      console.log('\nShutting down spawned Next.js test server...');
+      server.kill();
+    }
   }
 
   console.log(`\n${BOLD}${CYAN}================================================================${RESET}`);

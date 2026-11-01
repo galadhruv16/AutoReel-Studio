@@ -16,10 +16,10 @@ export async function POST(request: Request) {
     } = body;
 
     const targetSec = [30, 60, 90].includes(duration) ? (duration as StudioDuration) : 60;
-    // Strict speech cadence word budgets (approx 2.5 - 2.7 words/second for crisp video pacing)
-    const targetWords = targetSec === 30 ? 75 : targetSec === 60 ? 155 : 230;
-    const minWords = targetSec === 30 ? 65 : targetSec === 60 ? 140 : 210;
-    const maxWords = targetSec === 30 ? 85 : targetSec === 60 ? 170 : 250;
+    // Strict spoken cadence word budgets (approx 2.0 - 2.2 words/second for natural, unhurried articulation)
+    const targetWords = targetSec === 30 ? 60 : targetSec === 60 ? 120 : 180;
+    const minWords = targetSec === 30 ? 50 : targetSec === 60 ? 105 : 160;
+    const maxWords = targetSec === 30 ? 70 : targetSec === 60 ? 135 : 200;
     const targetSceneCount = targetSec === 30 ? 6 : targetSec === 60 ? 12 : 18;
 
     const geminiKey = process.env.GEMINI_API_KEY;
@@ -36,8 +36,8 @@ CRITICAL DIRECTIVE RULES:
 1. STRICT SPOKEN WORD CADENCE & EXACT WORD BUDGET:
    - Target total video duration: EXACTLY ${targetSec} seconds.
    - Total spoken word budget across ALL scenes combined MUST be between ${minWords} and ${maxWords} words (Target: ~${targetWords} words).
-   - You MUST generate EXACTLY ${targetSceneCount} sequential scenes (each scene between 10 and 15 words, lasting ~${(targetSec / targetSceneCount).toFixed(1)}s).
-   - NEVER output overlong scenes or dense paragraphs. Mobile vertical videos demand punchy, focused phrases.
+   - You MUST generate EXACTLY ${targetSceneCount} sequential scenes (each scene strictly between 8 and 12 punchy spoken words, lasting ~${(targetSec / targetSceneCount).toFixed(1)}s so spoken voiceover naturally and completely finishes before scene transition).
+   - NEVER output overlong scenes or dense multi-clause sentences. Mobile vertical videos demand punchy, focused, articulate phrases.
 2. DEEP FACTUAL SUBSTANCE & REAL ENTITIES:
    - Conduct thorough, accurate factual analysis of the user's specific topic.
    - Include real historical dates, operations, battles, treaties, names of leaders, institutions, legislation, scientific mechanisms, or economic statistics.
@@ -140,7 +140,14 @@ Respond STRICTLY with valid JSON (no markdown formatting, no code blocks):
               const resData = await res.json();
               const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
               if (rawText) {
-                const parsed = JSON.parse(rawText.trim());
+                let cleanedText = rawText.trim();
+                if (cleanedText.startsWith('```json')) {
+                  cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+                } else if (cleanedText.startsWith('```')) {
+                  cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+                }
+                cleanedText = cleanedText.replace(/,\s*([\]}])/g, '$1');
+                const parsed = JSON.parse(cleanedText);
                 if (parsed.scenes && Array.isArray(parsed.scenes) && parsed.scenes.length >= 2) {
                   usedModel = model;
                   scenes = parsed.scenes.map((s: any, idx: number) => {

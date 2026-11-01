@@ -10,7 +10,7 @@ const execFileAsync = promisify(execFile);
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { text, voice = 'alloy', sceneIndex = 1 } = body;
+    const { text, voice = 'alloy', sceneIndex = 1, rate = '+12%' } = body;
 
     if (!text || typeof text !== 'string' || text.trim().length === 0) {
       return NextResponse.json(
@@ -21,11 +21,12 @@ export async function POST(request: Request) {
 
     const cleanText = text.trim();
     const cleanVoice = voice.trim();
+    const cleanRate = String(rate).trim();
 
-    // SHA-256 Fingerprint Caching for instant, zero-latency revisions
+    // SHA-256 Fingerprint Caching with v2 salt to ensure unchopped audio
     const fingerprint = crypto
       .createHash('sha256')
-      .update(`${cleanText}_${cleanVoice}`)
+      .update(`${cleanText}_${cleanVoice}_${cleanRate}_v2`)
       .digest('hex');
 
     const cacheDir = path.join(process.cwd(), 'out', 'cache', 'audio');
@@ -59,9 +60,9 @@ export async function POST(request: Request) {
     const scriptPath = path.join(process.cwd(), 'scripts', 'synthesize_scene.py');
 
     try {
-      // Attempt local edge-tts execution via Python
-      const { stdout } = await execFileAsync('python', [scriptPath, cleanText, cleanVoice], {
-        timeout: 12000,
+      // Attempt local edge-tts execution via Python with explicit rate
+      const { stdout } = await execFileAsync('python', [scriptPath, cleanText, cleanVoice, cleanRate], {
+        timeout: 15000,
         maxBuffer: 10 * 1024 * 1024,
       });
 

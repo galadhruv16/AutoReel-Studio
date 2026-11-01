@@ -56,6 +56,7 @@ export interface StudioScene {
   decisionFrame?: number;
   graphicData?: DynamicGraphicData;
   audioUrl?: string;
+  audioDuration?: number; // Exact spoken audio duration in seconds
 }
 
 export interface StudioProject {

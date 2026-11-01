@@ -75,9 +75,7 @@ export const Stage03Review: React.FC = () => {
       const updatedScenes = [...scenes];
       let synthCount = 0;
 
-      for (let i = 0; i < updatedScenes.length; i++) {
-        if (isCancelled) break;
-        const sc = updatedScenes[i];
+      const promises = updatedScenes.map(async (sc, i) => {
         if (!sc.audioUrl && sc.narration) {
           try {
             const res = await fetch('/api/studio/synthesize-scene', {
@@ -87,13 +85,18 @@ export const Stage03Review: React.FC = () => {
                 text: sc.narration,
                 voice: project.voice,
                 sceneIndex: sc.index,
+                rate: '+12%',
               }),
             });
             const data = await res.json();
             if (data.success && data.data?.audioUrl) {
+              const actualDur = data.data.duration;
+              const sceneDur = Number((actualDur + 0.35).toFixed(2));
               updatedScenes[i] = {
                 ...updatedScenes[i],
                 audioUrl: data.data.audioUrl,
+                audioDuration: actualDur,
+                duration: Math.max(sceneDur, updatedScenes[i].duration || 3.0),
               };
               synthCount++;
             }
@@ -101,10 +104,26 @@ export const Stage03Review: React.FC = () => {
             console.warn(`Failed to synthesize scene ${sc.index}`, err);
           }
         }
-      }
+      });
+
+      await Promise.all(promises);
 
       if (!isCancelled && synthCount > 0) {
-        updateProject({ scenes: updatedScenes });
+        let curTime = 0;
+        const reindexed = updatedScenes.map((s, idx) => {
+          const dur = s.duration;
+          const start = Number(curTime.toFixed(2));
+          curTime += dur;
+          const end = Number(curTime.toFixed(2));
+          return {
+            ...s,
+            index: idx + 1,
+            startTime: start,
+            endTime: end,
+            duration: dur,
+          };
+        });
+        updateProject({ scenes: reindexed });
         setSynthSuccess(`All ${synthCount} scenes synchronized with neural voice.`);
       }
       if (!isCancelled) {
@@ -195,18 +214,41 @@ export const Stage03Review: React.FC = () => {
           text: selectedScene.narration,
           voice: project.voice,
           sceneIndex: selectedScene.index,
+          rate: '+12%',
         }),
       });
 
       const data = await res.json();
       if (data.success && data.data) {
-        handleUpdateSceneData({
-          duration: data.data.duration,
+        const actualDur = data.data.duration;
+        const newDur = Math.max(Number((actualDur + 0.35).toFixed(2)), selectedScene.duration || 3.0);
+        const updated = [...project.scenes];
+        updated[selectedSceneIndex] = {
+          ...updated[selectedSceneIndex],
+          duration: newDur,
+          audioDuration: actualDur,
           audioUrl: data.data.audioUrl,
+        };
+
+        // Re-index all scenes sequentially
+        let curTime = 0;
+        const reindexed = updated.map((s, idx) => {
+          const dur = s.duration;
+          const start = Number(curTime.toFixed(2));
+          curTime += dur;
+          const end = Number(curTime.toFixed(2));
+          return {
+            ...s,
+            index: idx + 1,
+            startTime: start,
+            endTime: end,
+            duration: dur,
+          };
         });
+        updateProject({ scenes: reindexed });
 
         setSynthSuccess(
-          `Audio re-synthesized successfully (${data.data.duration}s)!`
+          `Audio re-synthesized successfully (${actualDur}s)!`
         );
 
         // Preview the audio immediately

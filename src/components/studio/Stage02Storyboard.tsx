@@ -66,12 +66,18 @@ export const Stage02Storyboard: React.FC = () => {
 
       const data = await res.json();
       if (data.success && data.data?.scenes) {
+        setSuccessMsg(
+          `Synthesizing neural voices and phrase-locking ${data.data.scenes.length} beats...`
+        );
+        // Synchronously synthesize and calibrate exact audio durations in parallel
+        const synchronizedScenes = await syncScenesAudio(data.data.scenes);
         updateProject({
-          scenes: data.data.scenes,
+          scenes: synchronizedScenes,
           scriptMode: activeTab,
         });
+        const totalDur = synchronizedScenes.reduce((acc, s) => acc + s.duration, 0);
         setSuccessMsg(
-          `Generated ${data.data.scenes.length} phrase-synced beats for "${project.topic}" (${data.data.totalDuration}s)`
+          `Generated & voice-synchronized ${synchronizedScenes.length} beats for "${project.topic}" (${totalDur.toFixed(1)}s)`
         );
       } else {
         setError(data.error || 'Failed to generate storyboard.');
@@ -83,16 +89,81 @@ export const Stage02Storyboard: React.FC = () => {
     }
   };
 
+  const syncScenesAudio = async (inputScenes: StudioScene[]): Promise<StudioScene[]> => {
+    setIsSynthesizingVoices(true);
+    try {
+      const updatedScenes = [...inputScenes];
+      const synthesisPromises = updatedScenes.map(async (sc, i) => {
+        if (!sc.narration) return;
+        try {
+          const res = await fetch('/api/studio/synthesize-scene', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text: sc.narration,
+              voice: project.voice,
+              sceneIndex: sc.index,
+              rate: '+12%',
+            }),
+          });
+          const data = await res.json();
+          if (data.success && data.data?.audioUrl) {
+            const actualDur = data.data.duration;
+            // Pad 350ms so voiceover has natural acoustic release and zero cutoff
+            const sceneDur = Number((actualDur + 0.35).toFixed(2));
+            updatedScenes[i] = {
+              ...updatedScenes[i],
+              audioUrl: data.data.audioUrl,
+              audioDuration: actualDur,
+              duration: Math.max(sceneDur, updatedScenes[i].duration || 3.0),
+            };
+          }
+        } catch (e) {
+          console.warn(`Could not synthesize scene ${sc.index}:`, e);
+        }
+      });
+
+      await Promise.all(synthesisPromises);
+
+      // Re-index timing sequentially across all scenes
+      let curTime = 0;
+      const reindexed = updatedScenes.map((s, idx) => {
+        const dur = s.duration;
+        const start = Number(curTime.toFixed(2));
+        curTime += dur;
+        const end = Number(curTime.toFixed(2));
+        const cueRatio = (s.cueFrame && s.duration) ? (s.cueFrame / (s.duration * 30)) : 0.25;
+        const cueFrame = Math.max(4, Math.floor(cueRatio * dur * 30));
+        return {
+          ...s,
+          index: idx + 1,
+          duration: dur,
+          startTime: start,
+          endTime: end,
+          cueFrame,
+        };
+      });
+
+      return reindexed;
+    } finally {
+      setIsSynthesizingVoices(false);
+    }
+  };
+
   const handleUpdateScene = (index: number, updates: Partial<StudioScene>) => {
     const updatedScenes = [...project.scenes];
+    const prevNarration = updatedScenes[index].narration;
+    const narrationChanged = updates.narration !== undefined && updates.narration !== prevNarration;
+
     updatedScenes[index] = {
       ...updatedScenes[index],
       ...updates,
+      ...(narrationChanged ? { audioUrl: undefined, audioDuration: undefined } : {}),
     };
     // Recalculate duration if narration word count changes noticeably
-    if (updates.narration !== undefined) {
+    if (narrationChanged && updates.narration !== undefined) {
       const words = updates.narration.trim().split(/\s+/).length;
-      const estimatedDur = Number(Math.max(2.0, Math.min(6.5, words / 2.6)).toFixed(1));
+      const estimatedDur = Number(Math.max(2.5, Math.min(8.0, words / 2.5)).toFixed(1));
       updatedScenes[index].duration = estimatedDur;
     }
 
@@ -216,13 +287,17 @@ export const Stage02Storyboard: React.FC = () => {
     const factor = project.duration / rawTotal;
     let currentTime = 0;
     const updatedScenes = project.scenes.map((s, idx) => {
-      let dur = Number((s.duration * factor).toFixed(1));
-      if (idx === project.scenes.length - 1) {
-        dur = Number((project.duration - currentTime).toFixed(1));
+      // Audio safety floor: never compress a scene below its spoken audio duration!
+      const minDur = s.audioDuration ? Number((s.audioDuration + 0.3).toFixed(2)) : 2.5;
+      let dur = Number((s.duration * factor).toFixed(2));
+      dur = Math.max(minDur, dur);
+
+      if (idx === project.scenes.length - 1 && factor >= 1.0) {
+        dur = Number(Math.max(minDur, (project.duration - currentTime)).toFixed(2));
       }
-      const start = Number(currentTime.toFixed(1));
+      const start = Number(currentTime.toFixed(2));
       currentTime += dur;
-      const end = Number(currentTime.toFixed(1));
+      const end = Number(currentTime.toFixed(2));
       const cueRatio = (s.cueFrame && s.duration) ? (s.cueFrame / (s.duration * 30)) : 0.25;
       const cueFrame = Math.max(4, Math.floor(cueRatio * dur * 30));
 
@@ -240,35 +315,8 @@ export const Stage02Storyboard: React.FC = () => {
   const handleProceedToReview = async () => {
     const unvoiced = project.scenes.filter((s) => !s.audioUrl && s.narration);
     if (unvoiced.length > 0) {
-      setIsSynthesizingVoices(true);
-      const updatedScenes = [...project.scenes];
-      for (let i = 0; i < updatedScenes.length; i++) {
-        const sc = updatedScenes[i];
-        if (!sc.audioUrl && sc.narration) {
-          try {
-            const res = await fetch('/api/studio/synthesize-scene', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                text: sc.narration,
-                voice: project.voice,
-                sceneIndex: sc.index,
-              }),
-            });
-            const data = await res.json();
-            if (data.success && data.data?.audioUrl) {
-              updatedScenes[i] = {
-                ...updatedScenes[i],
-                audioUrl: data.data.audioUrl,
-              };
-            }
-          } catch (e) {
-            console.warn(`Could not synthesize scene ${sc.index}:`, e);
-          }
-        }
-      }
-      updateProject({ scenes: updatedScenes });
-      setIsSynthesizingVoices(false);
+      const synchronized = await syncScenesAudio(project.scenes);
+      updateProject({ scenes: synchronized });
     }
     setStage(3);
   };

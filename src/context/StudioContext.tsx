@@ -112,7 +112,19 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
   };
   const setTone = (tone: StudioTone) => updateProject({ tone });
-  const setVoice = (voice: VoiceId) => updateProject({ voice });
+  const setVoice = (voice: VoiceId) => {
+    setProject((prev) => {
+      const voiceChanged = prev.voice !== voice;
+      return {
+        ...prev,
+        voice,
+        scenes: voiceChanged
+          ? prev.scenes.map((s) => ({ ...s, audioUrl: undefined, audioDuration: undefined }))
+          : prev.scenes,
+        updatedAt: new Date().toISOString(),
+      };
+    });
+  };
   const setStage = (stage: 1 | 2 | 3 | 4) => updateProject({ stage });
   const setScriptMode = (scriptMode: 'ai_generate' | 'own_script') => updateProject({ scriptMode });
   const setCustomScript = (customScript: string) => updateProject({ customScript });

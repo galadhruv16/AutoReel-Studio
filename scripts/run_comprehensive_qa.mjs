@@ -508,9 +508,9 @@ recordTest('Suite 8: Build', 'TypeScript Compilation Output Check', () => {
 
 recordTest('Suite 8: Build', 'Next.js Production Build Artifacts Presence (.next/standalone or .next/server)', () => {
   assert(fs.existsSync('.next/server'), 'Next.js production build artifacts missing in .next/server');
-  assert(fs.existsSync('.next/BUILD_ID'), 'Next.js BUILD_ID missing');
-  const buildId = fs.readFileSync('.next/BUILD_ID', 'utf-8').trim();
-  assert(buildId.length > 5, 'Next.js BUILD_ID invalid');
+  assert(fs.existsSync('.next/build-manifest.json'), 'Next.js build-manifest.json missing');
+  const manifest = JSON.parse(fs.readFileSync('.next/build-manifest.json', 'utf-8'));
+  assert(manifest && typeof manifest.pages === 'object', 'Next.js build manifest invalid');
 });
 
 // -------------------------------------------------------------
