@@ -9,6 +9,8 @@ VOICE_MAP = {
     'echo': 'en-US-BrianMultilingualNeural',
     'fable': 'en-US-AndrewMultilingualNeural',
     'nova': 'en-US-AvaMultilingualNeural',
+    'onyx': 'en-US-GuyNeural',
+    'shimmer': 'en-US-MichelleNeural',
 }
 
 async def run(text: str, voice_key: str, rate: str = "+12%"):

@@ -88,7 +88,12 @@ export const Stage01Topic: React.FC = () => {
 
       audio.play().catch((err) => {
         console.warn('Audio playback error', err);
-        setAudioError('Preview audio unavailable locally');
+        const isNotAllowed = err && (err.name === 'NotAllowedError' || String(err).includes('interact'));
+        setAudioError(
+          isNotAllowed
+            ? 'Browser blocked audio autoplay — click anywhere on the page to enable audio'
+            : 'Audio preview unavailable or unsupported'
+        );
         setPlayingVoice(null);
       });
 
@@ -376,9 +381,13 @@ export const Stage01Topic: React.FC = () => {
         </div>
       </div>
 
-      {!isTopicValid && project.topic.length > 0 && (
-        <p className="mt-2 text-center text-xs text-amber-400">
-          Please enter at least 5 characters to describe your concept.
+      {!isTopicValid && (
+        <p className="mt-2 text-center text-xs text-[#94A3B8]">
+          {project.topic.length === 0 ? (
+            <span>💡 Enter a concept above (at least 5 characters) or click any suggestion chip to begin.</span>
+          ) : (
+            <span className="text-amber-400">Please enter at least 5 characters to describe your concept.</span>
+          )}
         </p>
       )}
     </div>

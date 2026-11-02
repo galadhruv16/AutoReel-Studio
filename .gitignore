@@ -37,3 +37,11 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+*.tsbuildinfo
+
+# Test and temporary media outputs
+/public/qa_screenshots/
+/public/renders/*.mp4
+/public/renders/*.png
+/public/renders/*.mp3
+

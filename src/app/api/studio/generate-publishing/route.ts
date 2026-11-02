@@ -125,7 +125,14 @@ Return STRICTLY valid JSON with no markdown formatting:
               const resData = await res.json();
               const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
               if (rawText) {
-                const parsed = JSON.parse(rawText.trim());
+                let cleanedText = rawText.trim();
+                if (cleanedText.startsWith('```json')) {
+                  cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+                } else if (cleanedText.startsWith('```')) {
+                  cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+                }
+                cleanedText = cleanedText.replace(/,\s*([\]}])/g, '$1');
+                const parsed = JSON.parse(cleanedText);
                 if (parsed.youtube && parsed.instagram && parsed.tiktok && parsed.linkedin) {
                   // Ensure chapter timestamps are present in YouTube description
                   const chapters = generateVideoChapters(typedScenes);

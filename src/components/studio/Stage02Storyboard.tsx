@@ -170,9 +170,9 @@ export const Stage02Storyboard: React.FC = () => {
     // Re-index timing
     let curTime = 0;
     const reindexed = updatedScenes.map((s, idx) => {
-      const start = Number(curTime.toFixed(1));
+      const start = Number(curTime.toFixed(2));
       curTime += s.duration;
-      const end = Number(curTime.toFixed(1));
+      const end = Number(curTime.toFixed(2));
       return {
         ...s,
         index: idx + 1,
@@ -189,9 +189,9 @@ export const Stage02Storyboard: React.FC = () => {
     const remaining = project.scenes.filter((_, i) => i !== index);
     let curTime = 0;
     const reindexed = remaining.map((s, idx) => {
-      const start = Number(curTime.toFixed(1));
+      const start = Number(curTime.toFixed(2));
       curTime += s.duration;
-      const end = Number(curTime.toFixed(1));
+      const end = Number(curTime.toFixed(2));
       return {
         ...s,
         index: idx + 1,
@@ -233,9 +233,9 @@ export const Stage02Storyboard: React.FC = () => {
 
     let curTime = 0;
     const reindexed = newScenes.map((s, idx) => {
-      const start = Number(curTime.toFixed(1));
+      const start = Number(curTime.toFixed(2));
       curTime += s.duration;
-      const end = Number(curTime.toFixed(1));
+      const end = Number(curTime.toFixed(2));
       return {
         ...s,
         index: idx + 1,
@@ -253,7 +253,7 @@ export const Stage02Storyboard: React.FC = () => {
       id: `scene_${Date.now()}`,
       index: project.scenes.length + 1,
       startTime: start,
-      endTime: Number((start + 3.5).toFixed(1)),
+      endTime: Number((start + 3.5).toFixed(2)),
       duration: 3.5,
       narration: 'New spoken phrase introducing the next critical concept.',
       cue: 'critical concept',

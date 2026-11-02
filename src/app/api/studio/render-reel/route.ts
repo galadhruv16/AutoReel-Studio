@@ -54,8 +54,14 @@ export async function POST(request: Request) {
       timestampsUrl = '/audio/reel_kubernetes.json';
     }
 
-    // Always compile real Remotion dynamic render for user-generated custom scenes
-    const shouldRenderDynamic = renderDynamic || !presetId;
+    // Render real Remotion dynamic render when explicitly requested or required
+    const shouldRenderDynamic = renderDynamic === true;
+
+    // Fallback default sample video if no preset and no dynamic render
+    if (!videoUrl && !shouldRenderDynamic) {
+      videoUrl = '/videos/reel_genetics.mp4';
+      posterUrl = '/videos/poster_genetics.png';
+    }
 
     if (shouldRenderDynamic && safeScenes.length > 0) {
       const outDir = path.resolve(process.cwd(), 'out');
@@ -68,9 +74,28 @@ export async function POST(request: Request) {
 
         const outputMp4Path = path.join(rendersDir, `${reelId}.mp4`);
 
+        // Prepare physical MP3 files for Remotion FFMPEG rendering if data URIs are present
+        const preparedScenes = safeScenes.map((sc, i) => {
+          if (sc.audioUrl && sc.audioUrl.startsWith('data:audio/mp3;base64,')) {
+            try {
+              const audioFileName = `audio_${reelId}_scene_${i}.mp3`;
+              const audioFilePath = path.join(rendersDir, audioFileName);
+              const b64Data = sc.audioUrl.replace(/^data:audio\/mp3;base64,/, '');
+              fs.writeFileSync(audioFilePath, Buffer.from(b64Data, 'base64'));
+              return {
+                ...sc,
+                audioUrl: `/renders/${audioFileName}`,
+              };
+            } catch {
+              return sc;
+            }
+          }
+          return sc;
+        });
+
         const propsData = {
           topic: topic || 'AutoReel Motion Explainer',
-          scenes: safeScenes,
+          scenes: preparedScenes,
           captionStyle: ['kinetic', 'minimal', 'bold'].includes(captionStyle) ? captionStyle : 'kinetic',
           accentColor: accentColor || '#FF4F00',
         };
@@ -84,9 +109,18 @@ export async function POST(request: Request) {
         // Execute rendering with 180 second timeout
         await execAsync(renderCmd, { timeout: 180000 });
 
+        const outputPosterPath = path.join(rendersDir, `${reelId}.png`);
+        try {
+          // Generate poster still frame at frame 15
+          const stillCmd = `npx remotion still src/remotion/index.ts DynamicStoryReel "${outputPosterPath}" --props="${propsPath}" --frame=15`;
+          await execAsync(stillCmd, { timeout: 30000 });
+        } catch (stillErr) {
+          console.warn('Remotion poster frame extraction skipped or failed:', stillErr);
+        }
+
         if (fs.existsSync(outputMp4Path)) {
           videoUrl = `/renders/${reelId}.mp4`;
-          posterUrl = `/renders/${reelId}.png`;
+          posterUrl = fs.existsSync(outputPosterPath) ? `/renders/${reelId}.png` : null;
           isDynamic = true;
         }
       } catch (renderErr) {

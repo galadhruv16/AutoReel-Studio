@@ -87,17 +87,11 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const setTopic = (topic: string) => {
-    setProject((prev) => {
-      const topicChanged = prev.topic.trim().toLowerCase() !== topic.trim().toLowerCase();
-      return {
-        ...prev,
-        topic,
-        scenes: topicChanged ? [] : prev.scenes,
-        videoUrl: topicChanged ? null : prev.videoUrl,
-        srtUrl: topicChanged ? null : prev.srtUrl,
-        updatedAt: new Date().toISOString(),
-      };
-    });
+    setProject((prev) => ({
+      ...prev,
+      topic,
+      updatedAt: new Date().toISOString(),
+    }));
   };
   const setDuration = (duration: StudioDuration) => {
     setProject((prev) => {

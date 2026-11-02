@@ -40,6 +40,16 @@ export const Stage03Review: React.FC = () => {
   const playerHandleRef = useRef<RemotionStudioPlayerHandle | null>(null);
   const sceneAudioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Clean up any preview audio on unmount
+  React.useEffect(() => {
+    return () => {
+      if (sceneAudioRef.current) {
+        sceneAudioRef.current.pause();
+        sceneAudioRef.current = null;
+      }
+    };
+  }, []);
+
   // Master video asset (only populated when an actual MP4 render has been compiled)
   const videoSrc = project.videoUrl || undefined;
   const posterSrc = project.videoUrl ? project.videoUrl.replace('.mp4', '.png') : undefined;
@@ -221,7 +231,7 @@ export const Stage03Review: React.FC = () => {
       const data = await res.json();
       if (data.success && data.data) {
         const actualDur = data.data.duration;
-        const newDur = Math.max(Number((actualDur + 0.35).toFixed(2)), selectedScene.duration || 3.0);
+        const newDur = Math.max(Number((actualDur + 0.35).toFixed(2)), 2.5);
         const updated = [...project.scenes];
         updated[selectedSceneIndex] = {
           ...updated[selectedSceneIndex],
@@ -253,6 +263,10 @@ export const Stage03Review: React.FC = () => {
 
         // Preview the audio immediately
         if (data.data.audioUrl) {
+          if (sceneAudioRef.current) {
+            sceneAudioRef.current.pause();
+            sceneAudioRef.current = null;
+          }
           const previewAudio = new Audio(data.data.audioUrl);
           sceneAudioRef.current = previewAudio;
           previewAudio.play().catch(() => {});

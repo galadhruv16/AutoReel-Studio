@@ -6,6 +6,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { scenes, filename = 'autoreel_subtitles.srt' } = body;
+    const safeFilename = String(filename || 'autoreel_subtitles.srt')
+      .replace(/[^a-zA-Z0-9_.-]/g, '_')
+      .slice(0, 100);
 
     if (!scenes || !Array.isArray(scenes)) {
       return NextResponse.json(
@@ -20,7 +23,7 @@ export async function POST(request: Request) {
       status: 200,
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
-        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Disposition': `attachment; filename="${safeFilename}"`,
       },
     });
   } catch (error: any) {

@@ -110,8 +110,19 @@ export const Stage04Publish: React.FC = () => {
     return slug || 'autoreel_video';
   };
 
+  // Trigger download helper
+  const triggerDownload = (url: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${getTopicSlug()}_1080p.mp4`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Compile Dynamic MP4 via Remotion Server
-  const handleRenderDynamicMp4 = async () => {
+  const handleRenderDynamicMp4 = async (andDownload: boolean = false) => {
+    if (isRenderingDynamic) return;
     setIsRenderingDynamic(true);
     setRenderStatus('Compiling Remotion 1080×1920 frames...');
     try {
@@ -131,6 +142,9 @@ export const Stage04Publish: React.FC = () => {
       if (json.success && json.data?.videoUrl) {
         setDynamicVideoUrl(json.data.videoUrl);
         setRenderStatus(json.data.isDynamic ? 'Render Complete (1080p 60FPS)' : 'Master MP4 Ready');
+        if (andDownload) {
+          triggerDownload(json.data.videoUrl);
+        }
       }
     } catch (err) {
       console.warn('Render request error:', err);
@@ -144,15 +158,10 @@ export const Stage04Publish: React.FC = () => {
   const handleDownloadVideo = () => {
     const downloadHref = dynamicVideoUrl || videoSrc;
     if (!downloadHref) {
-      handleRenderDynamicMp4();
+      handleRenderDynamicMp4(true);
       return;
     }
-    const link = document.createElement('a');
-    link.href = downloadHref;
-    link.download = `${getTopicSlug()}_1080p.mp4`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    triggerDownload(downloadHref);
   };
 
   // Instant SRT Subtitles Download
@@ -236,7 +245,7 @@ export const Stage04Publish: React.FC = () => {
             {!dynamicVideoUrl ? (
               <button
                 type="button"
-                onClick={handleRenderDynamicMp4}
+                onClick={() => handleRenderDynamicMp4(false)}
                 disabled={isRenderingDynamic}
                 className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#FF4F00]/50 bg-[#FF4F00]/10 hover:bg-[#FF4F00]/20 py-2.5 px-4 text-xs font-mono text-[#FF4F00] transition active:scale-95 cursor-pointer disabled:opacity-50"
               >
@@ -263,10 +272,20 @@ export const Stage04Publish: React.FC = () => {
             <button
               type="button"
               onClick={handleDownloadVideo}
-              className="w-full inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#FF4F00] py-3.5 px-4 text-sm font-bold text-white shadow-xl shadow-[#FF4F00]/30 hover:bg-[#FF3B00] transition active:scale-95 cursor-pointer"
+              disabled={isRenderingDynamic}
+              className="w-full inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#FF4F00] py-3.5 px-4 text-sm font-bold text-white shadow-xl shadow-[#FF4F00]/30 hover:bg-[#FF3B00] transition active:scale-95 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <Download className="h-4 w-4 stroke-[2.5]" />
-              <span>{dynamicVideoUrl ? 'Download Custom MP4 (1080p 60FPS)' : 'Download MP4 Video (1080p 60FPS)'}</span>
+              {isRenderingDynamic ? (
+                <>
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Compiling Master MP4...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 stroke-[2.5]" />
+                  <span>{dynamicVideoUrl ? 'Download Custom MP4 (1080p 60FPS)' : 'Download MP4 Video (1080p 60FPS)'}</span>
+                </>
+              )}
             </button>
 
             {/* Secondary: SRT Subtitles */}

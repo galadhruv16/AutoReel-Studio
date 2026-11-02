@@ -1774,7 +1774,7 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
           >
             <Audio
               src={
-                scene.audioUrl.startsWith('http') || scene.audioUrl.startsWith('data:')
+                scene.audioUrl.startsWith('http') || scene.audioUrl.startsWith('data:') || scene.audioUrl.startsWith('/api/')
                   ? scene.audioUrl
                   : staticFile(scene.audioUrl.replace(/^\//, ''))
               }
@@ -1788,7 +1788,7 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
       {audioUrl && !safeScenes.some((s) => s.audioUrl) && (
         <Audio
           src={
-            audioUrl.startsWith('http') || audioUrl.startsWith('data:')
+            audioUrl.startsWith('http') || audioUrl.startsWith('data:') || audioUrl.startsWith('/api/')
               ? audioUrl
               : staticFile(audioUrl.replace(/^\//, ''))
           }
