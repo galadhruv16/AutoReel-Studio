@@ -254,8 +254,6 @@ const VOICES = [
   { id: 'echo', name: 'Echo', edgeVoice: 'en-US-BrianMultilingualNeural', gender: 'Male' },
   { id: 'fable', name: 'Fable', edgeVoice: 'en-US-AndrewMultilingualNeural', gender: 'Male' },
   { id: 'nova', name: 'Nova', edgeVoice: 'en-US-AvaMultilingualNeural', gender: 'Female' },
-  { id: 'onyx', name: 'Onyx', edgeVoice: 'en-US-GuyNeural', gender: 'Male' },
-  { id: 'shimmer', name: 'Shimmer', edgeVoice: 'en-US-MichelleNeural', gender: 'Female' },
 ];
 
 recordTest('Suite 3: Stage 01', 'Duration Configurations & Word Targets (30s, 60s, 90s)', () => {
@@ -265,17 +263,14 @@ recordTest('Suite 3: Stage 01', 'Duration Configurations & Word Targets (30s, 60
 });
 
 recordTest('Suite 3: Stage 01', 'Voice Registry & Edge TTS Voice Model Mappings', () => {
-  assert.strictEqual(VOICES.length, 6);
+  assert.strictEqual(VOICES.length, 4);
   const voiceIds = VOICES.map((v) => v.id);
   assert(voiceIds.includes('alloy'));
   assert(voiceIds.includes('echo'));
   assert(voiceIds.includes('fable'));
   assert(voiceIds.includes('nova'));
-  assert(voiceIds.includes('onyx'));
-  assert(voiceIds.includes('shimmer'));
   assert.strictEqual(VOICES.find((v) => v.id === 'echo').edgeVoice, 'en-US-BrianMultilingualNeural');
-  assert.strictEqual(VOICES.find((v) => v.id === 'onyx').edgeVoice, 'en-US-GuyNeural');
-  assert.strictEqual(VOICES.find((v) => v.id === 'shimmer').edgeVoice, 'en-US-MichelleNeural');
+  assert.strictEqual(VOICES.find((v) => v.id === 'alloy').edgeVoice, 'en-US-JennyNeural');
 });
 
 recordTest('Suite 3: Stage 01', 'Topic Input Validation Boundaries', () => {

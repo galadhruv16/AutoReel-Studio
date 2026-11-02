@@ -2,7 +2,7 @@ export type StudioDuration = 30 | 60 | 90;
 
 export type StudioTone = 'engaging' | 'academic' | 'narrative' | 'casual';
 
-export type VoiceId = 'alloy' | 'echo' | 'fable' | 'nova' | 'onyx' | 'shimmer';
+export type VoiceId = 'alloy' | 'echo' | 'fable' | 'nova';
 
 export interface VoiceOption {
   id: VoiceId;
@@ -115,22 +115,6 @@ export const VOICES: VoiceOption[] = [
     description: 'Calm, polished, and confident modern delivery',
     gender: 'Female',
     sampleAudio: '/audio/spike_test.mp3',
-  },
-  {
-    id: 'onyx',
-    name: 'Onyx',
-    edgeVoice: 'en-US-GuyNeural',
-    description: 'Authoritative, grounded, and deep baritone delivery',
-    gender: 'Male',
-    sampleAudio: '/audio/reel_saraighat.mp3',
-  },
-  {
-    id: 'shimmer',
-    name: 'Shimmer',
-    edgeVoice: 'en-US-MichelleNeural',
-    description: 'Expressive, warm, and clear storytelling voice',
-    gender: 'Female',
-    sampleAudio: '/audio/reel_genetics.mp3',
   },
 ];
 
