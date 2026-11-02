@@ -279,37 +279,42 @@ export const RemotionStudioPlayer = forwardRef<RemotionStudioPlayerHandle, Remot
       <div className="relative w-full max-w-[310px] aspect-[9/16] rounded-3xl overflow-hidden border-2 border-[#232634] bg-[#000000] shadow-2xl shadow-black/80 flex flex-col justify-between group">
         {/* Top Header Mode Switcher Bar */}
         <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-3 bg-gradient-to-b from-black/80 via-black/40 to-transparent pointer-events-auto">
-          {/* Toggle Mode: Remotion Canvas vs Render Master */}
-          <div className="flex items-center gap-1 bg-[#08090A]/90 p-0.5 rounded-full border border-[#232634]">
-            <button
-              type="button"
-              onClick={() => setRenderMode('remotion')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono transition ${
-                renderMode === 'remotion'
-                  ? 'bg-[#FF4F00] text-white shadow-sm font-bold'
-                  : 'text-[#94A3B8] hover:text-white'
-              }`}
-            >
-              <Sparkles className="h-2.5 w-2.5" />
-              <span>AI Canvas</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setRenderMode('master')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono transition ${
-                renderMode === 'master'
-                  ? 'bg-[#14161F] text-white border border-[#3D445C] font-bold'
-                  : 'text-[#94A3B8] hover:text-white'
-              }`}
-            >
-              <Film className="h-2.5 w-2.5" />
-              <span>Master MP4</span>
-            </button>
-          </div>
+          {fallbackVideoSrc && fallbackVideoSrc.startsWith('/renders/') ? (
+            <div className="flex items-center gap-1 bg-[#08090A]/90 p-0.5 rounded-full border border-[#232634]">
+              <button
+                type="button"
+                onClick={() => setRenderMode('remotion')}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono transition ${
+                  renderMode === 'remotion'
+                    ? 'bg-[#FF4F00] text-white shadow-sm font-bold'
+                    : 'text-[#94A3B8] hover:text-white'
+                }`}
+              >
+                <Sparkles className="h-2.5 w-2.5" />
+                <span>AI Canvas</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setRenderMode('master')}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono transition ${
+                  renderMode === 'master'
+                    ? 'bg-emerald-500 text-white font-bold'
+                    : 'text-[#94A3B8] hover:text-white'
+                }`}
+              >
+                <Film className="h-2.5 w-2.5" />
+                <span>Rendered MP4</span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 bg-[#08090A]/90 px-3 py-1 rounded-full border border-[#232634]">
+              <Sparkles className="h-3 w-3 text-[#FF4F00]" />
+              <span className="text-[10px] font-mono text-white font-bold tracking-wide">REMOTION AI CANVAS</span>
+            </div>
+          )}
 
           <span className="rounded-full bg-[#14161F]/80 backdrop-blur-md px-2 py-0.5 text-[10px] font-mono text-[#FF4F00] border border-[#FF4F00]/30">
-            60FPS
+            1080×1920 • 60FPS
           </span>
         </div>
 

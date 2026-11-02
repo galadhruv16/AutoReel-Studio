@@ -167,28 +167,35 @@ export const Stage04Publish: React.FC = () => {
         }),
       });
       const json = await res.json();
-      const downloadTarget = json.data?.videoUrl || matchedMasterVideo;
-      setDynamicVideoUrl(downloadTarget);
-      setRenderStatus(json.data?.isDynamic ? 'Custom MP4 Ready (1080p 60FPS)' : 'Master MP4 Ready (1080p)');
-      if (andDownload) {
-        await triggerDownload(downloadTarget);
+      if (json.success && json.data?.videoUrl) {
+        setDynamicVideoUrl(json.data.videoUrl);
+        setRenderStatus(json.data?.isDynamic ? 'Custom MP4 Ready (1080p 60FPS)' : 'Master MP4 Ready (1080p)');
+        if (andDownload) {
+          await triggerDownload(json.data.videoUrl);
+        }
+      } else {
+        throw new Error(json?.error || 'Render did not complete');
       }
     } catch (err) {
       console.warn('Render request error, using master asset:', err);
-      setDynamicVideoUrl(matchedMasterVideo);
+      const fallbackTarget = matchedMasterVideo;
+      setDynamicVideoUrl(fallbackTarget);
       setRenderStatus('Master MP4 Ready (1080p)');
       if (andDownload) {
-        await triggerDownload(matchedMasterVideo);
+        await triggerDownload(fallbackTarget);
       }
     } finally {
       setIsRenderingDynamic(false);
     }
   };
 
-  // Instant MP4 Download - directly triggers instant save of the 1080p Master without any server blocking
+  // Download MP4 Video - renders custom Remotion 1080p MP4 if not already compiled, then downloads
   const handleDownloadVideo = async () => {
-    const downloadHref = dynamicVideoUrl || project.videoUrl || matchedMasterVideo;
-    await triggerDownload(downloadHref);
+    if (!dynamicVideoUrl) {
+      await handleRenderDynamicMp4(true);
+      return;
+    }
+    await triggerDownload(dynamicVideoUrl);
   };
 
   // Instant SRT Subtitles Download
@@ -305,12 +312,12 @@ export const Stage04Publish: React.FC = () => {
               {isRenderingDynamic ? (
                 <>
                   <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Compiling Master MP4...</span>
+                  <span>{renderStatus || 'Compiling Remotion 1080×1920 MP4...'}</span>
                 </>
               ) : (
                 <>
                   <Download className="h-4 w-4 stroke-[2.5]" />
-                  <span>{dynamicVideoUrl ? 'Download Custom MP4 (1080p 60FPS)' : 'Download MP4 Video (1080p 60FPS)'}</span>
+                  <span>{dynamicVideoUrl ? 'Download Custom MP4 (1080p 60FPS)' : 'Render & Download Custom MP4 (1080p)'}</span>
                 </>
               )}
             </button>
