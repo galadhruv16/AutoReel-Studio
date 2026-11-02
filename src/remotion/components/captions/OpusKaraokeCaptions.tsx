@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { WordBoundary } from '../../types';
 
-interface KineticCaptionsProps {
+export interface OpusKaraokeCaptionsProps {
   wordTimestamps: WordBoundary[];
   accentColor?: string;
 }
@@ -29,7 +29,7 @@ interface CaptionChunk {
  * - Non-spoken words remain crisp bold white (#FFFFFF) with multi-layer black contrast drop shadows.
  * - No background dock; pure kinetic typography floating cleanly.
  */
-export const OpusKaraokeCaptions: React.FC<KineticCaptionsProps> = ({
+export const OpusKaraokeCaptions: React.FC<OpusKaraokeCaptionsProps> = ({
   wordTimestamps,
   accentColor = '#FACC15', // Vibrant neon electric yellow
 }) => {

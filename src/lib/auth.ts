@@ -21,8 +21,7 @@ const getSecretKey = async (): Promise<CryptoKey> => {
 };
 
 // Base64Url encode/decode helpers
-function toBase64Url(str: string): string {
-  const bytes = new TextEncoder().encode(str);
+function bytesToBase64Url(bytes: Uint8Array): string {
   let binary = '';
   for (let i = 0; i < bytes.byteLength; i++) {
     binary += String.fromCharCode(bytes[i]);
@@ -30,17 +29,26 @@ function toBase64Url(str: string): string {
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-function fromBase64Url(base64url: string): string {
+function toBase64Url(str: string): string {
+  return bytesToBase64Url(new TextEncoder().encode(str));
+}
+
+function fromBase64UrlToBytes(base64url: string): Uint8Array {
   let base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
   while (base64.length % 4) {
     base64 += '=';
   }
   const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
+  const buffer = new ArrayBuffer(binary.length);
+  const bytes = new Uint8Array(buffer);
   for (let i = 0; i < binary.length; i++) {
     bytes[i] = binary.charCodeAt(i);
   }
-  return new TextDecoder().decode(bytes);
+  return bytes;
+}
+
+function fromBase64Url(base64url: string): string {
+  return new TextDecoder().decode(fromBase64UrlToBytes(base64url));
 }
 
 export interface SessionPayload {
@@ -65,13 +73,7 @@ export async function createSessionToken(email: string): Promise<string> {
     new TextEncoder().encode(dataToSign)
   );
 
-  let binarySig = '';
-  const bytes = new Uint8Array(signatureBytes);
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binarySig += String.fromCharCode(bytes[i]);
-  }
-  const signatureStr = btoa(binarySig).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-
+  const signatureStr = bytesToBase64Url(new Uint8Array(signatureBytes));
   return `${dataToSign}.${signatureStr}`;
 }
 
@@ -84,22 +86,12 @@ export async function verifySessionToken(token: string): Promise<SessionPayload 
     const dataToVerify = `${headerStr}.${payloadStr}`;
 
     const key = await getSecretKey();
-
-    // Decode signature
-    let base64 = signatureStr.replace(/-/g, '+').replace(/_/g, '/');
-    while (base64.length % 4) {
-      base64 += '=';
-    }
-    const binary = atob(base64);
-    const sigBytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      sigBytes[i] = binary.charCodeAt(i);
-    }
+    const sigBytes = fromBase64UrlToBytes(signatureStr);
 
     const isValid = await crypto.subtle.verify(
       'HMAC',
       key,
-      sigBytes,
+      sigBytes as BufferSource,
       new TextEncoder().encode(dataToVerify)
     );
 

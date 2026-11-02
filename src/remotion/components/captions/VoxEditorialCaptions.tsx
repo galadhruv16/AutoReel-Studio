@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { interpolate, useCurrentFrame, useVideoConfig } from 'remotion';
 import { WordBoundary } from '../../types';
 
-interface KineticCaptionsProps {
+export interface VoxEditorialCaptionsProps {
   wordTimestamps: WordBoundary[];
   accentColor?: string;
 }
@@ -28,7 +28,7 @@ interface CaptionChunk {
  * - Zero scale jumping/bouncing: words never push neighbors.
  * - Calm illumination: unspoken words in muted slate (#94A3B8) -> smoothly illuminate to crisp white (#FFFFFF) with cyan underline (#38BDF8).
  */
-export const VoxEditorialCaptions: React.FC<KineticCaptionsProps> = ({
+export const VoxEditorialCaptions: React.FC<VoxEditorialCaptionsProps> = ({
   wordTimestamps,
   accentColor = '#38BDF8', // Refined sky blue accent (clean tech editorial)
 }) => {
