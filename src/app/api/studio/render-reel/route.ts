@@ -59,16 +59,16 @@ export async function POST(request: Request) {
     const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT);
     const shouldRenderDynamic = renderDynamic === true && !isServerless;
 
-    // Fallback default sample video if no preset and no dynamic render
+    // Fallback preset matching only when explicitly requested by presetId or matching showcase keywords
     if (!videoUrl && !shouldRenderDynamic) {
       const topicLower = (topic || '').toLowerCase();
-      if (topicLower.includes('saraighat') || topicLower.includes('borphukan') || topicLower.includes('bachari') || topicLower.includes('mughal') || topicLower.includes('history')) {
+      if (presetId === 'saraighat' || topicLower.includes('saraighat') || topicLower.includes('borphukan') || topicLower.includes('bachari')) {
         videoUrl = '/videos/reel_saraighat.mp4';
         posterUrl = '/videos/poster_saraighat.png';
-      } else if (topicLower.includes('kubernetes') || topicLower.includes('cluster') || topicLower.includes('devops') || topicLower.includes('cloud') || topicLower.includes('docker')) {
+      } else if (presetId === 'kubernetes' || topicLower.includes('kubernetes') || topicLower.includes('k8s pod')) {
         videoUrl = '/videos/reel_kubernetes.mp4';
         posterUrl = '/videos/poster_kubernetes.png';
-      } else {
+      } else if (presetId === 'genetics' || topicLower.includes('crispr') || topicLower.includes('mendel')) {
         videoUrl = '/videos/reel_genetics.mp4';
         posterUrl = '/videos/poster_genetics.png';
       }
@@ -147,16 +147,16 @@ export async function POST(request: Request) {
       }
     }
 
-    // Fallback guaranteed valid 1080p master MP4 if dynamic render was unavailable or failed (e.g. serverless runtime)
+    // Only map to showcase presets if topic explicitly matches them
     if (!videoUrl) {
       const topicLower = (topic || '').toLowerCase();
-      if (topicLower.includes('saraighat') || topicLower.includes('borphukan') || topicLower.includes('bachari') || topicLower.includes('mughal') || topicLower.includes('history')) {
+      if (presetId === 'saraighat' || topicLower.includes('saraighat') || topicLower.includes('borphukan') || topicLower.includes('bachari')) {
         videoUrl = '/videos/reel_saraighat.mp4';
         posterUrl = '/videos/poster_saraighat.png';
-      } else if (topicLower.includes('kubernetes') || topicLower.includes('cluster') || topicLower.includes('devops') || topicLower.includes('cloud') || topicLower.includes('docker')) {
+      } else if (presetId === 'kubernetes' || topicLower.includes('kubernetes') || topicLower.includes('k8s pod')) {
         videoUrl = '/videos/reel_kubernetes.mp4';
         posterUrl = '/videos/poster_kubernetes.png';
-      } else {
+      } else if (presetId === 'genetics' || topicLower.includes('crispr') || topicLower.includes('mendel')) {
         videoUrl = '/videos/reel_genetics.mp4';
         posterUrl = '/videos/poster_genetics.png';
       }

@@ -45,21 +45,24 @@ export const Stage04Publish: React.FC = () => {
   const [dynamicVideoUrl, setDynamicVideoUrl] = useState<string | null>(null);
   const [renderStatus, setRenderStatus] = useState<string>('');
 
-  // Automatically resolve matched 1080p Full HD master video for topic
+  // Only match preset master videos if the topic explicitly relates to them
   const getMatchedMasterVideo = (topicStr: string) => {
     const t = (topicStr || '').toLowerCase();
-    if (t.includes('saraighat') || t.includes('borphukan') || t.includes('bachari') || t.includes('mughal') || t.includes('history')) {
+    if (t.includes('saraighat') || t.includes('borphukan') || t.includes('bachari')) {
       return '/videos/reel_saraighat.mp4';
     }
-    if (t.includes('kubernetes') || t.includes('cluster') || t.includes('devops') || t.includes('cloud') || t.includes('docker') || t.includes('pod')) {
+    if (t.includes('kubernetes') || t.includes('k8s pod')) {
       return '/videos/reel_kubernetes.mp4';
     }
-    return '/videos/reel_genetics.mp4';
+    if (t.includes('crispr') || t.includes('mendel') || t.includes('genetics') || t.includes('dna')) {
+      return '/videos/reel_genetics.mp4';
+    }
+    return null;
   };
 
   const matchedMasterVideo = getMatchedMasterVideo(project.topic);
-  const videoSrc = dynamicVideoUrl || project.videoUrl || matchedMasterVideo;
-  const posterSrc = videoSrc.replace('.mp4', '.png');
+  const videoSrc = dynamicVideoUrl || project.videoUrl || matchedMasterVideo || undefined;
+  const posterSrc = videoSrc ? videoSrc.replace('.mp4', '.png') : undefined;
   const voiceObj = VOICES.find((v) => v.id === project.voice) || VOICES[0];
 
   const scenes = project.scenes.length > 0 ? project.scenes : [
@@ -177,12 +180,15 @@ export const Stage04Publish: React.FC = () => {
         throw new Error(json?.error || 'Render did not complete');
       }
     } catch (err) {
-      console.warn('Render request error, using master asset:', err);
-      const fallbackTarget = matchedMasterVideo;
-      setDynamicVideoUrl(fallbackTarget);
-      setRenderStatus('Master MP4 Ready (1080p)');
-      if (andDownload) {
-        await triggerDownload(fallbackTarget);
+      console.warn('Render request error:', err);
+      if (matchedMasterVideo) {
+        setDynamicVideoUrl(matchedMasterVideo);
+        setRenderStatus('Master MP4 Ready (1080p)');
+        if (andDownload) {
+          await triggerDownload(matchedMasterVideo);
+        }
+      } else {
+        setRenderStatus('Live 60FPS on Canvas (Export via Local Host)');
       }
     } finally {
       setIsRenderingDynamic(false);
