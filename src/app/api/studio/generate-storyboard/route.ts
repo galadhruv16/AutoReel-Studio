@@ -132,12 +132,12 @@ Respond STRICTLY with valid JSON (no markdown formatting, no code blocks):
   ]
 }`;
 
-        const models = ['gemini-1.5-flash', 'gemini-2.0-flash'];
+        const models = ['gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-flash-latest'];
         for (const model of models) {
           if (scenes) break;
           try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            const timeoutId = setTimeout(() => controller.abort(), 12000);
             const res = await fetch(
               `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
               {
@@ -156,11 +156,11 @@ Respond STRICTLY with valid JSON (no markdown formatting, no code blocks):
 
             clearTimeout(timeoutId);
 
-            if (res.status === 400 || res.status === 401 || res.status === 403 || res.status === 404) {
-              console.warn('Gemini API returned error status, bypassing API call to avoid timeouts.');
-              break;
+            if (!res.ok) {
+              const errSnippet = await res.text().catch(() => '');
+              console.warn(`Gemini model ${model} returned status ${res.status}: ${errSnippet.slice(0, 120)}, attempting fallback model...`);
+              continue;
             }
-
             if (res.ok) {
               const resData = await res.json();
               const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text;

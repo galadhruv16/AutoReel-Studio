@@ -103,14 +103,17 @@ Return STRICTLY valid JSON with no markdown formatting:
   }
 }`;
 
-        const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'];
+        const models = ['gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-flash-latest'];
         for (const model of models) {
           try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
             const res = await fetch(
               `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
               {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                signal: controller.signal,
                 body: JSON.stringify({
                   contents: [{ parts: [{ text: prompt }] }],
                   generationConfig: {
@@ -120,7 +123,7 @@ Return STRICTLY valid JSON with no markdown formatting:
                 }),
               }
             );
-
+            clearTimeout(timeoutId);
             if (res.ok) {
               const resData = await res.json();
               const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text;

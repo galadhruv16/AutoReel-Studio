@@ -4,12 +4,6 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['msedge-tts', 'ws'],
   },
-  webpack: (config, { dev }) => {
-    if (dev) {
-      config.cache = { type: 'memory' };
-    }
-    return config;
-  },
 };
 
 export default nextConfig;
