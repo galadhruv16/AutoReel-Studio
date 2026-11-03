@@ -13,6 +13,8 @@ import {
   Clock,
   Tag,
   Hash,
+  Volume2,
+  AlertTriangle,
 } from 'lucide-react';
 import { useStudio } from '../../context/StudioContext';
 import { VOICES, StudioScene } from '../../types/studio';
@@ -44,6 +46,7 @@ export const Stage04Publish: React.FC = () => {
   const [isRenderingDynamic, setIsRenderingDynamic] = useState<boolean>(false);
   const [dynamicVideoUrl, setDynamicVideoUrl] = useState<string | null>(null);
   const [renderStatus, setRenderStatus] = useState<string>('');
+  const [showServerlessNotice, setShowServerlessNotice] = useState<boolean>(false);
 
   // Only match preset master videos if the topic explicitly relates to them
   const getMatchedMasterVideo = (topicStr: string) => {
@@ -198,6 +201,58 @@ export const Stage04Publish: React.FC = () => {
     }
   };
 
+  // Download Full Spoken Voiceover MP3 (merges all scene MP3 segments)
+  const handleDownloadAudio = async () => {
+    const voicedScenes = scenes.filter((s) => s.audioUrl);
+    if (voicedScenes.length === 0) {
+      alert('Voiceover audio is not yet generated. Visit Stage 03 to synthesize scenes.');
+      return;
+    }
+
+    try {
+      const byteArrays: Uint8Array[] = [];
+      for (const sc of voicedScenes) {
+        if (!sc.audioUrl) continue;
+        if (sc.audioUrl.startsWith('data:audio/mp3;base64,')) {
+          const raw = atob(sc.audioUrl.split(',')[1]);
+          const arr = new Uint8Array(raw.length);
+          for (let i = 0; i < raw.length; i++) {
+            arr[i] = raw.charCodeAt(i);
+          }
+          byteArrays.push(arr);
+        } else {
+          const resp = await fetch(sc.audioUrl);
+          if (resp.ok) {
+            const buf = await resp.arrayBuffer();
+            byteArrays.push(new Uint8Array(buf));
+          }
+        }
+      }
+
+      if (byteArrays.length === 0) return;
+
+      const totalLen = byteArrays.reduce((acc, b) => acc + b.length, 0);
+      const merged = new Uint8Array(totalLen);
+      let offset = 0;
+      for (const b of byteArrays) {
+        merged.set(b, offset);
+        offset += b.length;
+      }
+
+      const blob = new Blob([merged], { type: 'audio/mp3' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${getTopicSlug()}_narration.mp3`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    } catch (e) {
+      console.warn('Failed to download merged audio:', e);
+    }
+  };
+
   // Download MP4 Video - renders custom Remotion 1080p MP4 if not already compiled, then downloads
   const handleDownloadVideo = async () => {
     if (!dynamicVideoUrl) {
@@ -340,6 +395,29 @@ export const Stage04Publish: React.FC = () => {
               <FileText className="h-4 w-4 text-[#FF4F00]" />
               <span>Download Subtitles (.SRT)</span>
             </button>
+
+            {/* Audio Voiceover Download */}
+            <button
+              type="button"
+              onClick={handleDownloadAudio}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#232634] bg-[#14161F] py-2.5 px-4 text-xs font-medium text-[#EDEDED] hover:bg-[#1C1E26] hover:border-[#3D445C] transition active:scale-95 cursor-pointer"
+            >
+              <Volume2 className="h-4 w-4 text-emerald-400" />
+              <span>Download Spoken Voiceover (.MP3)</span>
+            </button>
+
+            {/* Cloud Serverless Notice */}
+            {showServerlessNotice && (
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200 mt-2 space-y-1.5">
+                <div className="flex items-center gap-1.5 font-bold text-amber-300">
+                  <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+                  <span>Cloud Serverless Render Notice</span>
+                </div>
+                <p className="text-[11px] leading-relaxed text-[#CBD5E1]">
+                  Your vertical reel is running at full 60FPS with dynamic vectors and audio ducking on the live canvas. Serverless cloud functions cannot run headless Chromium. To render physical 1080p MP4 files, launch AutoReel locally (<code className="text-[#FF4F00] font-mono">npm run dev</code>). Your full voiceover (.mp3) and subtitles (.srt) are ready to download above!
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Video Metadata Technical Specs Card */}
