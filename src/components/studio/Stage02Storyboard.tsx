@@ -64,21 +64,43 @@ export const Stage02Storyboard: React.FC = () => {
         }),
       });
 
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => '');
+        let errMsg = `Generation request failed (${res.status})`;
+        try {
+          const parsed = JSON.parse(errorText);
+          if (parsed.error) errMsg = parsed.error;
+        } catch {
+          if (errorText.length > 0 && errorText.length < 120) errMsg = errorText;
+        }
+        throw new Error(errMsg);
+      }
+
       const data = await res.json();
-      if (data.success && data.data?.scenes) {
-        setSuccessMsg(
-          `Synthesizing neural voices and phrase-locking ${data.data.scenes.length} beats...`
-        );
-        // Synchronously synthesize and calibrate exact audio durations in parallel
-        const synchronizedScenes = await syncScenesAudio(data.data.scenes);
+      if (data.success && data.data?.scenes && data.data.scenes.length > 0) {
+        const initialScenes: StudioScene[] = data.data.scenes;
+
+        // 1. Instantly commit generated scenes to state so user sees new storyboard immediately!
         updateProject({
-          scenes: synchronizedScenes,
+          scenes: initialScenes,
           scriptMode: activeTab,
         });
-        const totalDur = synchronizedScenes.reduce((acc, s) => acc + s.duration, 0);
+        setIsLoading(false);
         setSuccessMsg(
-          `Generated & voice-synchronized ${synchronizedScenes.length} beats for "${project.topic}" (${totalDur.toFixed(1)}s)`
+          `Generated ${initialScenes.length} dynamic scenes for "${project.topic}"! Calibrating neural voices...`
         );
+
+        // 2. Synchronize neural voice audio in background without blocking storyboard view
+        syncScenesAudio(initialScenes).then((synced) => {
+          updateProject({ scenes: synced });
+          const totalDur = synced.reduce((acc, s) => acc + s.duration, 0);
+          setSuccessMsg(
+            `Ready: ${synced.length} beats synchronized for "${project.topic}" (${totalDur.toFixed(1)}s)`
+          );
+        }).catch((err) => {
+          console.warn('Voice sync background notice (fallback timing used):', err);
+        });
+        return;
       } else {
         setError(data.error || 'Failed to generate storyboard.');
       }
@@ -96,9 +118,12 @@ export const Stage02Storyboard: React.FC = () => {
       const synthesisPromises = updatedScenes.map(async (sc, i) => {
         if (!sc.narration) return;
         try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 6000);
           const res = await fetch('/api/studio/synthesize-scene', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
             body: JSON.stringify({
               text: sc.narration,
               voice: project.voice,
@@ -106,6 +131,8 @@ export const Stage02Storyboard: React.FC = () => {
               rate: '+12%',
             }),
           });
+          clearTimeout(timer);
+          if (!res.ok) return;
           const data = await res.json();
           if (data.success && data.data?.audioUrl) {
             const actualDur = data.data.duration;
@@ -412,13 +439,17 @@ export const Stage02Storyboard: React.FC = () => {
         {activeTab === 'ai_generate' && (
           <div className="mt-5 space-y-4">
             <div className="rounded-xl border border-[#232634] bg-[#08090A] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="space-y-1">
+              <div className="space-y-1.5 flex-1 mr-2">
                 <span className="text-[11px] font-mono text-[#FF4F00] uppercase tracking-wider block">
-                  Active Video Topic
+                  Active Video Topic Brief
                 </span>
-                <p className="text-sm font-semibold text-white leading-snug">
-                  {project.topic || 'No topic brief specified.'}
-                </p>
+                <input
+                  type="text"
+                  value={project.topic}
+                  onChange={(e) => updateProject({ topic: e.target.value })}
+                  placeholder="Enter topic prompt (e.g. CRISPR Gene Editing or The 1971 Naval Battle)..."
+                  className="w-full rounded-lg border border-[#232634] bg-[#14161F] px-3.5 py-2 text-sm text-white placeholder-[#64748B] focus:border-[#FF4F00] focus:outline-none transition font-medium"
+                />
                 <div className="flex flex-wrap items-center gap-2 text-xs text-[#94A3B8] font-mono mt-1">
                   <span>Target: {project.duration}s (~{durationMeta.targetWords} words)</span>
                   <span>•</span>
@@ -430,9 +461,9 @@ export const Stage02Storyboard: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setStage(1)}
-                className="text-xs text-[#94A3B8] hover:text-[#FF4F00] flex items-center gap-1 shrink-0 transition"
+                className="text-xs text-[#94A3B8] hover:text-[#FF4F00] flex items-center gap-1 shrink-0 transition self-start sm:self-center"
               >
-                <span>Edit Topic</span>
+                <span>Full Setup</span>
                 <ArrowRight className="h-3 w-3" />
               </button>
             </div>

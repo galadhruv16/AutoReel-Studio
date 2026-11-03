@@ -17,7 +17,10 @@
    - Integrated both into Stage 02 and Stage 03 studio dropdowns and AI Director prompts.
    - **Fixed Storyboard Generator Bug**: Resolved whitelist omission in generate-storyboard/route.ts that previously coerced code_terminal and investigative_dossier back to kinetic_text.
    - **Intelligent Category-Aware Sequencing**: Topic keywords now intelligently route tech/code topics to feature code_terminal at Scene 2, investigative/history topics to feature investigative_dossier at Scene 2, and general topics to include both within the first 3 scenes.
-   - **Updated Gemini Models Chain**: Configured current stable models (gemini-2.5-flash, gemini-2.0-flash, gemini-1.5-flash).
+   - **Updated Gemini Models Chain**: Configured current stable models (gemini-1.5-flash, gemini-2.0-flash) with 5-second abort signals and fast break on authentication/404 errors.
+   - **Vercel Serverless Non-Blocking Regeneration**: Storyboard scenes are now committed to state IMMEDIATELY without blocking on 12 parallel Edge TTS WebSocket streams.
+   - **Route MaxDuration & Dynamic Exports**: Added maxDuration=60 and force-dynamic exports to avoid 10-second Vercel lambda gateway timeouts.
+   - **Inline Topic Prompting**: Added direct topic brief input field in Stage 02 for instantaneous regeneration without navigating back to Stage 01.
 3. **Atmospheric Canvas & Virtual 3D Camera Dynamics**:
    - Edge-darkening radial vignette and SVG fractal film grain texture (`feTurbulence`) overlay.
    - Continuous per-scene camera push (`scale: 1.0 -> 1.045`) eliminating static dead frames.

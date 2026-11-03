@@ -155,8 +155,17 @@ export async function synthesizeSpeechNode(
     }
 
     await new Promise<void>((resolve, reject) => {
-      audioStream.on('end', () => resolve());
-      audioStream.on('error', (err) => reject(err));
+      const timer = setTimeout(() => {
+        reject(new Error('Edge TTS stream timed out after 5000ms'));
+      }, 5000);
+      audioStream.on('end', () => {
+        clearTimeout(timer);
+        resolve();
+      });
+      audioStream.on('error', (err) => {
+        clearTimeout(timer);
+        reject(err);
+      });
     });
 
     const audioBuffer = Buffer.concat(audioChunks);

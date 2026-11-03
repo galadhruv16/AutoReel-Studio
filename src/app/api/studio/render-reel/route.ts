@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { StudioScene } from '@/types/studio';
+
+export const maxDuration = 120;
+export const dynamic = 'force-dynamic';
 import { exec } from 'child_process';
 import path from 'path';
 import fs from 'fs';

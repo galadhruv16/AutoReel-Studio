@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { StudioScene, StudioDuration, StudioTone, DynamicGraphicData, VisualArchetype, SfxCue } from '@/types/studio';
 
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
+
 export type StoryboardScene = StudioScene;
 
 export async function POST(request: Request) {
@@ -129,15 +132,18 @@ Respond STRICTLY with valid JSON (no markdown formatting, no code blocks):
   ]
 }`;
 
-        const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+        const models = ['gemini-1.5-flash', 'gemini-2.0-flash'];
         for (const model of models) {
           if (scenes) break;
           try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
             const res = await fetch(
               `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
               {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                signal: controller.signal,
                 body: JSON.stringify({
                   contents: [{ parts: [{ text: systemPrompt }] }],
                   generationConfig: {
@@ -147,6 +153,13 @@ Respond STRICTLY with valid JSON (no markdown formatting, no code blocks):
                 }),
               }
             );
+
+            clearTimeout(timeoutId);
+
+            if (res.status === 400 || res.status === 401 || res.status === 403 || res.status === 404) {
+              console.warn('Gemini API returned error status, bypassing API call to avoid timeouts.');
+              break;
+            }
 
             if (res.ok) {
               const resData = await res.json();
