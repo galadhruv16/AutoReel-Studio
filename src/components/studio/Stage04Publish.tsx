@@ -85,23 +85,7 @@ export const Stage04Publish: React.FC = () => {
     }
   }, [project.videoUrl, dynamicVideoUrl]);
 
-  // Only match preset master videos if the topic explicitly relates to them
-  const getMatchedMasterVideo = (topicStr: string) => {
-    const t = (topicStr || '').toLowerCase();
-    if (t.includes('saraighat') || t.includes('borphukan') || t.includes('bachari')) {
-      return '/videos/reel_saraighat.mp4';
-    }
-    if (t.includes('kubernetes') || t.includes('k8s pod')) {
-      return '/videos/reel_kubernetes.mp4';
-    }
-    if (t.includes('crispr') || t.includes('mendel') || t.includes('genetics') || t.includes('dna')) {
-      return '/videos/reel_genetics.mp4';
-    }
-    return null;
-  };
-
-  const matchedMasterVideo = getMatchedMasterVideo(project.topic);
-  const videoSrc = dynamicVideoUrl || project.videoUrl || matchedMasterVideo || undefined;
+  const videoSrc = dynamicVideoUrl || project.videoUrl || undefined;
   const posterSrc = videoSrc ? videoSrc.replace('.mp4', '.png') : undefined;
   const voiceObj = VOICES.find((v) => v.id === project.voice) || VOICES[0];
 
@@ -187,29 +171,13 @@ export const Stage04Publish: React.FC = () => {
           await downloadFileFromUrl(result.videoUrl, `${getTopicSlug(project.topic)}_1080p.mp4`);
         }
       } else {
-        if (matchedMasterVideo) {
-          setDynamicVideoUrl(matchedMasterVideo);
-          setRenderStatus('Master MP4 Ready (1080p)');
-          if (andDownload) {
-            await downloadFileFromUrl(matchedMasterVideo, `${getTopicSlug(project.topic)}_1080p.mp4`);
-          }
-        } else {
-          setShowServerlessNotice(true);
-          setRenderStatus('Export via Local Host Ready');
-        }
-      }
-    } catch (err) {
-      console.warn('Render request error:', err);
-      if (matchedMasterVideo) {
-        setDynamicVideoUrl(matchedMasterVideo);
-        setRenderStatus('Master MP4 Ready (1080p)');
-        if (andDownload) {
-          await downloadFileFromUrl(matchedMasterVideo, `${getTopicSlug(project.topic)}_1080p.mp4`);
-        }
-      } else {
         setShowServerlessNotice(true);
         setRenderStatus('Export via Local Host Ready');
       }
+    } catch (err) {
+      console.warn('Render request error:', err);
+      setShowServerlessNotice(true);
+      setRenderStatus('Export via Local Host Ready');
     } finally {
       setIsRenderingDynamic(false);
     }

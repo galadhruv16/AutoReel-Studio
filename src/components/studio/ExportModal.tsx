@@ -110,33 +110,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         setRenderStatus('Finalizing MP4 file...');
         await downloadFileFromUrl(result.videoUrl, `${getTopicSlug(project.topic)}_1080p.mp4`);
       } else {
-        const t = (project.topic || '').toLowerCase();
-        const matched = t.includes('saraighat') ? '/videos/reel_saraighat.mp4'
-          : t.includes('kubernetes') ? '/videos/reel_kubernetes.mp4'
-          : (t.includes('genetics') || t.includes('crispr') || t.includes('dna')) ? '/videos/reel_genetics.mp4'
-          : null;
-
-        if (matched) {
-          setRenderedVideoUrl(matched);
-          await downloadFileFromUrl(matched, `${getTopicSlug(project.topic)}_1080p.mp4`);
-        } else {
-          setShowServerlessNotice(true);
-        }
+        setShowServerlessNotice(true);
       }
     } catch (err) {
       console.warn('Render failed:', err);
-      const t = (project.topic || '').toLowerCase();
-      const matched = t.includes('saraighat') ? '/videos/reel_saraighat.mp4'
-        : t.includes('kubernetes') ? '/videos/reel_kubernetes.mp4'
-        : (t.includes('genetics') || t.includes('crispr') || t.includes('dna')) ? '/videos/reel_genetics.mp4'
-        : null;
-
-      if (matched) {
-        setRenderedVideoUrl(matched);
-        await downloadFileFromUrl(matched, `${getTopicSlug(project.topic)}_1080p.mp4`);
-      } else {
-        setShowServerlessNotice(true);
-      }
+      setShowServerlessNotice(true);
     } finally {
       setIsRendering(false);
     }

@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     const reelId = `reel_${Date.now()}`;
     let isDynamic = false;
 
-    // Map presets to their real 1080x1920 MP4 video and audio files
+    // Map presets to their real 1080x1920 MP4 video and audio files ONLY if presetId was explicitly supplied
     let videoUrl: string | null = null;
     let posterUrl: string | null = null;
     let audioUrl: string | null = null;
@@ -72,24 +72,9 @@ export async function POST(request: Request) {
     }
 
     // On serverless environments (Vercel, AWS Lambda), headless Chromium & FFMPEG are unavailable.
-    // Prevent 10-15s timeouts by skipping server-side Remotion CLI and instantly serving the Full HD master.
+    // Prevent 10-15s execution timeouts by skipping server-side Remotion CLI and returning serverless status.
     const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT);
     const shouldRenderDynamic = renderDynamic === true && !isServerless;
-
-    // Fallback preset matching only when explicitly requested by presetId or matching showcase keywords
-    if (!videoUrl && !shouldRenderDynamic) {
-      const topicLower = (topic || '').toLowerCase();
-      if (presetId === 'saraighat' || topicLower.includes('saraighat') || topicLower.includes('borphukan') || topicLower.includes('bachari')) {
-        videoUrl = '/videos/reel_saraighat.mp4';
-        posterUrl = '/videos/poster_saraighat.png';
-      } else if (presetId === 'kubernetes' || topicLower.includes('kubernetes') || topicLower.includes('k8s pod')) {
-        videoUrl = '/videos/reel_kubernetes.mp4';
-        posterUrl = '/videos/poster_kubernetes.png';
-      } else if (presetId === 'genetics' || topicLower.includes('crispr') || topicLower.includes('mendel')) {
-        videoUrl = '/videos/reel_genetics.mp4';
-        posterUrl = '/videos/poster_genetics.png';
-      }
-    }
 
     if (shouldRenderDynamic && safeScenes.length > 0) {
       const outDir = path.resolve(process.cwd(), 'out');
@@ -108,14 +93,14 @@ export async function POST(request: Request) {
           const dur = typeof sc.duration === 'number' && !isNaN(sc.duration) && sc.duration > 0 ? sc.duration : 4.0;
           const start = typeof sc.startTime === 'number' && !isNaN(sc.startTime) ? sc.startTime : cumulativeTime;
           cumulativeTime = start + dur;
-          let audioUrl = sc.audioUrl;
-          if (audioUrl && audioUrl.startsWith('data:audio/mp3;base64,')) {
+          let sceneAudio = sc.audioUrl;
+          if (sceneAudio && sceneAudio.startsWith('data:audio/mp3;base64,')) {
             try {
               const audioFileName = `audio_${reelId}_scene_${i}.mp3`;
               const audioFilePath = path.join(rendersDir, audioFileName);
-              const b64Data = audioUrl.replace(/^data:audio\/mp3;base64,/, '');
+              const b64Data = sceneAudio.replace(/^data:audio\/mp3;base64,/, '');
               fs.writeFileSync(audioFilePath, Buffer.from(b64Data, 'base64'));
-              audioUrl = `/renders/${audioFileName}`;
+              sceneAudio = `/renders/${audioFileName}`;
             } catch {
               // fallback to original
             }
@@ -125,7 +110,7 @@ export async function POST(request: Request) {
             duration: dur,
             startTime: start,
             endTime: start + dur,
-            audioUrl,
+            audioUrl: sceneAudio,
           };
         });
 
@@ -178,27 +163,12 @@ export async function POST(request: Request) {
       }
     }
 
-    // Only map to showcase presets if topic explicitly matches them
-    if (!videoUrl) {
-      const topicLower = (topic || '').toLowerCase();
-      if (presetId === 'saraighat' || topicLower.includes('saraighat') || topicLower.includes('borphukan') || topicLower.includes('bachari')) {
-        videoUrl = '/videos/reel_saraighat.mp4';
-        posterUrl = '/videos/poster_saraighat.png';
-      } else if (presetId === 'kubernetes' || topicLower.includes('kubernetes') || topicLower.includes('k8s pod')) {
-        videoUrl = '/videos/reel_kubernetes.mp4';
-        posterUrl = '/videos/poster_kubernetes.png';
-      } else if (presetId === 'genetics' || topicLower.includes('crispr') || topicLower.includes('mendel')) {
-        videoUrl = '/videos/reel_genetics.mp4';
-        posterUrl = '/videos/poster_genetics.png';
-      }
-    }
-
     const telemetryLogs = [
       { step: 'NEURAL_TTS', status: 'OK', detail: `Synthesized with ${voice} via Microsoft Edge Neural ($0.00 cost)` },
       { step: 'ALIGNMENT', status: 'OK', detail: `Extracted ${safeScenes.length * 18} millisecond-accurate word boundary timestamps` },
       { step: 'ARCHETYPES', status: 'OK', detail: `Compiled ${safeScenes.length} deterministic SVG vector scene compositions across 8 archetypes` },
       { step: 'CAPTIONS', status: 'OK', detail: `Rendered ${String(captionStyle).toUpperCase()} dynamic word highlight overlays` },
-      { step: 'REMOTION_BUNDLE', status: 'OK', detail: isDynamic ? `Compiled custom dynamic Remotion MP4: ${videoUrl}` : `Target 1080x1920 @ 60fps vector canvas active (${videoUrl})` },
+      { step: 'REMOTION_BUNDLE', status: 'OK', detail: isDynamic ? `Compiled custom dynamic Remotion MP4: ${videoUrl}` : `Target 1080x1920 @ 60fps vector canvas active` },
     ];
 
     return NextResponse.json({
@@ -216,6 +186,7 @@ export async function POST(request: Request) {
         timestampsUrl,
         scenesCount: safeScenes.length,
         isDynamic,
+        isServerless,
         telemetry: telemetryLogs,
         createdAt: new Date().toISOString(),
       },

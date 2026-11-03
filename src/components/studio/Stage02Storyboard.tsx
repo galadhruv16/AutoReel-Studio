@@ -83,6 +83,7 @@ export const Stage02Storyboard: React.FC = () => {
         // 1. Instantly commit generated scenes to state so user sees new storyboard immediately!
         updateProject({
           scenes: initialScenes,
+          videoUrl: null,
           scriptMode: activeTab,
         });
         setIsLoading(false);

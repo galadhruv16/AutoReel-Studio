@@ -90,6 +90,7 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setProject((prev) => ({
       ...prev,
       topic,
+      videoUrl: prev.topic !== topic ? null : prev.videoUrl,
       updatedAt: new Date().toISOString(),
     }));
   };
