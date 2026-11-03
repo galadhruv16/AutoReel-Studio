@@ -1916,17 +1916,18 @@ const SynchronizedCaption: React.FC<SynchronizedCaptionProps> = ({
 // =========================================================================
 // MAIN COMPOSITION: DYNAMIC STORY REEL
 // =========================================================================
-export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
-  topic,
-  scenes = [],
-  captionStyle = 'kinetic',
-  accentColor = '#FF4F00',
-  voiceName = 'Alloy',
-  audioUrl,
-  musicUrl = 'audio/music/ambient_tension.wav',
-  enableSfx = true,
-  enableMusicDucking = true,
-}) => {
+export const DynamicStoryReel = React.forwardRef<HTMLDivElement, DynamicStoryReelProps>((props, ref) => {
+  const {
+    topic,
+    scenes = [],
+    captionStyle = 'kinetic',
+    accentColor = '#FF4F00',
+    voiceName = 'Alloy',
+    audioUrl,
+    musicUrl = 'audio/music/ambient_tension.wav',
+    enableSfx = true,
+    enableMusicDucking = true,
+  } = props;
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
@@ -2030,8 +2031,16 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
   };
 
   return (
-    <AbsoluteFill
+    <div
+      ref={ref}
       style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        height: '100%',
         backgroundColor: '#08090A',
         color: '#EDEDED',
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
@@ -2317,6 +2326,7 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
           volume={calculateMusicVolume}
         />
       )}
-    </AbsoluteFill>
+    </div>
   );
-};
+});
+DynamicStoryReel.displayName = 'DynamicStoryReel';

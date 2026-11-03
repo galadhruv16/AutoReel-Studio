@@ -224,29 +224,35 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={handleRenderAndDownloadVideo}
-              disabled={isRendering}
-              className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF4F00] px-5 py-3 text-xs font-bold text-white shadow-lg shadow-[#FF4F00]/25 hover:bg-[#FF3B00] transition active:scale-95 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {isRendering ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Rendering ({renderElapsed}s)...</span>
-                </>
-              ) : renderedVideoUrl ? (
-                <>
-                  <Download className="h-4 w-4" />
-                  <span>Download MP4</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4" />
-                  <span>Render &amp; Download MP4</span>
-                </>
-              )}
-            </button>
+            {renderedVideoUrl ? (
+              <a
+                href={`/api/studio/download?file=${encodeURIComponent(renderedVideoUrl.replace(/^\/+/,''))}&name=${encodeURIComponent(`${getTopicSlug(project.topic)}_1080p.mp4`)}`}
+                download={`${getTopicSlug(project.topic)}_1080p.mp4`}
+                className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-3 text-xs font-bold text-white shadow-lg shadow-emerald-500/25 hover:from-emerald-400 hover:to-teal-400 transition active:scale-95 cursor-pointer text-center no-underline"
+              >
+                <Download className="h-4 w-4 stroke-[2.5]" />
+                <span>Save Master MP4</span>
+              </a>
+            ) : (
+              <button
+                type="button"
+                onClick={handleRenderAndDownloadVideo}
+                disabled={isRendering}
+                className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF4F00] px-5 py-3 text-xs font-bold text-white shadow-lg shadow-[#FF4F00]/25 hover:bg-[#FF3B00] transition active:scale-95 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isRendering ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Rendering ({renderElapsed}s)...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" />
+                    <span>Render &amp; Download MP4</span>
+                  </>
+                )}
+              </button>
+            )}
           </div>
 
           {/* Active Rendering Status Display */}

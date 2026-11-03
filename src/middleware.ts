@@ -26,8 +26,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 3. Protect internal Studio API routes (exempt audio stream endpoint so media players & Remotion can stream safely)
-  if (pathname.startsWith('/api/studio') && !pathname.startsWith('/api/studio/audio')) {
+  // 3. Protect internal Studio API routes (exempt audio stream & file downloads so media players, browsers & Remotion can access safely)
+  if (
+    pathname.startsWith('/api/studio') &&
+    !pathname.startsWith('/api/studio/audio') &&
+    !pathname.startsWith('/api/studio/download')
+  ) {
     if (!session) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized. Insider access credentials required.' },

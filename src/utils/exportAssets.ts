@@ -25,24 +25,63 @@ export function downloadBlob(blob: Blob, filename: string): void {
 }
 
 /**
- * Downloads a file from a URL (relative, data URI, or absolute) using a Blob fetch
- * to ensure direct file saving without browser navigation.
+ * Downloads a file from a URL using streaming Content-Disposition: attachment
+ * and hidden iframe trigger to bypass browser popup and user-activation expiration limits.
  */
 export async function downloadFileFromUrl(url: string, filename: string): Promise<void> {
+  const cleanFilename = filename.endsWith('.mp4') ? filename : `${filename}.mp4`;
+
+  // For server video renders, route through the dedicated attachment download endpoint
+  // which streams with Content-Disposition: attachment and bypasses browser user-activation expiration.
+  const isServerFile =
+    url.startsWith('/renders/') ||
+    url.startsWith('renders/') ||
+    url.startsWith('/videos/') ||
+    url.startsWith('videos/');
+
+  const targetUrl = isServerFile
+    ? `/api/studio/download?file=${encodeURIComponent(url.replace(/^\/+/, ''))}&name=${encodeURIComponent(cleanFilename)}`
+    : url;
+
+  // 1. Direct hidden iframe download (industry standard for attachment streaming without navigation or popup blocking)
   try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const blob = await res.blob();
-    downloadBlob(blob, filename);
-  } catch (err) {
-    // Direct link fallback
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.top = '-9999px';
+    iframe.style.left = '-9999px';
+    iframe.style.width = '1px';
+    iframe.style.height = '1px';
+    iframe.style.visibility = 'hidden';
+    iframe.src = targetUrl;
+    document.body.appendChild(iframe);
+    setTimeout(() => {
+      try {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      } catch {}
+    }, 120000);
+  } catch (iframeErr) {
+    console.warn('Iframe download fallback:', iframeErr);
+  }
+
+  // 2. Also trigger synthetic anchor click as dual guarantee
+  try {
     const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.target = '_blank';
+    link.href = targetUrl;
+    link.download = cleanFilename;
+    link.target = '_self';
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    setTimeout(() => {
+      try {
+        if (document.body.contains(link)) {
+          document.body.removeChild(link);
+        }
+      } catch {}
+    }, 1000);
+  } catch (linkErr) {
+    console.warn('Anchor download fallback:', linkErr);
   }
 }
 

@@ -333,29 +333,44 @@ export const Stage04Publish: React.FC = () => {
                 </div>
               )}
 
-              <button
-                type="button"
-                onClick={handleDownloadVideo}
-                disabled={isRenderingDynamic}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF4F00] py-3 px-4 text-xs font-bold text-white shadow-xl shadow-[#FF4F00]/30 hover:bg-[#FF3B00] transition active:scale-95 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {isRenderingDynamic ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Rendering ({renderElapsed}s)...</span>
-                  </>
-                ) : dynamicVideoUrl ? (
-                  <>
+              {dynamicVideoUrl ? (
+                <div className="space-y-2">
+                  <a
+                    href={`/api/studio/download?file=${encodeURIComponent(dynamicVideoUrl.replace(/^\/+/,''))}&name=${encodeURIComponent(`${getTopicSlug(project.topic)}_1080p.mp4`)}`}
+                    download={`${getTopicSlug(project.topic)}_1080p.mp4`}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 py-3.5 px-4 text-xs font-bold text-white shadow-xl shadow-emerald-500/30 hover:from-emerald-400 hover:to-teal-400 transition active:scale-95 cursor-pointer text-center no-underline"
+                  >
                     <Download className="h-4 w-4 stroke-[2.5]" />
-                    <span>Download 1080p Master MP4</span>
-                  </>
-                ) : (
-                  <>
-                    <Download className="h-4 w-4 stroke-[2.5]" />
-                    <span>Render &amp; Download 1080p MP4</span>
-                  </>
-                )}
-              </button>
+                    <span>Save 1080p Master MP4</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => handleRenderDynamicMp4(true)}
+                    className="w-full text-center text-[10px] font-mono text-[#94A3B8] hover:text-[#FF4F00] transition cursor-pointer py-1"
+                  >
+                    ↻ Re-render with fresh seed
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleDownloadVideo}
+                  disabled={isRenderingDynamic}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF4F00] py-3 px-4 text-xs font-bold text-white shadow-xl shadow-[#FF4F00]/30 hover:bg-[#FF3B00] transition active:scale-95 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isRenderingDynamic ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Rendering ({renderElapsed}s)...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4 stroke-[2.5]" />
+                      <span>Render &amp; Download 1080p MP4</span>
+                    </>
+                  )}
+                </button>
+              )}
 
               {!dynamicVideoUrl && !isRenderingDynamic && (
                 <button
