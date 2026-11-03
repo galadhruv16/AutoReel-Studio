@@ -6,20 +6,33 @@ import { Play, Film, Sparkles } from 'lucide-react';
 import { StudioScene } from '../../types/studio';
 import { DynamicStoryReel } from '../../remotion/compositions/DynamicStoryReel';
 
-// Dynamic import with SSR disabled for Next.js browser canvas compatibility
-const Player = dynamic(
-  () => import('@remotion/player').then((mod) => mod.Player),
-  {
-    ssr: false,
-    loading: () => (
+// Client-side forwardRef wrapper for Remotion Player with SSR safety
+const RemotionPlayer = forwardRef<any, any>((props, ref) => {
+  const [PlayerComponent, setPlayerComponent] = useState<any>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    import('@remotion/player').then((mod) => {
+      if (isMounted) setPlayerComponent(() => mod.Player);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (!PlayerComponent) {
+    return (
       <div className="w-full h-full flex flex-col items-center justify-center bg-[#08090A] text-[#94A3B8] p-6 text-center">
         <div className="h-8 w-8 border-2 border-[#FF4F00] border-t-transparent rounded-full animate-spin mb-3" />
         <span className="text-xs font-mono text-[#EDEDED]">INITIALIZING REMOTION CANVAS</span>
         <span className="text-[10px] font-mono text-[#64748B] mt-1">1080×1920 • 60FPS</span>
       </div>
-    ),
+    );
   }
-);
+
+  return <PlayerComponent ref={ref} {...props} />;
+});
+RemotionPlayer.displayName = 'RemotionPlayer';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -339,9 +352,10 @@ export const RemotionStudioPlayer = forwardRef<RemotionStudioPlayerHandle, Remot
                     </div>
                   }
                 >
-                  <Player
+                  <RemotionPlayer
                     ref={remotionPlayerRef}
                     component={DynamicStoryReel as any}
+                    acknowledgeRemotionLicense
                     inputProps={{
                       topic,
                       scenes: safeScenes,
