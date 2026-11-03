@@ -15,11 +15,22 @@ import {
   Hash,
   Volume2,
   AlertTriangle,
+  FileCode,
+  PackageCheck,
+  Loader2,
 } from 'lucide-react';
 import { useStudio } from '../../context/StudioContext';
 import { VOICES, StudioScene } from '../../types/studio';
 import { generateSrtContent, generateVideoChapters } from '../../utils/srt';
 import { RemotionStudioPlayer } from './RemotionStudioPlayer';
+import {
+  getTopicSlug,
+  downloadFileFromUrl,
+  downloadSubtitlesSrt,
+  downloadVoiceoverMp3,
+  downloadStoryboardJson,
+  requestReelRender,
+} from '../../utils/exportAssets';
 
 type PlatformKey = 'youtube' | 'instagram' | 'tiktok' | 'linkedin';
 
@@ -37,16 +48,42 @@ interface AllPlatformsKit {
 }
 
 export const Stage04Publish: React.FC = () => {
-  const { project, setStage, resetProject } = useStudio();
+  const { project, setStage, resetProject, updateProject } = useStudio();
 
   const [activePlatform, setActivePlatform] = useState<PlatformKey>('youtube');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [isGeneratingKit, setIsGeneratingKit] = useState<boolean>(false);
   const [publishingKit, setPublishingKit] = useState<AllPlatformsKit | null>(null);
   const [isRenderingDynamic, setIsRenderingDynamic] = useState<boolean>(false);
-  const [dynamicVideoUrl, setDynamicVideoUrl] = useState<string | null>(null);
+  const [dynamicVideoUrl, setDynamicVideoUrl] = useState<string | null>(project.videoUrl || null);
   const [renderStatus, setRenderStatus] = useState<string>('');
+  const [renderElapsed, setRenderElapsed] = useState<number>(0);
   const [showServerlessNotice, setShowServerlessNotice] = useState<boolean>(false);
+  const [audioSuccess, setAudioSuccess] = useState<boolean>(false);
+  const [srtSuccess, setSrtSuccess] = useState<boolean>(false);
+  const [jsonSuccess, setJsonSuccess] = useState<boolean>(false);
+  const [isBatchDownloading, setIsBatchDownloading] = useState<boolean>(false);
+
+  // Track render elapsed time
+  useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    if (isRenderingDynamic) {
+      setRenderElapsed(0);
+      timer = setInterval(() => {
+        setRenderElapsed((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isRenderingDynamic]);
+
+  // Keep video URL synced
+  useEffect(() => {
+    if (project.videoUrl && !dynamicVideoUrl) {
+      setDynamicVideoUrl(project.videoUrl);
+    }
+  }, [project.videoUrl, dynamicVideoUrl]);
 
   // Only match preset master videos if the topic explicitly relates to them
   const getMatchedMasterVideo = (topicStr: string) => {
@@ -121,69 +158,45 @@ export const Stage04Publish: React.FC = () => {
     };
   }, [project.topic, project.scenes, totalDuration, project.tone]);
 
-  // Safe file slug generator
-  const getTopicSlug = () => {
-    const raw = (project.topic || 'AutoReel').trim().toLowerCase();
-    const slug = raw.replace(/[^a-z0-9]+/g, '_').slice(0, 32);
-    return slug || 'autoreel_video';
-  };
-
-  // Trigger download helper (blob-based to guarantee direct file save across all browsers)
-  const triggerDownload = async (url: string) => {
-    try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = `${getTopicSlug()}_1080p.mp4`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-    } catch {
-      // Fallback direct link click
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${getTopicSlug()}_1080p.mp4`;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-
   // Compile Dynamic MP4 via Remotion Server
   const handleRenderDynamicMp4 = async (andDownload: boolean = false) => {
     if (isRenderingDynamic) return;
     setIsRenderingDynamic(true);
-    setRenderStatus('Rendering 1080×1920 video...');
+    setShowServerlessNotice(false);
+    setRenderStatus('Initializing Remotion 1080×1920 canvas...');
+
+    setTimeout(() => setRenderStatus('Rendering 60FPS video frames via Remotion...'), 3000);
+
     try {
-      const res = await fetch('/api/studio/render-reel', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          topic: project.topic,
-          voice: voiceObj.name,
-          captionStyle: project.captionStyle,
-          accentColor: '#FF4F00',
-          scenes,
-          renderDynamic: true,
-          musicUrl: project.musicTrack?.enabled !== false ? (project.musicTrack?.url || 'audio/music/ambient_tension.wav') : null,
-          enableSfx: project.enableSfx !== false,
-          enableMusicDucking: project.enableMusicDucking !== false,
-        }),
+      const result = await requestReelRender({
+        topic: project.topic,
+        voice: voiceObj.name,
+        captionStyle: project.captionStyle,
+        accentColor: '#FF4F00',
+        scenes,
+        musicUrl: project.musicTrack?.enabled !== false ? (project.musicTrack?.url || 'audio/music/ambient_tension.wav') : null,
+        enableSfx: project.enableSfx !== false,
+        enableMusicDucking: project.enableMusicDucking !== false,
       });
-      const json = await res.json();
-      if (json.success && json.data?.videoUrl) {
-        setDynamicVideoUrl(json.data.videoUrl);
-        setRenderStatus(json.data?.isDynamic ? 'Custom MP4 Ready (1080p 60FPS)' : 'Master MP4 Ready (1080p)');
+
+      if (result.success && result.videoUrl) {
+        setDynamicVideoUrl(result.videoUrl);
+        updateProject({ videoUrl: result.videoUrl });
+        setRenderStatus('Custom MP4 Master Ready (1080p 60FPS)');
         if (andDownload) {
-          await triggerDownload(json.data.videoUrl);
+          await downloadFileFromUrl(result.videoUrl, `${getTopicSlug(project.topic)}_1080p.mp4`);
         }
       } else {
-        throw new Error(json?.error || 'Render did not complete');
+        if (matchedMasterVideo) {
+          setDynamicVideoUrl(matchedMasterVideo);
+          setRenderStatus('Master MP4 Ready (1080p)');
+          if (andDownload) {
+            await downloadFileFromUrl(matchedMasterVideo, `${getTopicSlug(project.topic)}_1080p.mp4`);
+          }
+        } else {
+          setShowServerlessNotice(true);
+          setRenderStatus('Export via Local Host Ready');
+        }
       }
     } catch (err) {
       console.warn('Render request error:', err);
@@ -191,65 +204,14 @@ export const Stage04Publish: React.FC = () => {
         setDynamicVideoUrl(matchedMasterVideo);
         setRenderStatus('Master MP4 Ready (1080p)');
         if (andDownload) {
-          await triggerDownload(matchedMasterVideo);
+          await downloadFileFromUrl(matchedMasterVideo, `${getTopicSlug(project.topic)}_1080p.mp4`);
         }
       } else {
-        setRenderStatus('Live 60FPS on Canvas (Export via Local Host)');
+        setShowServerlessNotice(true);
+        setRenderStatus('Export via Local Host Ready');
       }
     } finally {
       setIsRenderingDynamic(false);
-    }
-  };
-
-  // Download Full Spoken Voiceover MP3 (merges all scene MP3 segments)
-  const handleDownloadAudio = async () => {
-    const voicedScenes = scenes.filter((s) => s.audioUrl);
-    if (voicedScenes.length === 0) {
-      alert('Voiceover audio is not yet generated. Visit Stage 03 to synthesize scenes.');
-      return;
-    }
-
-    try {
-      const byteArrays: Uint8Array[] = [];
-      for (const sc of voicedScenes) {
-        if (!sc.audioUrl) continue;
-        if (sc.audioUrl.startsWith('data:audio/mp3;base64,')) {
-          const raw = atob(sc.audioUrl.split(',')[1]);
-          const arr = new Uint8Array(raw.length);
-          for (let i = 0; i < raw.length; i++) {
-            arr[i] = raw.charCodeAt(i);
-          }
-          byteArrays.push(arr);
-        } else {
-          const resp = await fetch(sc.audioUrl);
-          if (resp.ok) {
-            const buf = await resp.arrayBuffer();
-            byteArrays.push(new Uint8Array(buf));
-          }
-        }
-      }
-
-      if (byteArrays.length === 0) return;
-
-      const totalLen = byteArrays.reduce((acc, b) => acc + b.length, 0);
-      const merged = new Uint8Array(totalLen);
-      let offset = 0;
-      for (const b of byteArrays) {
-        merged.set(b, offset);
-        offset += b.length;
-      }
-
-      const blob = new Blob([merged], { type: 'audio/mp3' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${getTopicSlug()}_narration.mp3`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(url), 10000);
-    } catch (e) {
-      console.warn('Failed to download merged audio:', e);
     }
   };
 
@@ -259,21 +221,56 @@ export const Stage04Publish: React.FC = () => {
       await handleRenderDynamicMp4(true);
       return;
     }
-    await triggerDownload(dynamicVideoUrl);
+    await downloadFileFromUrl(dynamicVideoUrl, `${getTopicSlug(project.topic)}_1080p.mp4`);
+  };
+
+  // Download Full Spoken Voiceover MP3 (merges all scene MP3 segments)
+  const handleDownloadAudio = async () => {
+    const res = await downloadVoiceoverMp3(scenes, project.topic);
+    if (res.success) {
+      setAudioSuccess(true);
+      setTimeout(() => setAudioSuccess(false), 3000);
+    } else {
+      alert(res.error || 'Voiceover audio is not yet generated. Visit Stage 03 to synthesize scenes.');
+    }
   };
 
   // Instant SRT Subtitles Download
   const handleDownloadSrt = () => {
-    const srtContent = generateSrtContent(scenes);
-    const blob = new Blob([srtContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${getTopicSlug()}_subtitles.srt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadSubtitlesSrt(scenes, project.topic);
+    setSrtSuccess(true);
+    setTimeout(() => setSrtSuccess(false), 3000);
+  };
+
+  // Storyboard JSON Download
+  const handleDownloadJson = () => {
+    downloadStoryboardJson(project, publishingKit);
+    setJsonSuccess(true);
+    setTimeout(() => setJsonSuccess(false), 3000);
+  };
+
+  // Download All Assets Batch
+  const handleDownloadAll = async () => {
+    setIsBatchDownloading(true);
+    try {
+      handleDownloadSrt();
+      await new Promise((r) => setTimeout(r, 600));
+
+      handleDownloadJson();
+      await new Promise((r) => setTimeout(r, 600));
+
+      const voicedScenes = scenes.filter((s) => s.audioUrl);
+      if (voicedScenes.length > 0) {
+        await handleDownloadAudio();
+        await new Promise((r) => setTimeout(r, 600));
+      }
+
+      if (dynamicVideoUrl) {
+        await downloadFileFromUrl(dynamicVideoUrl, `${getTopicSlug(project.topic)}_1080p.mp4`);
+      }
+    } finally {
+      setIsBatchDownloading(false);
+    }
   };
 
   // Copy to clipboard helper
@@ -337,118 +334,189 @@ export const Stage04Publish: React.FC = () => {
             posterSrc={posterSrc}
           />
 
-          {/* Primary & Secondary Download Actions */}
-          <div className="w-full max-w-[310px] mt-4 space-y-2.5">
-            {/* Compile Dynamic MP4 via Remotion Engine */}
-            {!dynamicVideoUrl ? (
+          {/* Reel Export & Download Center */}
+          <div className="w-full max-w-[320px] mt-4 space-y-3">
+            {/* Primary Action Card: 1080p MP4 */}
+            <div className="rounded-2xl border border-[#FF4F00]/40 bg-gradient-to-b from-[#FF4F00]/10 to-[#14161F] p-4 shadow-xl">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-[#FF4F00]" />
+                  <span>Master Reel (.mp4)</span>
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#FF4F00]/20 text-[#FF4F00] font-bold">
+                  1080×1920 • 60FPS
+                </span>
+              </div>
+
+              {dynamicVideoUrl && (
+                <div className="mb-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
+                  <Check className="h-3 w-3" />
+                  <span>1080p Master Compiled &amp; Ready</span>
+                </div>
+              )}
+
+              {isRenderingDynamic && (
+                <div className="mb-2.5 rounded-lg bg-[#08090A] border border-[#232634] p-2 text-xs font-mono text-[#EDEDED] flex items-center justify-between animate-pulse">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-3.5 w-3.5 text-[#FF4F00] animate-spin" />
+                    <span className="text-[11px] truncate max-w-[190px]">{renderStatus || 'Compiling MP4...'}</span>
+                  </div>
+                  <span className="text-[#FF4F00] text-[11px] font-bold">{renderElapsed}s</span>
+                </div>
+              )}
+
               <button
                 type="button"
-                onClick={() => handleRenderDynamicMp4(false)}
+                onClick={handleDownloadVideo}
                 disabled={isRenderingDynamic}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#FF4F00]/50 bg-[#FF4F00]/10 hover:bg-[#FF4F00]/20 py-2.5 px-4 text-xs font-mono text-[#FF4F00] transition active:scale-95 cursor-pointer disabled:opacity-50"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF4F00] py-3 px-4 text-xs font-bold text-white shadow-xl shadow-[#FF4F00]/30 hover:bg-[#FF3B00] transition active:scale-95 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {isRenderingDynamic ? (
                   <>
-                    <div className="h-3.5 w-3.5 border-2 border-[#FF4F00] border-t-transparent rounded-full animate-spin" />
-                    <span>{renderStatus || 'Compiling Remotion 1080×1920 MP4...'}</span>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Rendering ({renderElapsed}s)...</span>
+                  </>
+                ) : dynamicVideoUrl ? (
+                  <>
+                    <Download className="h-4 w-4 stroke-[2.5]" />
+                    <span>Download 1080p Master MP4</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="h-3.5 w-3.5" />
-                    <span>⚡ Compile Custom MP4 (Remotion)</span>
+                    <Download className="h-4 w-4 stroke-[2.5]" />
+                    <span>Render &amp; Download 1080p MP4</span>
                   </>
                 )}
               </button>
-            ) : (
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-center text-xs font-mono text-emerald-400 flex items-center justify-center gap-2">
-                <Check className="h-3.5 w-3.5 text-emerald-400" />
-                <span>Custom Dynamic MP4 Compiled & Ready</span>
-              </div>
-            )}
 
-            {/* Primary: 1080p MP4 Video */}
-            <button
-              type="button"
-              onClick={handleDownloadVideo}
-              disabled={isRenderingDynamic}
-              className="w-full inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#FF4F00] py-3.5 px-4 text-sm font-bold text-white shadow-xl shadow-[#FF4F00]/30 hover:bg-[#FF3B00] transition active:scale-95 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {isRenderingDynamic ? (
-                <>
-                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>{renderStatus || 'Compiling Remotion 1080×1920 MP4...'}</span>
-                </>
-              ) : (
-                <>
-                  <Download className="h-4 w-4 stroke-[2.5]" />
-                  <span>{dynamicVideoUrl ? 'Download Custom MP4 (1080p 60FPS)' : 'Render & Download Custom MP4 (1080p)'}</span>
-                </>
+              {!dynamicVideoUrl && !isRenderingDynamic && (
+                <button
+                  type="button"
+                  onClick={() => handleRenderDynamicMp4(false)}
+                  className="w-full mt-2 text-center text-[10px] font-mono text-[#94A3B8] hover:text-white transition cursor-pointer"
+                >
+                  Or compile in background without downloading
+                </button>
               )}
-            </button>
+            </div>
 
-            {/* Secondary: SRT Subtitles */}
-            <button
-              type="button"
-              onClick={handleDownloadSrt}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#232634] bg-[#14161F] py-2.5 px-4 text-xs font-medium text-[#EDEDED] hover:bg-[#1C1E26] hover:border-[#3D445C] transition active:scale-95 cursor-pointer"
-            >
-              <FileText className="h-4 w-4 text-[#FF4F00]" />
-              <span>Download Subtitles (.SRT)</span>
-            </button>
+            {/* Media Asset Quick Downloads */}
+            <div className="grid grid-cols-1 gap-2">
+              {/* Spoken Voiceover Narration (.MP3) */}
+              <button
+                type="button"
+                onClick={handleDownloadAudio}
+                className="w-full inline-flex items-center justify-between rounded-xl border border-[#232634] bg-[#14161F] p-2.5 px-3.5 text-xs text-left hover:bg-[#1C1E26] hover:border-emerald-500/40 transition active:scale-95 cursor-pointer group"
+              >
+                <div className="flex items-center gap-2">
+                  <Volume2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <div>
+                    <span className="font-semibold text-white block leading-tight">Spoken Voiceover (.mp3)</span>
+                    <span className="text-[10px] text-[#94A3B8] font-mono">{voiceObj.name} • {scenes.filter((s) => s.audioUrl).length}/{scenes.length} Scenes</span>
+                  </div>
+                </div>
+                {audioSuccess ? (
+                  <Check className="h-4 w-4 text-emerald-400" />
+                ) : (
+                  <Download className="h-4 w-4 text-[#94A3B8] group-hover:text-emerald-400 transition" />
+                )}
+              </button>
 
-            {/* Audio Voiceover Download */}
-            <button
-              type="button"
-              onClick={handleDownloadAudio}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#232634] bg-[#14161F] py-2.5 px-4 text-xs font-medium text-[#EDEDED] hover:bg-[#1C1E26] hover:border-[#3D445C] transition active:scale-95 cursor-pointer"
-            >
-              <Volume2 className="h-4 w-4 text-emerald-400" />
-              <span>Download Spoken Voiceover (.MP3)</span>
-            </button>
+              {/* Subtitles (.SRT) */}
+              <button
+                type="button"
+                onClick={handleDownloadSrt}
+                className="w-full inline-flex items-center justify-between rounded-xl border border-[#232634] bg-[#14161F] p-2.5 px-3.5 text-xs text-left hover:bg-[#1C1E26] hover:border-cyan-500/40 transition active:scale-95 cursor-pointer group"
+              >
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-cyan-400 shrink-0" />
+                  <div>
+                    <span className="font-semibold text-white block leading-tight">Subtitles (.srt)</span>
+                    <span className="text-[10px] text-[#94A3B8] font-mono">Word-accurate SubRip captions</span>
+                  </div>
+                </div>
+                {srtSuccess ? (
+                  <Check className="h-4 w-4 text-cyan-400" />
+                ) : (
+                  <Download className="h-4 w-4 text-[#94A3B8] group-hover:text-cyan-400 transition" />
+                )}
+              </button>
+
+              {/* Storyboard JSON */}
+              <button
+                type="button"
+                onClick={handleDownloadJson}
+                className="w-full inline-flex items-center justify-between rounded-xl border border-[#232634] bg-[#14161F] p-2.5 px-3.5 text-xs text-left hover:bg-[#1C1E26] hover:border-amber-500/40 transition active:scale-95 cursor-pointer group"
+              >
+                <div className="flex items-center gap-2">
+                  <FileCode className="h-4 w-4 text-amber-400 shrink-0" />
+                  <div>
+                    <span className="font-semibold text-white block leading-tight">Storyboard &amp; Metadata (.json)</span>
+                    <span className="text-[10px] text-[#94A3B8] font-mono">Full prompt &amp; multi-platform kit</span>
+                  </div>
+                </div>
+                {jsonSuccess ? (
+                  <Check className="h-4 w-4 text-amber-400" />
+                ) : (
+                  <Download className="h-4 w-4 text-[#94A3B8] group-hover:text-amber-400 transition" />
+                )}
+              </button>
+
+              {/* Download All Available Bundle */}
+              <button
+                type="button"
+                onClick={handleDownloadAll}
+                disabled={isBatchDownloading}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#232634] bg-[#1A1D27] p-2.5 px-3 text-xs font-mono font-semibold text-[#EDEDED] hover:bg-[#252938] hover:text-white transition active:scale-95 cursor-pointer disabled:opacity-50"
+              >
+                <PackageCheck className="h-3.5 w-3.5 text-[#FF4F00]" />
+                <span>{isBatchDownloading ? 'Downloading All Assets...' : 'Download Complete Asset Bundle'}</span>
+              </button>
+            </div>
 
             {/* Cloud Serverless Notice */}
             {showServerlessNotice && (
-              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200 mt-2 space-y-1.5">
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200 space-y-1.5">
                 <div className="flex items-center gap-1.5 font-bold text-amber-300">
                   <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
                   <span>Cloud Serverless Render Notice</span>
                 </div>
                 <p className="text-[11px] leading-relaxed text-[#CBD5E1]">
-                  Your vertical reel is running at full 60FPS with dynamic vectors and audio ducking on the live canvas. Serverless cloud functions cannot run headless Chromium. To render physical 1080p MP4 files, launch AutoReel locally (<code className="text-[#FF4F00] font-mono">npm run dev</code>). Your full voiceover (.mp3) and subtitles (.srt) are ready to download above!
+                  Your vertical reel is running at full 60FPS on the live canvas. Serverless cloud functions cannot run headless Chromium. To render physical 1080p MP4 files, launch AutoReel locally (<code className="text-[#FF4F00] font-mono">npm run dev</code>). Your full voiceover (.mp3), subtitles (.srt), and storyboard (.json) are ready to download above!
                 </p>
               </div>
             )}
-          </div>
 
-          {/* Video Metadata Technical Specs Card */}
-          <div className="w-full max-w-[310px] mt-4 rounded-2xl border border-[#232634] bg-[#14161F] p-4 text-xs space-y-2">
-            <span className="text-[10px] font-mono uppercase text-[#94A3B8] block mb-2 font-semibold">
-              Asset Technical Specifications:
-            </span>
+            {/* Video Metadata Technical Specs Card */}
+            <div className="rounded-2xl border border-[#232634] bg-[#14161F] p-4 text-xs space-y-2">
+              <span className="text-[10px] font-mono uppercase text-[#94A3B8] block mb-2 font-semibold">
+                Asset Technical Specifications:
+              </span>
 
-            <div className="flex justify-between items-center py-1 border-b border-[#232634]/50">
-              <span className="text-[#94A3B8]">Resolution</span>
-              <span className="font-mono text-white font-medium">1080 × 1920 (9:16)</span>
-            </div>
+              <div className="flex justify-between items-center py-1 border-b border-[#232634]/50">
+                <span className="text-[#94A3B8]">Resolution</span>
+                <span className="font-mono text-white font-medium">1080 × 1920 (9:16)</span>
+              </div>
 
-            <div className="flex justify-between items-center py-1 border-b border-[#232634]/50">
-              <span className="text-[#94A3B8]">Frame Rate</span>
-              <span className="font-mono text-white font-medium">60.0 FPS</span>
-            </div>
+              <div className="flex justify-between items-center py-1 border-b border-[#232634]/50">
+                <span className="text-[#94A3B8]">Frame Rate</span>
+                <span className="font-mono text-white font-medium">60.0 FPS</span>
+              </div>
 
-            <div className="flex justify-between items-center py-1 border-b border-[#232634]/50">
-              <span className="text-[#94A3B8]">Encoding</span>
-              <span className="font-mono text-white font-medium">H.264 / AAC 48kHz</span>
-            </div>
+              <div className="flex justify-between items-center py-1 border-b border-[#232634]/50">
+                <span className="text-[#94A3B8]">Encoding</span>
+                <span className="font-mono text-white font-medium">H.264 / AAC 48kHz</span>
+              </div>
 
-            <div className="flex justify-between items-center py-1 border-b border-[#232634]/50">
-              <span className="text-[#94A3B8]">Speech Synthesis</span>
-              <span className="font-mono text-white font-medium">{voiceObj.name} (Edge TTS)</span>
-            </div>
+              <div className="flex justify-between items-center py-1 border-b border-[#232634]/50">
+                <span className="text-[#94A3B8]">Speech Synthesis</span>
+                <span className="font-mono text-white font-medium">{voiceObj.name} (Edge TTS)</span>
+              </div>
 
-            <div className="flex justify-between items-center py-1">
-              <span className="text-[#94A3B8]">Word Count</span>
-              <span className="font-mono text-white font-medium">{totalWords} spoken words</span>
+              <div className="flex justify-between items-center py-1">
+                <span className="text-[#94A3B8]">Word Count</span>
+                <span className="font-mono text-white font-medium">{totalWords} spoken words</span>
+              </div>
             </div>
           </div>
         </div>

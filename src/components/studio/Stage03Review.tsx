@@ -18,16 +18,19 @@ import {
   RefreshCw,
   FastForward,
   Rewind,
+  Download,
 } from 'lucide-react';
 import { useStudio } from '../../context/StudioContext';
 import { StudioScene, VOICES } from '../../types/studio';
 import { RemotionStudioPlayer, RemotionStudioPlayerHandle } from './RemotionStudioPlayer';
+import { ExportModal } from './ExportModal';
 
 export const Stage03Review: React.FC = () => {
   const { project, setStage, updateProject } = useStudio();
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
+  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [duration, setDuration] = useState<number>(project.duration || 60);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
@@ -433,6 +436,16 @@ export const Stage03Review: React.FC = () => {
               })}
             </div>
           </div>
+
+          {/* Quick Export / Download Button */}
+          <button
+            type="button"
+            onClick={() => setIsExportModalOpen(true)}
+            className="w-full max-w-[310px] mt-4 inline-flex items-center justify-center gap-2 rounded-xl border border-[#FF4F00]/50 bg-[#FF4F00]/10 hover:bg-[#FF4F00]/20 py-2.5 px-4 text-xs font-mono font-bold text-[#FF4F00] transition active:scale-95 cursor-pointer shadow-lg shadow-[#FF4F00]/10"
+          >
+            <Download className="h-4 w-4" />
+            <span>⚡ Quick Export &amp; Download Reel</span>
+          </button>
         </div>
 
         {/* ========================================================
@@ -660,13 +673,22 @@ export const Stage03Review: React.FC = () => {
         <button
           type="button"
           onClick={() => setStage(2)}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-[#232634] bg-[#14161F] px-5 py-3 text-xs font-medium text-[#EDEDED] hover:bg-[#1C1E26] transition active:scale-95"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-[#232634] bg-[#14161F] px-5 py-3 text-xs font-medium text-[#EDEDED] hover:bg-[#1C1E26] transition active:scale-95 cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4 text-[#FF4F00]" />
           <span>← Back to Storyboard</span>
         </button>
 
-        <div className="w-full sm:w-auto flex items-center justify-end">
+        <div className="w-full sm:w-auto flex flex-wrap items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={() => setIsExportModalOpen(true)}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-[#FF4F00]/50 bg-[#FF4F00]/10 hover:bg-[#FF4F00]/20 px-5 py-3 text-xs font-mono font-bold text-[#FF4F00] transition active:scale-95 cursor-pointer"
+          >
+            <Download className="h-4 w-4" />
+            <span>Quick Export</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setStage(4)}
@@ -677,6 +699,13 @@ export const Stage03Review: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Quick Export Modal */}
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        onGoToPublish={() => setStage(4)}
+      />
     </div>
   );
 };

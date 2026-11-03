@@ -50,7 +50,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="DynamicStoryReel"
         component={DynamicStoryReel as any}
-        durationInFrames={30 * 60}
+        durationInFrames={30 * 180}
         fps={fps}
         width={1080}
         height={1920}

@@ -102,23 +102,31 @@ export async function POST(request: Request) {
 
         const outputMp4Path = path.join(rendersDir, `${reelId}.mp4`);
 
-        // Prepare physical MP3 files for Remotion FFMPEG rendering if data URIs are present
+        // Prepare physical MP3 files and sanitize chronological timing for Remotion FFMPEG rendering
+        let cumulativeTime = 0;
         const preparedScenes = safeScenes.map((sc, i) => {
-          if (sc.audioUrl && sc.audioUrl.startsWith('data:audio/mp3;base64,')) {
+          const dur = typeof sc.duration === 'number' && !isNaN(sc.duration) && sc.duration > 0 ? sc.duration : 4.0;
+          const start = typeof sc.startTime === 'number' && !isNaN(sc.startTime) ? sc.startTime : cumulativeTime;
+          cumulativeTime = start + dur;
+          let audioUrl = sc.audioUrl;
+          if (audioUrl && audioUrl.startsWith('data:audio/mp3;base64,')) {
             try {
               const audioFileName = `audio_${reelId}_scene_${i}.mp3`;
               const audioFilePath = path.join(rendersDir, audioFileName);
-              const b64Data = sc.audioUrl.replace(/^data:audio\/mp3;base64,/, '');
+              const b64Data = audioUrl.replace(/^data:audio\/mp3;base64,/, '');
               fs.writeFileSync(audioFilePath, Buffer.from(b64Data, 'base64'));
-              return {
-                ...sc,
-                audioUrl: `/renders/${audioFileName}`,
-              };
+              audioUrl = `/renders/${audioFileName}`;
             } catch {
-              return sc;
+              // fallback to original
             }
           }
-          return sc;
+          return {
+            ...sc,
+            duration: dur,
+            startTime: start,
+            endTime: start + dur,
+            audioUrl,
+          };
         });
 
         const propsData = {
@@ -135,15 +143,18 @@ export async function POST(request: Request) {
 
         // Total frames at 30 FPS matching the exact project duration
         const totalFrames = Math.max(60, Math.ceil(totalDurationSec * 30));
-        const renderCmd = `npx remotion render src/remotion/index.ts DynamicStoryReel "${outputMp4Path}" --props="${propsPath}" --frames=0-${totalFrames} --concurrency=4`;
+        const cleanOutPath = outputMp4Path.replace(/\\/g, '/');
+        const cleanPropsPath = propsPath.replace(/\\/g, '/');
+        const renderCmd = `npx remotion render src/remotion/index.ts DynamicStoryReel "${cleanOutPath}" --props="${cleanPropsPath}" --frames=0-${totalFrames} --concurrency=4`;
 
         // Execute rendering with 180 second timeout
         await execAsync(renderCmd, { timeout: 180000 });
 
         const outputPosterPath = path.join(rendersDir, `${reelId}.png`);
+        const cleanPosterPath = outputPosterPath.replace(/\\/g, '/');
         try {
           // Generate poster still frame at frame 15
-          const stillCmd = `npx remotion still src/remotion/index.ts DynamicStoryReel "${outputPosterPath}" --props="${propsPath}" --frame=15`;
+          const stillCmd = `npx remotion still src/remotion/index.ts DynamicStoryReel "${cleanPosterPath}" --props="${cleanPropsPath}" --frame=15`;
           await execAsync(stillCmd, { timeout: 30000 });
         } catch (stillErr) {
           console.warn('Remotion poster frame extraction skipped or failed:', stillErr);

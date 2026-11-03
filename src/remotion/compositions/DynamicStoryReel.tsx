@@ -1935,7 +1935,9 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
     extrapolateRight: 'clamp',
   });
 
-  const safeScenes = scenes.length > 0 ? scenes : [
+  // Defensive normalization: guarantee every scene has valid, finite numerical startTime and duration
+  let cumulativeTime = 0;
+  const rawScenes = scenes.length > 0 ? scenes : [
     {
       id: 'default_1',
       index: 1,
@@ -1948,6 +1950,18 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
       highlightWords: ['AutoReel', 'explainers'],
     },
   ];
+
+  const safeScenes = rawScenes.map((s, idx) => {
+    const dur = typeof s.duration === 'number' && !isNaN(s.duration) && s.duration > 0 ? s.duration : 4.0;
+    const start = typeof s.startTime === 'number' && !isNaN(s.startTime) ? s.startTime : cumulativeTime;
+    cumulativeTime = start + dur;
+    return {
+      ...s,
+      duration: dur,
+      startTime: start,
+      endTime: start + dur,
+    };
+  });
 
   // Dynamic Audio Ducking Engine:
   // Evaluates narration voiceover activity frame-by-frame.
