@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const geminiKey = process.env.GEMINI_API_KEY;
 
     let scenes: StudioScene[] | null = null;
-    let usedModel = 'heuristic-engine';
+    let usedModel = geminiKey ? 'heuristic-fallback' : 'missing-GEMINI_API_KEY';
 
     if (geminiKey && !geminiKey.includes('your_') && geminiKey.trim().length > 10) {
       try {
