@@ -21,7 +21,11 @@ export type VisualArchetype =
   | 'process_flow'
   | 'dynamic_chart'
   | 'timeline'
-  | 'step_sequence';
+  | 'step_sequence'
+  | 'code_terminal'
+  | 'investigative_dossier';
+
+export type SfxCue = 'bass_drop' | 'whoosh' | 'pop' | 'typewriter' | 'none';
 
 export interface DynamicGraphicData {
   badge?: string;
@@ -57,6 +61,7 @@ export interface StudioScene {
   graphicData?: DynamicGraphicData;
   audioUrl?: string;
   audioDuration?: number; // Exact spoken audio duration in seconds
+  sfxCue?: SfxCue;
 }
 
 export interface StudioProject {
@@ -74,6 +79,14 @@ export interface StudioProject {
   aspectRatio: '9:16';
   videoUrl: string | null;
   srtUrl: string | null;
+  musicTrack?: {
+    id: string;
+    name: string;
+    url: string;
+    enabled: boolean;
+  };
+  enableSfx?: boolean;
+  enableMusicDucking?: boolean;
   publishing: {
     platform: 'youtube' | 'instagram' | 'tiktok' | 'linkedin';
     title: string;

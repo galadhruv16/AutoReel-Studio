@@ -167,6 +167,9 @@ export const Stage04Publish: React.FC = () => {
           accentColor: '#FF4F00',
           scenes,
           renderDynamic: true,
+          musicUrl: project.musicTrack?.enabled !== false ? (project.musicTrack?.url || 'audio/music/ambient_tension.wav') : null,
+          enableSfx: project.enableSfx !== false,
+          enableMusicDucking: project.enableMusicDucking !== false,
         }),
       });
       const json = await res.json();

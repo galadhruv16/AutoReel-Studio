@@ -59,6 +59,9 @@ export const RemotionRoot: React.FC = () => {
           scenes: [],
           captionStyle: 'kinetic' as const,
           accentColor: '#FF4F00',
+          musicUrl: 'audio/music/ambient_tension.wav',
+          enableSfx: true,
+          enableMusicDucking: true,
         }}
       />
 

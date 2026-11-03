@@ -640,6 +640,8 @@ export const Stage02Storyboard: React.FC = () => {
                     <option value="dynamic_chart">Dynamic Metric Chart</option>
                     <option value="timeline">Chronological Timeline</option>
                     <option value="step_sequence">Step Sequence Takeaways</option>
+                    <option value="code_terminal">Code & Terminal Explainer</option>
+                    <option value="investigative_dossier">Investigative Dossier & Paper</option>
                   </select>
                 </div>
               </div>

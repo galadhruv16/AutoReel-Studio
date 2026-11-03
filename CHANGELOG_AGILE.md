@@ -1,6 +1,30 @@
 # AutoReel Studio — Agile Development Changelog
 
-## [Option B Release] Full 8 Motion Graphics Patterns & Dynamic MP4 Rendering Pipeline
+## [Release] Next-Gen Hybrid Motion Engine & Acoustic Refinement
+- **Status**: Completed & Verified
+- **Date**: 2026-11-03
+- **Focus**: Transition from rigid 8-archetype UI cards to 10+ broadcast-grade editorial archetypes (including Code Terminal & Investigative Dossier), dynamic audio ducking, silky acoustic sound design, and elimination of repetitive transition noise.
+
+### Implemented Features:
+1. **Acoustic Refinement & Elimination of Repetitive Transition Fatigue**:
+   - Diagnosed and resolved repetitive "crashing" sound: removed automatic whoosh triggers on every scene boundary. Scene cuts now default to clean, natural silent cuts.
+   - Replaced harsh white-noise whoosh synthesis with silky-smooth pink noise (Voss-McCartney algorithm) low-passed strictly below 480 Hz with cosine-squared windowing.
+   - Master volume attenuation: reduced transition SFX from 0.40 to 0.14 and hook bass drop from 0.70 to 0.35.
+   - Frame-accurate dynamic audio ducking: ambient tension synth bed ducks to 9% during narration speech and swells to 28% during natural pauses and narrative transitions.
+2. **Expanded Editorial Archetypes & Storyboard Generator Routing**:
+   - `code_terminal` (Fireship Style): Dark IDE window, macOS traffic lights, syntax-highlighted code tokens, line numbers, blinking cursor, and live typing animation.
+   - `investigative_dossier` (Vox Style): Archival document card, angled confidential stamp, metadata header, and animated yellow highlighter ink reveal.
+   - Integrated both into Stage 02 and Stage 03 studio dropdowns and AI Director prompts.
+   - **Fixed Storyboard Generator Bug**: Resolved whitelist omission in generate-storyboard/route.ts that previously coerced code_terminal and investigative_dossier back to kinetic_text.
+   - **Intelligent Category-Aware Sequencing**: Topic keywords now intelligently route tech/code topics to feature code_terminal at Scene 2, investigative/history topics to feature investigative_dossier at Scene 2, and general topics to include both within the first 3 scenes.
+   - **Updated Gemini Models Chain**: Configured current stable models (gemini-2.5-flash, gemini-2.0-flash, gemini-1.5-flash).
+3. **Atmospheric Canvas & Virtual 3D Camera Dynamics**:
+   - Edge-darkening radial vignette and SVG fractal film grain texture (`feTurbulence`) overlay.
+   - Continuous per-scene camera push (`scale: 1.0 -> 1.045`) eliminating static dead frames.
+4. **Verification & Quality Assurance**:
+   - Full 10-second Next-Gen reel rendered cleanly (`out/test_nextgen_hybrid_reel.mp4`, 7.01 MB).
+   - 25 / 25 end-to-end QA tests passed (100% success rate).
+   - Next.js production build succeeded across all 14 routes.
 - **Status**: Completed & Verified
 - **Date**: 2026-11-01
 - **Focus**: Delivery of all 8 Remotion motion graphics patterns specified in the PRD, dynamic semantic archetype selection via Gemini 3.5, and server-side Remotion 1080×1920 MP4 compilation.

@@ -327,6 +327,9 @@ export const Stage03Review: React.FC = () => {
             scenes={scenes}
             captionStyle={project.captionStyle}
             accentColor="#FF4F00"
+            musicUrl={ambientVolume > 0 ? (project.musicTrack?.url || 'audio/music/ambient_tension.wav') : null}
+            enableSfx={project.enableSfx !== false}
+            enableMusicDucking={project.enableMusicDucking !== false}
             fallbackVideoSrc={videoSrc}
             posterSrc={posterSrc}
             onTimeUpdate={handleTimeUpdate}
@@ -552,6 +555,8 @@ export const Stage03Review: React.FC = () => {
                     <option value="dynamic_chart">Dynamic Metric Chart</option>
                     <option value="timeline">Chronological Timeline</option>
                     <option value="step_sequence">Step Sequence Takeaways</option>
+                    <option value="code_terminal">Code & Terminal Explainer</option>
+                    <option value="investigative_dossier">Investigative Dossier & Paper</option>
                   </select>
                 </div>
 

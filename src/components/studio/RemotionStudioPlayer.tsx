@@ -65,6 +65,9 @@ export interface RemotionStudioPlayerProps {
   captionStyle: 'kinetic' | 'minimal' | 'bold';
   accentColor?: string;
   audioUrl?: string | null;
+  musicUrl?: string | null;
+  enableSfx?: boolean;
+  enableMusicDucking?: boolean;
   fallbackVideoSrc?: string;
   posterSrc?: string;
   onTimeUpdate?: (currentSeconds: number) => void;
@@ -80,6 +83,9 @@ export const RemotionStudioPlayer = forwardRef<RemotionStudioPlayerHandle, Remot
       captionStyle,
       accentColor = '#FF4F00',
       audioUrl,
+      musicUrl = 'audio/music/ambient_tension.wav',
+      enableSfx = true,
+      enableMusicDucking = true,
       fallbackVideoSrc,
       posterSrc,
       onTimeUpdate,
@@ -342,6 +348,9 @@ export const RemotionStudioPlayer = forwardRef<RemotionStudioPlayerHandle, Remot
                       captionStyle,
                       accentColor,
                       audioUrl: audioUrl || null,
+                      musicUrl: musicUrl || 'audio/music/ambient_tension.wav',
+                      enableSfx,
+                      enableMusicDucking,
                     }}
                     durationInFrames={durationInFrames}
                     fps={fps}

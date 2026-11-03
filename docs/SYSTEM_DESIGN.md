@@ -1,8 +1,8 @@
 # System Architecture & Technical Design Document (SDD)
 
 # Project: AutoReel Studio
-**Version:** 1.0.0  
-**Status:** Approved Baseline for Implementation  
+**Version:** 2.0.0 (Next-Gen Hybrid Motion Video Engine & Procedural Sound Design)  
+**Status:** Approved Technical Upgrade Baseline  
 **Target:** 9:16 Vertical Short-Form Video Generation Engine & Web Studio  
 
 ---
@@ -13,11 +13,11 @@ AutoReel Studio is organized into five decoupled tiers:
 1. **Client Tier (Web Studio):** Next.js App Router (React, Tailwind CSS, Shadcn UI) hosting the AI Director Chat, Storyboard Inspector, and the in-browser real-time Remotion Player.
 2. **API & Orchestration Tier:** Next.js Server Actions and Route Handlers triggering durable, multi-step background workflows via **Inngest**.
 3. **Multi-Engine Intelligence & Audio Layer:** 
-   - LLM: Google Gemini 1.5 / 3.8 Flash (structured JSON output mode).
-   - Audio: Abstracted `AudioProvider` supporting **Microsoft Edge Neural TTS** (Free Dev default) and **ElevenLabs** (Studio drop-in).
-   - Generative Concept Art: Pollinations.ai (Flux Schnell / Dev).
+   - LLM: Google Gemini 1.5 / 3.8 Flash (structured JSON output mode for scripts, visual cues, and SFX triggers).
+   - Audio & Sound Design: Abstracted `AudioProvider` supporting **Microsoft Edge Neural TTS** and **ElevenLabs** + Multi-Track Procedural SFX & Royalty-Free ducked soundtrack library.
+   - Generative Canvas & B-Roll Service: Pexels Video API + Pollinations.ai (Flux Schnell / Dev) for atmospheric background canvases and subject cutouts.
 4. **Motion Composition & Video Rendering Engine:** Remotion framework running `@remotion/player` for client preview and `@remotion/renderer` with Headless Chrome + FFmpeg for 1080 × 1920 MP4 export.
-5. **Persistence & Social Integration Tier:** PostgreSQL / Supabase (or MongoDB) for state dimensions, Cloudflare R2 / S3 for media storage, and Meta Graph API for Instagram Reels publishing.
+5. **Persistence & Social Integration Tier:** PostgreSQL / Supabase for state dimensions, Cloudflare R2 / S3 for media storage, and Meta Graph API for Instagram Reels publishing.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
@@ -25,7 +25,7 @@ AutoReel Studio is organized into five decoupled tiers:
 │                                                                                        │
 │   ┌────────────────────┐   ┌──────────────────────────┐   ┌────────────────────────┐  │
 │   │ AI Director Chat   │   │ Storyboard Inspector     │   │ Real-Time Preview      │  │
-│   │ (Seed / Hooks)     │   │ (8 Motion Patterns / UI) │   │ (@remotion/player)     │  │
+│   │ (Seed / Hooks)     │   │ (12+ Archetypes / Media) │   │ (@remotion/player)     │  │
 │   └─────────┬──────────┘   └────────────┬─────────────┘   └───────────▲────────────┘  │
 └─────────────┼───────────────────────────┼─────────────────────────────┼────────────────┘
               │ HTTP / Server Actions     │ HTTP                        │ Reads Props
@@ -36,16 +36,16 @@ AutoReel Studio is organized into five decoupled tiers:
 │   Next.js API Routes / Inngest Durable Workflow Engine                                 │
 │   • Version Invalidation Resolver                                                      │
 │   • Job Queue & Deduplication Coordinator                                              │
-│   • Atomic State Transitions                                                           │
+│   • Audio Ducking & Procedural SFX Alignment Coordinator                              │
 └──────┬──────────────────────┬──────────────────────┬────────────────────┬──────────────┘
        │                      │                      │                    │
        ▼                      ▼                      ▼                    ▼
 ┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌──────────────┐
-│  LLM SERVICE │      │ AUDIO ENGINE │      │ VISUAL ASSET │      │ VIDEO RENDER │
-│              │      │ (Abstracted) │      │   SERVICE    │      │    ENGINE    │
-│ Gemini Flash │      │ 1. Edge-TTS  │      │ 1. Lucide SVG│      │ Remotion     │
-│ JSON Output  │      │    (Default) │      │ 2. Flux AI   │      │ Renderer     │
-│ Hook & Plan  │      │ 2. ElevenLabs│      │ 3. Canvas UI │      │ FFmpeg MP4   │
+│  LLM SERVICE │      │ SOUND DESIGN │      │ VISUAL MEDIA │      │ VIDEO RENDER │
+│              │      │    ENGINE    │      │    CANVAS    │      │    ENGINE    │
+│ Gemini Flash │      │ 1. Edge/11Lb │      │ 1. Pexels B-Roll│   │ Remotion 60f │
+│ Structured   │      │ 2. Ducked Bed│      │ 2. Flux AI Cutout│  │ Continuous 3D│
+│ Script & Cues│      │ 3. SFX Track │      │ 3. 2.5D Collage │   │ FFmpeg MP4   │
 └──────┬───────┘      └──────┬───────┘      └──────┬───────┘      └──────┬───────┘
        │                     │                     │                     │
        └─────────────────────┼─────────────────────┴─────────────────────┘
@@ -76,16 +76,43 @@ export const MotionPatternEnum = z.enum([
   'timeline',
   'dynamic_chart',
   'step_sequence',
-  'kinetic_summary'
+  'kinetic_summary',
+  // Next-Gen Editorial Archetypes
+  'investigative_dossier',
+  'code_terminal',
+  'archival_collage',
+  'macro_map'
 ]);
 
-export const SfxCueEnum = z.enum(['whoosh', 'pop', 'click', 'none']);
+export const SfxCueEnum = z.enum([
+  'bass_drop',
+  'whoosh',
+  'pop',
+  'typewriter',
+  'chime',
+  'none'
+]);
+
+export const BackgroundMediaSchema = z.object({
+  type: z.enum(['video_loop', 'ai_image', 'gradient_mesh', 'none']).default('gradient_mesh'),
+  url: z.string().optional(),
+  searchQuery: z.string().optional(),
+  opacity: z.number().min(0).max(1).default(0.35),
+});
+
+export const SubjectCutoutSchema = z.object({
+  url: z.string().optional(),
+  label: z.string().optional(),
+  driftDirection: z.enum(['left_to_right', 'right_to_left', 'scale_up']).default('scale_up'),
+});
 
 export const VisualChoiceSchema = z.object({
-  geometryType: z.enum(['isometric_3d', 'split_screen', 'radial_orbit', 'linear_flow', 'minimal_editorial']),
+  geometryType: z.enum(['isometric_3d', 'split_screen', 'radial_orbit', 'linear_flow', 'minimal_editorial', 'dossier_paper', 'terminal_window']),
   focalElements: z.array(z.string()),
-  accentColor: z.string().default('#38BDF8'),
-  cameraMotion: z.enum(['dolly_in', 'pan_down', 'subtle_float', 'static_anchor']).default('dolly_in'),
+  accentColor: z.string().default('#FF4F00'),
+  cameraMotion: z.enum(['dolly_in', 'pan_down', 'subtle_float', 'whip_pan', 'zoom_punch', 'static_anchor']).default('dolly_in'),
+  backgroundMedia: BackgroundMediaSchema.optional(),
+  subjectCutout: SubjectCutoutSchema.optional(),
 });
 
 export const SceneLabelsSchema = z.object({
@@ -282,28 +309,70 @@ export function calculateMusicVolume(
 
 ## 5. Remotion Video Composition Architecture
 
-The Remotion composition tree is structured as a series of nested sequences:
+The Remotion composition tree is structured as a 4-tier layered compositing stack with continuous virtual camera dynamics:
 
 ```
 <Root>
-  └── <Composition id="MainReel" width={1080} height={1920} fps={30}>
-        ├── <BackgroundLayer /> (Dynamic canvas gradient / subtle ambient particles)
-        ├── <Series>
-        │     ├── <Series.Sequence durationInFrames={scene1Frames}>
-        │     │     ├── <MotionPatternComponent pattern={scene1.pattern} params={scene1.params} />
-        │     │     ├── <Audio src={scene1.audioUrl} />
-        │     │     └── <SfxAudio cue={scene1.sfxCue} />
-        │     │
-        │     ├── <Series.Sequence durationInFrames={scene2Frames}>
-        │     │     ├── <MotionPatternComponent pattern={scene2.pattern} params={scene2.params} />
-        │     │     ├── <Audio src={scene2.audioUrl} />
-        │     │     └── <SfxAudio cue={scene2.sfxCue} />
-        │     │
-        │     └── ... [Scene N]
-        │
-        ├── <GlobalCaptionLayer wordTimestamps={allWordTimestamps} />
-        ├── <BackgroundMusicLayer audioUrl={musicUrl} activeIntervals={speechIntervals} />
-        └── <InstagramSafeZoneOverlay isVisible={showSafeZone} />
+  └── <Composition id="DynamicStoryReel" width={1080} height={1920} fps={30}>
+        {/* Tier 1: Virtual Cinematic Camera Container (Continuous 1.0 -> 1.06 push-in) */}
+        <AbsoluteFill style={{ transform: `scale(${cameraScale})` }}>
+          
+          {/* Tier 2: Background Canvas & Atmospheric Texture */}
+          <BackgroundMediaCanvas 
+            media={scene.backgroundMedia} 
+            vignetteOverlay={true}
+            filmGrainIntensity={0.12} 
+          />
+          
+          {/* Tier 3: 2.5D Subject Cutout / Archival Collage Layer */}
+          {scene.subjectCutout && (
+            <SubjectCutoutParallax 
+              cutout={scene.subjectCutout} 
+              depthOffset={25} 
+            />
+          )}
+
+          {/* Tier 4: Editorial Motion HUD & Dynamic Archetypes (12+ Formats) */}
+          <Series>
+            {scenes.map(scene => (
+              <Series.Sequence durationInFrames={scene.durationFrames}>
+                <ArchetypeRenderer 
+                  type={scene.visualType} 
+                  cueFrame={scene.cueFrame}
+                  graphicData={scene.graphicData} 
+                  accentColor={accentColor} 
+                />
+              </Series.Sequence>
+            ))}
+          </Series>
+          
+          {/* Live Synchronized Kinetic Captions */}
+          <GlobalCaptionLayer captionStyle={captionStyle} scenes={scenes} />
+          
+        </AbsoluteFill>
+
+        {/* Multi-Track Audio Engine with Automatic Dynamic Ducking */}
+        <BackgroundMusicBed 
+          trackUrl={project.musicUrl} 
+          volume={calculateMusicVolume(currentFrame, activeSpeechIntervals)} 
+        />
+        
+        {/* Procedural SFX Sequence Layer */}
+        {scenes.map(scene => (
+          <Sequence from={scene.startFrame} durationInFrames={30}>
+            <Audio src={getSfxUrl(scene.sfxCue)} volume={0.65} />
+          </Sequence>
+        ))}
+
+        {/* Isolated Voiceover Sequences */}
+        {scenes.map(scene => (
+          <Sequence from={scene.startFrame} durationInFrames={scene.audioFrames}>
+            <Audio src={scene.audioUrl} volume={1.0} />
+          </Sequence>
+        ))}
+
+        {/* Guardrail Overlay */}
+        <InstagramSafeZoneOverlay isVisible={showSafeZone} />
 ```
 
 ### 5.1. Instagram Safe-Zone Guardrails (9:16 Canvas)
@@ -313,7 +382,7 @@ Total Canvas: $1080 \times 1920 \text{ px}$
 - **Right Safe Margin:** $160 \text{ px}$ ($14.8\%$) $\rightarrow$ Avoids Like, Comment, Share, Remix buttons.
 - **Safe Center Area:** $W: 880 \text{ px}, H: 1280 \text{ px}$, centered horizontally from $X = 40 \text{ px}$ to $X = 920 \text{ px}$, and vertically from $Y = 160 \text{ px}$ to $Y = 1440 \text{ px}$.
 
-All 8 Motion Pattern layouts and dynamic captions are strictly clamped inside this **Safe Center Area**.
+All Motion Pattern layouts, subject cutouts, and dynamic captions are strictly clamped inside this **Safe Center Area**.
 
 ---
 

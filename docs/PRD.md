@@ -1,8 +1,8 @@
 # Product Requirements Document (PRD)
 
 # Project: AutoReel Studio (AI-Powered Short-Form Motion Video SaaS)
-**Version:** 2.0 (Integrated Master Baseline)  
-**Status:** Final Planning Baseline — Ready for System Architecture & Implementation  
+**Version:** 2.1 (Next-Gen Hybrid Motion Engine & Dynamic Audio Pipeline)  
+**Status:** Approved Technical Upgrade Baseline  
 **Target Platform:** Web (Desktop-first studio, mobile-optimized preview & review)  
 **Output Target:** 9:16 Vertical Video (1080 × 1920, 30/60 fps) for Instagram Reels, YouTube Shorts, and TikTok  
 
@@ -40,10 +40,10 @@ By pairing an **interactive AI Director co-pilot** with a **code-driven motion g
 | **Release Scope** | Internal development baseline & aggressive testing | Strict data isolation, robust project persistence, zero-cost dev. |
 | **Workspace Model** | Private personal dashboard per user | Strict data isolation; no cross-user project leakage. |
 | **Workflow** | 4-step progressive flow | 1. Idea $\rightarrow$ 2. Combined Storyboard $\rightarrow$ 3. Video Preview $\rightarrow$ 4. Publish/Schedule. |
-| **Durations & Pacing** | 30s, 60s, 90s targets with Pacing Modes | Fast & Punchy (2.5–3.5s/scene), Balanced (4–5s/scene), Deep-Dive (5–7s/scene). |
+| **Durations & Pacing** | 30s, 60s, 90s targets with Asymmetric Retention Pacing | Dynamic cadence: Micro-hook (1.2–2s), narrative build (2.5–3.5s), deep dive (4–6s), punchy conclusion. |
 | **Languages & Accents** | English narration with curated voice presets | Includes Indian English (Male/Female) and Global English presets. |
-| **Visual Direction** | Minimal editorial motion graphics + generative concept art | 8 reusable vector motion patterns + optional Flux AI concept illustrations. |
-| **Audio Engine** | Abstracted Hybrid Provider | Free-tier default: Edge Neural TTS (unlimited, $0). Drop-in: ElevenLabs. |
+| **Visual Direction** | Next-Gen Layered Hybrid Media (B-Roll + 2.5D Cutouts + Vector Motion HUD) | 3-layer compositing: generative video/stock canvas, 2.5D subject cutouts, 12+ Remotion motion archetypes. |
+| **Audio Engine** | Multi-Track Sound Design + Dynamic Audio Ducking | Abstracted TTS (Edge-TTS / ElevenLabs) + Ducked royalty-free music bed (-18dB speech / -6dB pauses) + procedural SFX (bass drop, whoosh, pop, typewriter). |
 | **Captions** | Visible, editable dynamic captions | Millisecond-accurate word sync; max 2 lines; strictly inside Instagram Safe Zone. |
 | **Revisions** | Conversational + In-place editing | Natural language chat edits at both Storyboard and Video Preview stages. |
 | **Delivery** | In-browser preview, 1080p MP4 download, Meta Instagram direct publish & schedule | Official Meta Graph API with atomic deduplication. |
@@ -95,28 +95,56 @@ By pairing an **interactive AI Director co-pilot** with a **code-driven motion g
 
 ---
 
-## 4. The 8 Reusable Motion-Graphics Patterns
+## 4. The Next-Gen Hybrid Motion Engine & Expanded Archetype Registry
 
-To prevent generic stock video and ensure visual hierarchy, every scene maps to one of **eight parameterized motion patterns** rendered via Remotion:
+To transcend flat, repetitive template cards and deliver broadcast-grade motion videos (comparable to Vox, Johnny Harris, Fireship, and Magnates Media), the video generation pipeline transitions from an isolated card compiler to a **4-Layer Compositing Engine**:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ 1. TITLE / HOOK        Bold kinetic headline, subtitle pulse, depth accent   │
-│ 2. LABELED DIAGRAM     Central concept node, directional arrows, callouts    │
-│ 3. PROCESS FLOW        Numbered steps connected by animated motion paths     │
-│ 4. COMPARISON          Split-screen frame ("Old vs New", "Problem vs Solution")│
-│ 5. TIMELINE            Chronological milestones with progressive reveal      │
-│ 6. DYNAMIC CHART       Animated bar charts, percentage counters, trendlines  │
-│ 7. STEP SEQUENCE       Stacked/cascading cards highlighting 1-2-3 takeaways │
-│ 8. KINETIC SUMMARY     Punchy thesis statement, key takeaway, call-to-action │
+│  LAYER 4: FOREGROUND HUD & KINETIC TYPOGRAPHY (Remotion 60 FPS)              │
+│  • Frame-accurate kinetic text reveals, high-contrast badges                 │
+│  • Vector arrows, interactive highlighter lines, stat callouts, captions      │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  LAYER 3: 2.5D SUBJECT CUTOUT & COLLAGE DEPTH                                │
+│  • Transparent subject/device/document with drop shadow & continuous drift   │
+│  • Pinned archival items, red circle highlights, confidential dossier stamps │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  LAYER 2: CINEMATIC CANVAS (Generative Video / B-Roll / Maps)                │
+│  • Topic-relevant footage (Pexels / Flux video loops), animated grid/noise   │
+│  • Radial vignette + 12% film grain overlay + color-grading tint             │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  LAYER 1: MULTI-TRACK SOUND DESIGN & AUDIO DUCKING                           │
+│  • Dynamic ducked music bed (-18 dB speaking / -6 dB dramatic pauses)        │
+│  • Procedural SFX library: sub-bass drops, whoosh pans, typewriter clicks    │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Visual System & Safe-Area Constraints
+### 4.1. The 12 Industry-Grade Editorial Archetypes
+
+Every storyboard scene maps to a content-adaptive archetype designed for maximum retention:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 1. TITLE / CINEMATIC HOOK     Heavy sub-bass hit, zoom punch, bold typography, radial energy│
+│ 2. LABELED SCHEMATIC          Active node pulse, directional data flow arrows, metric tags  │
+│ 3. PROCESS & DECISION FLOW    Numbered step chains with illuminated active beats            │
+│ 4. COMPARISON / OPPOSITION    Split-screen laser divide, side-by-side contrast metrics      │
+│ 5. CHRONOLOGICAL TIMELINE     Horizontal/vertical milestone track with progress beam        │
+│ 6. DYNAMIC STAT & CHART       Real-time counter easing, animated bar graphs, trendlines     │
+│ 7. STEP SEQUENCE              Cascading 3D cards, staggered takeaway highlights             │
+│ 8. KINETIC SUMMARY / LOOP     Looping thesis statement connecting back to opening hook      │
+│ 9. INVESTIGATIVE DOSSIER      Paper texture, confidential stamps, yellow highlighter reveal │
+│ 10. CODE & TERMINAL EXPLAINER Monospace syntax highlighting, blinking cursor, live typing   │
+│ 11. 2.5D ARCHIVAL COLLAGE     Cutout portraits/artifacts floating with depth-of-field drift │
+│ 12. MACRO MAP & TELEMETRY     Topographic dark map, flight path arcs, pulsing GPS beacons   │
+└─────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 4.2. Visual System & Safe-Area Constraints
 - **Safe-Area Enforcement:** Subtitles, diagrams, and labels strictly avoid the bottom 25% (Instagram handle/caption zone), right 15% (interaction icons), and top 8% (system header).
-- **Progressive Disclosure:** Elements animate in sync with narration phrases; diagrams never appear all at once.
-- **Consistent Stroke & Palette:** Restrained accent palette, consistent vector stroke weights, high contrast against light or dark neutral backgrounds.
-- **Fact-Based Data:** Charts only display user-supplied metrics or clearly marked illustrative figures; the AI never hallucinates fake quantitative evidence.
+- **Continuous Camera Dynamics:** Virtual 3D camera maintains a slow continuous push-in (`scale: 1.0 -> 1.06`) or lateral drift throughout every scene to eliminate static dead frames.
+- **Parametric Transitions:** Hard cuts are replaced with contextual transitions: whip pans for contrasting ideas, zoom punches for revelations, and subtle light leaks for historical retrospectives.
+- **Dynamic Audio Ducking:** Remotion dynamically evaluates narrator voice activity frame-by-frame, ducking the background music bed during speech and swelling during pauses.
 
 ---
 
@@ -221,6 +249,24 @@ The platform supports plain-language revision prompts at both Storyboard and Vid
 - **Fail-Safe Reconciliation (No Duplicate Posts):**
   - If a network request to Meta times out after submission, the job enters `Outcome unknown`.
   - The worker reconciles the status with Meta's container API before any retry is permitted, preventing accidental duplicate posts.
+
+### FR-12: Multi-Track Sound Design & Dynamic Audio Ducking
+- **Audio Ducking Engine:** Remotion dynamically analyzes active speech intervals. Background music track volume is ducked to 12% during voiceover and swells to 32% during natural pauses and narrative transitions.
+- **Curated Royalty-Free Soundtrack Library:** Project allows selecting music genre beds (e.g. *Dark Cyberpunk*, *Tech Ambient*, *Investigative Suspense*, *Lofi Chill*).
+- **Procedural SFX Engine:** Automated frame-accurate sound effect triggers:
+  - Sub-bass impact (`bass_drop.mp3`) on Scene 1 hook beat.
+  - Directional whoosh (`whoosh_pan.mp3`) on scene and camera transitions.
+  - High-frequency pop / chime (`pop_accent.mp3`) on statistic and badge reveals.
+  - Monospace keyboard clicks (`typewriter_click.mp3`) on code and terminal reveals.
+
+### FR-13: Layered Visual Canvas & Contextual B-Roll Integration
+- Abstracted `MediaAssetProvider` supporting Pexels API, Pollinations Flux, and local video loop presets.
+- Background canvas layer sits behind motion graphics with configurable opacity (0.25–0.40), radial darkening vignette, and 12% CSS film grain to preserve 100% typography contrast.
+- 2.5D Parallax cutout support: displays isolated entity PNGs with soft drop shadows and continuous scale-drift.
+
+### FR-14: Continuous Cinematic Camera & Micro-Movement Engine
+- Eliminates static frames: every scene executes continuous 3D camera push (`scale: 1.0 -> 1.06`) or lateral drift across its duration.
+- Parametric scene transitions replace hard cuts: whip pans, zoom punches, and subtle chromatic aberration flashes on high-tension beats.
 
 ---
 

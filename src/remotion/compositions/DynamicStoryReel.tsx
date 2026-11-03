@@ -18,6 +18,9 @@ export interface DynamicStoryReelProps {
   accentColor?: string;
   voiceName?: string;
   audioUrl?: string | null;
+  musicUrl?: string | null;
+  enableSfx?: boolean;
+  enableMusicDucking?: boolean;
 }
 
 // =========================================================================
@@ -1407,6 +1410,345 @@ const StepSequenceScene: React.FC<{
 };
 
 // =========================================================================
+// SUB-COMPONENT: CODE & TERMINAL EXPLAINER SCENE (Fireship Style)
+// =========================================================================
+const CodeTerminalScene: React.FC<{
+  scene: StudioScene;
+  accentColor: string;
+}> = ({ scene, accentColor }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const cueFrame = scene.cueFrame || Math.floor(fps * 0.35);
+  const isCueReached = frame >= cueFrame;
+  const cueProgress = interpolate(frame, [cueFrame, cueFrame + 10], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+
+  const enterSpring = spring({ frame, fps, config: { damping: 14, stiffness: 120 } });
+  const pulse = Math.sin(frame * 0.12) * 5;
+
+  const headline = scene.graphicData?.headline || 'EXECUTION PIPELINE';
+  const cleanId = headline.replace(/[^a-zA-Z0-9]/g, '');
+  const varIdentifier = cleanId && !/^[0-9]/.test(cleanId) ? cleanId : `Runtime_${cleanId || 'Execution'}`;
+  const fileName = (scene.graphicData?.badge || 'core_runtime.ts').toLowerCase().replace(/\s+/g, '_');
+  const codeLines = [
+    `// 01: ${scene.graphicData?.badge || '// SYSTEM DIRECTIVE'}`,
+    `const ${varIdentifier} = await initialize({`,
+    `  status: "${isCueReached ? 'ACTIVE' : 'IDLE'}",`,
+    `  metric: "${scene.graphicData?.statNumber || '100%'}", // ${scene.graphicData?.statLabel || 'Target Velocity'}`,
+    `  directive: "${(scene.graphicData?.subtext || scene.narration.slice(0, 36)).replace(/"/g, '')}",`,
+    `});`,
+  ];
+
+  return (
+    <AbsoluteFill
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '0 60px',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          width: 700 + pulse * 10,
+          height: 700 + pulse * 10,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${accentColor}18 0%, transparent 70%)`,
+          filter: 'blur(50px)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 900,
+          backgroundColor: '#0D1117',
+          border: `1.5px solid ${isCueReached ? accentColor : '#30363D'}`,
+          borderRadius: 28,
+          overflow: 'hidden',
+          boxShadow: isCueReached ? `0 30px 80px ${accentColor}25` : '0 25px 70px rgba(0,0,0,0.85)',
+          transform: `scale(${enterSpring})`,
+          transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
+          marginBottom: 36,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '16px 24px',
+            backgroundColor: '#161B22',
+            borderBottom: '1px solid #30363D',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 14, height: 14, borderRadius: '50%', backgroundColor: '#FF5F56' }} />
+            <div style={{ width: 14, height: 14, borderRadius: '50%', backgroundColor: '#FFBD2E' }} />
+            <div style={{ width: 14, height: 14, borderRadius: '50%', backgroundColor: '#27C93F' }} />
+          </div>
+
+          <div
+            style={{
+              fontSize: 14,
+              fontFamily: 'monospace',
+              color: '#C9D1D9',
+              backgroundColor: '#0D1117',
+              padding: '4px 16px',
+              borderRadius: 8,
+              border: '1px solid #30363D',
+              fontWeight: 600,
+            }}
+          >
+            {fileName}
+          </div>
+
+          <span
+            style={{
+              fontSize: 12,
+              fontFamily: 'monospace',
+              color: isCueReached ? accentColor : '#8B949E',
+              fontWeight: 700,
+            }}
+          >
+            {isCueReached ? '● COMPILED' : '○ EXECUTING'}
+          </span>
+        </div>
+
+        <div style={{ padding: '28px 32px', fontFamily: 'monospace', fontSize: 19, lineHeight: 1.6 }}>
+          {codeLines.map((line, lIdx) => {
+            const isHighlightLine = lIdx === 3;
+            return (
+              <div
+                key={lIdx}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 20,
+                  backgroundColor: isHighlightLine && isCueReached ? `${accentColor}15` : 'transparent',
+                  padding: '4px 12px',
+                  borderRadius: 8,
+                  borderLeft: isHighlightLine && isCueReached ? `3px solid ${accentColor}` : '3px solid transparent',
+                  transform: isHighlightLine && isCueReached ? `scale(${1 + cueProgress * 0.02})` : 'none',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <span style={{ color: '#484F58', width: 24, textAlign: 'right', userSelect: 'none', fontSize: 16 }}>
+                  {lIdx + 1}
+                </span>
+                <span
+                  style={{
+                    color: isHighlightLine ? (isCueReached ? '#FFFFFF' : '#8B949E') : lIdx === 0 ? '#8B949E' : '#79C0FF',
+                    fontWeight: isHighlightLine ? 700 : 500,
+                    letterSpacing: '-0.01em',
+                  }}
+                >
+                  {line}
+                  {lIdx === codeLines.length - 1 && Math.floor(frame / 15) % 2 === 0 && (
+                    <span style={{ color: accentColor, fontWeight: 900 }}>|</span>
+                  )}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div style={{ textAlign: 'center', maxWidth: 800 }}>
+        <h3
+          style={{
+            fontSize: 32,
+            fontWeight: 800,
+            color: '#FFFFFF',
+            textTransform: 'uppercase',
+            letterSpacing: '-0.02em',
+            margin: '0 0 8px 0',
+          }}
+        >
+          {headline}
+        </h3>
+        {scene.graphicData?.subtext && (
+          <p style={{ fontSize: 22, color: '#94A3B8', margin: 0, fontWeight: 500 }}>
+            {scene.graphicData.subtext}
+          </p>
+        )}
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// =========================================================================
+// SUB-COMPONENT: INVESTIGATIVE DOSSIER & PAPER SCENE (Vox Style)
+// =========================================================================
+const InvestigativeDossierScene: React.FC<{
+  scene: StudioScene;
+  accentColor: string;
+}> = ({ scene, accentColor }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const cueFrame = scene.cueFrame || Math.floor(fps * 0.35);
+  const isCueReached = frame >= cueFrame;
+  const cueProgress = interpolate(frame, [cueFrame, cueFrame + 14], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+
+  const enterSpring = spring({ frame, fps, config: { damping: 15, stiffness: 110 } });
+
+  const headline = scene.graphicData?.headline || 'DECLASSIFIED ARCHIVE';
+  const badge = scene.graphicData?.badge || 'DOCUMENT RECORD // 1971';
+  const subtext = scene.graphicData?.subtext || scene.narration;
+
+  return (
+    <AbsoluteFill
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '0 60px',
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 880,
+          backgroundColor: '#161922',
+          border: '1.5px solid #2B3040',
+          borderRadius: 32,
+          padding: '48px 44px',
+          boxShadow: '0 30px 80px rgba(0,0,0,0.9)',
+          transform: `scale(${enterSpring}) rotate(-0.8deg)`,
+          position: 'relative',
+          overflow: 'hidden',
+          marginBottom: 36,
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            top: 28,
+            right: 32,
+            border: `3px solid ${isCueReached ? '#EF4444' : '#6B7280'}`,
+            color: isCueReached ? '#EF4444' : '#6B7280',
+            padding: '6px 20px',
+            borderRadius: 8,
+            fontSize: 16,
+            fontWeight: 900,
+            fontFamily: 'monospace',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            transform: 'rotate(12deg)',
+            opacity: 0.9,
+            transition: 'all 0.3s ease',
+          }}
+        >
+          {isCueReached ? 'VERIFIED' : 'CONFIDENTIAL'}
+        </div>
+
+        <div style={{ marginBottom: 28 }}>
+          <span
+            style={{
+              fontSize: 14,
+              fontFamily: 'monospace',
+              color: accentColor,
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              fontWeight: 800,
+              display: 'block',
+              marginBottom: 8,
+            }}
+          >
+            {badge}
+          </span>
+          <div style={{ width: '100%', height: 2, backgroundColor: '#2B3040' }} />
+        </div>
+
+        <h2
+          style={{
+            fontSize: 48,
+            fontWeight: 900,
+            color: '#FFFFFF',
+            lineHeight: 1.15,
+            letterSpacing: '-0.02em',
+            textTransform: 'uppercase',
+            margin: '0 0 24px 0',
+          }}
+        >
+          {headline}
+        </h2>
+
+        <div
+          style={{
+            position: 'relative',
+            fontSize: 26,
+            lineHeight: 1.5,
+            color: '#EDEDED',
+            fontWeight: 600,
+            padding: '16px 20px',
+            backgroundColor: '#0F1117',
+            borderRadius: 16,
+            border: '1px solid #232736',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: 16,
+              backgroundColor: '#FACC15',
+              transform: `scaleX(${isCueReached ? cueProgress : 0})`,
+              transformOrigin: 'left center',
+              opacity: 0.85,
+              transition: 'transform 0.1s linear',
+            }}
+          />
+          <span
+            style={{
+              position: 'relative',
+              zIndex: 10,
+              color: isCueReached && cueProgress > 0.5 ? '#000000' : '#EDEDED',
+              fontWeight: isCueReached && cueProgress > 0.5 ? 800 : 600,
+              transition: 'color 0.2s ease',
+            }}
+          >
+            {subtext}
+          </span>
+        </div>
+
+        {scene.graphicData?.keyTags && (
+          <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
+            {scene.graphicData.keyTags.map((tag, tIdx) => (
+              <span
+                key={tIdx}
+                style={{
+                  fontSize: 13,
+                  fontFamily: 'monospace',
+                  color: '#94A3B8',
+                  backgroundColor: '#0D0F15',
+                  padding: '4px 12px',
+                  borderRadius: 6,
+                  border: '1px solid #232736',
+                }}
+              >
+                #{tag.toUpperCase()}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// =========================================================================
 // SUB-COMPONENT: SYNCHRONIZED RESPONSIVE CAPTION BAR
 // =========================================================================
 interface SynchronizedCaptionProps {
@@ -1581,12 +1923,15 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
   accentColor = '#FF4F00',
   voiceName = 'Alloy',
   audioUrl,
+  musicUrl = 'audio/music/ambient_tension.wav',
+  enableSfx = true,
+  enableMusicDucking = true,
 }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
-  // Subtle continuous camera zoom
-  const cameraZoom = interpolate(frame, [0, durationInFrames], [1.0, 1.04], {
+  // Master continuous cinematic camera zoom
+  const cameraZoom = interpolate(frame, [0, durationInFrames], [1.0, 1.05], {
     extrapolateRight: 'clamp',
   });
 
@@ -1603,6 +1948,72 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
       highlightWords: ['AutoReel', 'explainers'],
     },
   ];
+
+  // Dynamic Audio Ducking Engine:
+  // Evaluates narration voiceover activity frame-by-frame.
+  // Music ducks to ~9% during speech, then swells to 28% during dramatic pauses and transitions.
+  const calculateMusicVolume = (currentFrame: number) => {
+    if (!enableMusicDucking) return 0.22;
+
+    const DUCKED_VOLUME = 0.09;
+    const BASE_VOLUME = 0.28;
+    const FADE_FRAMES = 12; // ~400ms smooth organic crossfade window
+
+    // Find the closest voice boundary across all speaking scenes
+    let minDistanceToSpeech = 999999;
+    let insideSpeech = false;
+
+    for (const s of safeScenes) {
+      if (!s.audioUrl && !audioUrl) continue;
+      const start = Math.round(s.startTime * fps);
+      const audioDurationSec = s.audioDuration || s.duration;
+      const end = Math.round((s.startTime + audioDurationSec) * fps);
+
+      if (currentFrame >= start && currentFrame <= end) {
+        insideSpeech = true;
+        break;
+      }
+      const dist = currentFrame < start ? start - currentFrame : currentFrame - end;
+      if (dist < minDistanceToSpeech) {
+        minDistanceToSpeech = dist;
+      }
+    }
+
+    if (insideSpeech) {
+      return DUCKED_VOLUME;
+    }
+
+    if (minDistanceToSpeech < FADE_FRAMES) {
+      // Smooth linear interpolation from DUCKED_VOLUME up to BASE_VOLUME
+      return interpolate(minDistanceToSpeech, [0, FADE_FRAMES], [DUCKED_VOLUME, BASE_VOLUME], {
+        extrapolateLeft: 'clamp',
+        extrapolateRight: 'clamp',
+      });
+    }
+
+    return BASE_VOLUME;
+  };
+
+  // Refined acoustic mapping:
+  // - Scene 0 gets a gentle sub-bass opening pulse
+  // - Other transitions are clean/silent by default (NEVER spam whooshes on every scene cut)
+  // - Whoosh is ONLY played if the scene explicitly has sfxCue === 'whoosh'
+  const getSfxPath = (cue?: string, index?: number, visualType?: string): string | null => {
+    if (cue === 'none') return null;
+    if (cue === 'bass_drop' || (index === 0 && (!cue || cue === 'bass_drop'))) {
+      return 'audio/sfx/sub_bass_drop.wav';
+    }
+    if (cue === 'whoosh') {
+      return 'audio/sfx/whoosh_transition.wav';
+    }
+    if (cue === 'pop') {
+      return 'audio/sfx/pop_accent.wav';
+    }
+    if (cue === 'typewriter' || visualType === 'code_terminal') {
+      return 'audio/sfx/typewriter_click.wav';
+    }
+    return null;
+  };
 
   return (
     <AbsoluteFill
@@ -1636,6 +2047,30 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
             linear-gradient(90deg, ${accentColor}25 1px, transparent 1px)
           `,
           backgroundSize: '90px 90px',
+        }}
+      />
+
+      {/* Cinematic Radial Darkening Vignette */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: 'radial-gradient(circle at 50% 45%, transparent 35%, rgba(8, 9, 10, 0.75) 85%, rgba(0, 0, 0, 0.95) 100%)',
+          pointerEvents: 'none',
+          zIndex: 35,
+        }}
+      />
+
+      {/* Atmospheric SVG Film Grain Simulation */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          opacity: 0.06,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          pointerEvents: 'none',
+          mixBlendMode: 'screen',
+          zIndex: 36,
         }}
       />
 
@@ -1705,7 +2140,7 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
         </div>
       </div>
 
-      {/* 3. Sequence Renderer for Every Storyboard Scene */}
+      {/* 3. Sequence Renderer for Every Storyboard Scene with Continuous Camera Momentum */}
       {safeScenes.map((scene, idx) => {
         const fromFrame = Math.round(scene.startTime * fps);
         const durationFrames = Math.max(1, Math.round(scene.duration * fps));
@@ -1716,23 +2151,34 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
             from={fromFrame}
             durationInFrames={durationFrames}
           >
-            {scene.visualType === 'vector_schematic' ? (
-              <VectorSchematicScene scene={scene} accentColor={accentColor} />
-            ) : scene.visualType === 'crosshair_target' ? (
-              <CrosshairTargetScene scene={scene} accentColor={accentColor} />
-            ) : scene.visualType === 'split_comparison' ? (
-              <SplitComparisonScene scene={scene} accentColor={accentColor} />
-            ) : scene.visualType === 'process_flow' ? (
-              <ProcessFlowScene scene={scene} accentColor={accentColor} />
-            ) : scene.visualType === 'dynamic_chart' ? (
-              <DynamicChartScene scene={scene} accentColor={accentColor} />
-            ) : scene.visualType === 'timeline' ? (
-              <TimelineScene scene={scene} accentColor={accentColor} />
-            ) : scene.visualType === 'step_sequence' ? (
-              <StepSequenceScene scene={scene} accentColor={accentColor} />
-            ) : (
-              <KineticTextScene scene={scene} accentColor={accentColor} topic={topic} />
-            )}
+            <AbsoluteFill
+              style={{
+                transform: `scale(${interpolate(frame - fromFrame, [0, durationFrames], [1.0, 1.045], { extrapolateRight: 'clamp' })}) translateX(${idx % 2 === 1 ? interpolate(frame - fromFrame, [0, durationFrames], [-8, 8], { extrapolateRight: 'clamp' }) : 0}px)`,
+                transformOrigin: 'center center',
+              }}
+            >
+              {scene.visualType === 'vector_schematic' ? (
+                <VectorSchematicScene scene={scene} accentColor={accentColor} />
+              ) : scene.visualType === 'crosshair_target' ? (
+                <CrosshairTargetScene scene={scene} accentColor={accentColor} />
+              ) : scene.visualType === 'split_comparison' ? (
+                <SplitComparisonScene scene={scene} accentColor={accentColor} />
+              ) : scene.visualType === 'process_flow' ? (
+                <ProcessFlowScene scene={scene} accentColor={accentColor} />
+              ) : scene.visualType === 'dynamic_chart' ? (
+                <DynamicChartScene scene={scene} accentColor={accentColor} />
+              ) : scene.visualType === 'timeline' ? (
+                <TimelineScene scene={scene} accentColor={accentColor} />
+              ) : scene.visualType === 'step_sequence' ? (
+                <StepSequenceScene scene={scene} accentColor={accentColor} />
+              ) : scene.visualType === 'code_terminal' ? (
+                <CodeTerminalScene scene={scene} accentColor={accentColor} />
+              ) : scene.visualType === 'investigative_dossier' ? (
+                <InvestigativeDossierScene scene={scene} accentColor={accentColor} />
+              ) : (
+                <KineticTextScene scene={scene} accentColor={accentColor} topic={topic} />
+              )}
+            </AbsoluteFill>
           </Sequence>
         );
       })}
@@ -1793,6 +2239,68 @@ export const DynamicStoryReel: React.FC<DynamicStoryReelProps> = ({
               : staticFile(audioUrl.replace(/^\//, ''))
           }
           volume={1.0}
+        />
+      )}
+
+      {/* 7. Procedural Scene Transition & Hook SFX Layer (Gentle, Non-Fatiguing Levels) */}
+      {enableSfx &&
+        safeScenes.map((scene, idx) => {
+          const sfxPath = getSfxPath(scene.sfxCue, idx, scene.visualType);
+          if (!sfxPath) return null;
+
+          const fromFrame = Math.round(scene.startTime * fps);
+          const sfxFrames =
+            scene.sfxCue === 'bass_drop' || (idx === 0 && !scene.sfxCue)
+              ? Math.round(1.2 * fps)
+              : scene.sfxCue === 'whoosh'
+              ? Math.round(0.6 * fps)
+              : Math.round(0.38 * fps);
+
+          return (
+            <Sequence
+              key={`sfx_transition_${scene.id || idx}`}
+              from={fromFrame}
+              durationInFrames={sfxFrames}
+            >
+              <Audio
+                src={staticFile(sfxPath)}
+                volume={idx === 0 ? 0.35 : 0.14}
+              />
+            </Sequence>
+          );
+        })}
+
+      {/* 8. Procedural Metric & Pop SFX (Only when explicitly tagged, gentle volume) */}
+      {enableSfx &&
+        safeScenes.map((scene, idx) => {
+          if (scene.sfxCue !== 'pop') return null;
+          const cueRelative = scene.cueFrame || Math.floor(fps * 0.35);
+          const cueAbsoluteFrame = Math.round(scene.startTime * fps) + cueRelative;
+
+          return (
+            <Sequence
+              key={`sfx_pop_${scene.id || idx}`}
+              from={cueAbsoluteFrame}
+              durationInFrames={Math.round(0.18 * fps)}
+            >
+              <Audio
+                src={staticFile('audio/sfx/pop_accent.wav')}
+                volume={0.18}
+              />
+            </Sequence>
+          );
+        })}
+
+      {/* 9. Cinematic Ambient Music Bed with Dynamic Narration Ducking */}
+      {musicUrl && (
+        <Audio
+          loop
+          src={
+            musicUrl.startsWith('http') || musicUrl.startsWith('data:') || musicUrl.startsWith('/api/')
+              ? musicUrl
+              : staticFile(musicUrl.replace(/^\//, ''))
+          }
+          volume={calculateMusicVolume}
         />
       )}
     </AbsoluteFill>

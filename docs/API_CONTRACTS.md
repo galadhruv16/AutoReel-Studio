@@ -1,8 +1,8 @@
 # API Contracts & Interface Specification
 
 # Project: AutoReel Studio
-**Version:** 1.0.0  
-**Status:** Approved Baseline  
+**Version:** 2.0.0 (Next-Gen Hybrid Motion Video Engine & Procedural Sound Design)  
+**Status:** Approved Technical Upgrade Baseline  
 **Base URL:** `/api/v1`  
 **Communication Protocols:** HTTPS REST / Next.js Server Actions / Inngest Event Triggers  
 
@@ -218,6 +218,13 @@ Generates the complete card-by-card scene sequence mapped to the 8 parameterized
     "versionNumber": 1,
     "title": "Why Kubernetes Never Runs Containers Directly",
     "estimatedDurationSeconds": 58.5,
+    "soundtrack": {
+      "id": "tech_ambient_01",
+      "name": "Neon Pulse",
+      "genre": "Tech Ambient",
+      "audioUrl": "https://storage.autoreel.studio/audio/music/neon_pulse.mp3",
+      "duckingLevel": 0.12
+    },
     "scenes": [
       {
         "id": "scene_01",
@@ -231,8 +238,15 @@ Generates the complete card-by-card scene sequence mapped to the 8 parameterized
         },
         "highlightKeywords": ["lied to", "containers"],
         "visualAsset": { "type": "lucide_icon", "value": "Boxes" },
-        "sfxCue": "whoosh",
-        "estimatedDurationSeconds": 4.5
+        "backgroundMedia": {
+          "type": "video_loop",
+          "url": "https://storage.autoreel.studio/broll/abstract_server_rack.mp4",
+          "searchQuery": "server rack data center dark",
+          "opacity": 0.35
+        },
+        "cameraMotion": "zoom_punch",
+        "sfxCue": "bass_drop",
+        "estimatedDurationSeconds": 3.5
       },
       {
         "id": "scene_02",
@@ -248,8 +262,29 @@ Generates the complete card-by-card scene sequence mapped to the 8 parameterized
         },
         "highlightKeywords": ["Pods", "shared environment"],
         "visualAsset": { "type": "none", "value": "" },
-        "sfxCue": "pop",
-        "estimatedDurationSeconds": 6.0
+        "backgroundMedia": {
+          "type": "gradient_mesh",
+          "opacity": 0.25
+        },
+        "cameraMotion": "dolly_in",
+        "sfxCue": "whoosh",
+        "estimatedDurationSeconds": 5.0
+      },
+      {
+        "id": "scene_03",
+        "orderIndex": 2,
+        "voiceoverText": "Inside the Linux kernel, a pod is just a shared network namespace and shared cgroup limits.",
+        "motionPattern": "code_terminal",
+        "patternParams": {
+          "fileName": "pod-spec.yaml",
+          "language": "yaml",
+          "codeSnippet": "spec:\n  containers:\n  - name: web\n    image: nginx\n  - name: proxy\n    image: envoy",
+          "highlightLine": 4
+        },
+        "highlightKeywords": ["Linux kernel", "namespace"],
+        "cameraMotion": "subtle_float",
+        "sfxCue": "typewriter",
+        "estimatedDurationSeconds": 4.5
       }
     ]
   },

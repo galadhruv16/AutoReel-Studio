@@ -15,12 +15,26 @@ interface RenderRequest {
   accentColor: string;
   scenes: StudioScene[];
   renderDynamic?: boolean;
+  musicUrl?: string | null;
+  enableSfx?: boolean;
+  enableMusicDucking?: boolean;
 }
 
 export async function POST(request: Request) {
   try {
     const body: RenderRequest = await request.json();
-    const { presetId, topic, voice = 'Alloy', captionStyle = 'kinetic', accentColor = '#FF4F00', scenes = [], renderDynamic } = body;
+    const {
+      presetId,
+      topic,
+      voice = 'Alloy',
+      captionStyle = 'kinetic',
+      accentColor = '#FF4F00',
+      scenes = [],
+      renderDynamic,
+      musicUrl = 'audio/music/ambient_tension.wav',
+      enableSfx = true,
+      enableMusicDucking = true,
+    } = body;
     const safeScenes: StudioScene[] = Array.isArray(scenes) ? scenes : [];
 
     // Calculate total duration from scenes
@@ -109,6 +123,9 @@ export async function POST(request: Request) {
           scenes: preparedScenes,
           captionStyle: ['kinetic', 'minimal', 'bold'].includes(captionStyle) ? captionStyle : 'kinetic',
           accentColor: accentColor || '#FF4F00',
+          musicUrl: musicUrl || 'audio/music/ambient_tension.wav',
+          enableSfx: enableSfx !== false,
+          enableMusicDucking: enableMusicDucking !== false,
         };
 
         fs.writeFileSync(propsPath, JSON.stringify(propsData, null, 2), 'utf-8');
