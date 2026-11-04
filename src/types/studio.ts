@@ -227,3 +227,42 @@ export const DURATION_CONFIGS: Record<
     description: 'Deep dive, comprehensive multi-stage breakdown',
   },
 };
+
+export interface StoredProject {
+  id: string;
+  topic: string;
+  duration: StudioDuration;
+  tone: StudioTone;
+  voice: VoiceId;
+  status: 'draft' | 'storyboarded' | 'rendered' | 'published';
+  scenesCount: number;
+  videoUrl?: string | null;
+  srtUrl?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  projectData: StudioProject;
+}
+
+export interface InstagramPublishPayload {
+  projectId?: string;
+  videoUrl: string;
+  caption: string;
+  scheduledPublishTime?: number; // unix timestamp in seconds
+  coverUrl?: string;
+  thumbOffsetMs?: number;
+  accessToken?: string;
+  instagramAccountId?: string;
+}
+
+export interface InstagramPublishResult {
+  success: boolean;
+  mode: 'live' | 'sandbox';
+  containerId?: string;
+  mediaId?: string;
+  permalink?: string;
+  status?: string;
+  scheduledTime?: string;
+  message?: string;
+  error?: string;
+}
+

@@ -45,3 +45,8 @@ Thumbs.db
 /public/renders/*.png
 /public/renders/*.mp3
 
+# Persistent local project storage
+/data/*.json
+!/data/.gitkeep
+
+

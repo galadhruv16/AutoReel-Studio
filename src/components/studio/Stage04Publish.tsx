@@ -18,9 +18,15 @@ import {
   FileCode,
   PackageCheck,
   Loader2,
+  Send,
+  Calendar,
+  ExternalLink,
+  Globe,
+  Sliders,
+  ShieldCheck,
 } from 'lucide-react';
 import { useStudio } from '../../context/StudioContext';
-import { VOICES, StudioScene } from '../../types/studio';
+import { VOICES, StudioScene, InstagramPublishResult } from '../../types/studio';
 import { generateSrtContent, generateVideoChapters } from '../../utils/srt';
 import { RemotionStudioPlayer } from './RemotionStudioPlayer';
 import {
@@ -63,6 +69,36 @@ export const Stage04Publish: React.FC = () => {
   const [srtSuccess, setSrtSuccess] = useState<boolean>(false);
   const [jsonSuccess, setJsonSuccess] = useState<boolean>(false);
   const [isBatchDownloading, setIsBatchDownloading] = useState<boolean>(false);
+
+  // Direct Instagram Reels Publishing & Scheduling state
+  const [isPublishingIg, setIsPublishingIg] = useState<boolean>(false);
+  const [igMode, setIgMode] = useState<'publish' | 'schedule'>('publish');
+  const [igScheduleDateTime, setIgScheduleDateTime] = useState<string>(() => {
+    const d = new Date(Date.now() + 2 * 60 * 60 * 1000);
+    return d.toISOString().slice(0, 16);
+  });
+  const [igCustomToken, setIgCustomToken] = useState<string>('');
+  const [igCustomAccountId, setIgCustomAccountId] = useState<string>('');
+  const [showIgConfig, setShowIgConfig] = useState<boolean>(false);
+  const [igPublishResult, setIgPublishResult] = useState<InstagramPublishResult | null>(null);
+  const [igPublishStep, setIgPublishStep] = useState<string>('');
+  const [igPublishError, setIgPublishError] = useState<string | null>(null);
+
+  // Auto-save project to persistent library when entering Stage 04
+  useEffect(() => {
+    if (project.topic && project.topic.trim().length >= 3) {
+      fetch('/api/studio/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project: {
+            ...project,
+            videoUrl: dynamicVideoUrl || project.videoUrl,
+          },
+        }),
+      }).catch(() => {});
+    }
+  }, [project.id, dynamicVideoUrl]);
 
   // Track render elapsed time
   useEffect(() => {
@@ -141,6 +177,81 @@ export const Stage04Publish: React.FC = () => {
       isMounted = false;
     };
   }, [project.topic, project.scenes, totalDuration, project.tone]);
+
+  // Direct Meta Graph API Instagram Publisher
+  const handlePublishInstagram = async () => {
+    if (isPublishingIg) return;
+    setIsPublishingIg(true);
+    setIgPublishError(null);
+    setIgPublishResult(null);
+    setIgPublishStep('Preparing reel container payload...');
+
+    try {
+      const videoUrlToPublish =
+        dynamicVideoUrl ||
+        project.videoUrl ||
+        (typeof window !== 'undefined'
+          ? `${window.location.origin}/api/studio/download?sample=1`
+          : '');
+
+      const combinedCaption = `${currentKit.title}\n\n${currentKit.description}\n\n${(
+        currentKit.hashtags || []
+      ).join(' ')}`;
+
+      let scheduledPublishTime: number | undefined;
+      if (igMode === 'schedule') {
+        const scheduledSec = Math.floor(new Date(igScheduleDateTime).getTime() / 1000);
+        scheduledPublishTime = scheduledSec;
+      }
+
+      setIgPublishStep(
+        igMode === 'schedule'
+          ? 'Scheduling container on Meta Graph API...'
+          : 'Initializing Meta Reel container & transcoding...'
+      );
+
+      const res = await fetch('/api/studio/publish-instagram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          videoUrl: videoUrlToPublish,
+          caption: combinedCaption,
+          scheduledPublishTime,
+          accessToken: igCustomToken.trim() || undefined,
+          instagramAccountId: igCustomAccountId.trim() || undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Instagram publication failed');
+      }
+
+      setIgPublishResult(data);
+      setIgPublishStep('');
+
+      // Auto-save project status to library
+      try {
+        await fetch('/api/studio/projects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            project: {
+              ...project,
+              videoUrl: dynamicVideoUrl || project.videoUrl,
+              updatedAt: new Date().toISOString(),
+            },
+          }),
+        });
+      } catch {
+        // non-blocking
+      }
+    } catch (err: any) {
+      setIgPublishError(err.message || 'Failed to publish to Instagram');
+    } finally {
+      setIsPublishingIg(false);
+    }
+  };
 
   // Compile Dynamic MP4 via Remotion Server
   const handleRenderDynamicMp4 = async (andDownload: boolean = false) => {
@@ -693,6 +804,207 @@ export const Stage04Publish: React.FC = () => {
               )}
             </button>
           </div>
+
+          {/* Instagram Direct Reels Publishing & Scheduling Hub (Meta Graph API) */}
+          {activePlatform === 'instagram' && (
+            <div className="rounded-2xl border border-pink-500/30 bg-gradient-to-b from-purple-950/20 via-[#14161F] to-[#14161F] p-5 shadow-2xl space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#232634] pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 text-white shadow-md">
+                    <Send className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                      Direct Instagram Reels Publisher
+                      <span className="text-[10px] font-mono text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded-full border border-pink-500/20">
+                        Meta Graph API v19.0
+                      </span>
+                    </h4>
+                    <p className="text-[11px] text-[#94A3B8]">
+                      Publish or schedule this generated reel directly to Instagram without leaving AutoReel Studio.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1 text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  <span>Meta Safe Zone Compliant</span>
+                </div>
+              </div>
+
+              {/* Mode Selector */}
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIgMode('publish')}
+                  className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs font-semibold transition ${
+                    igMode === 'publish'
+                      ? 'border-pink-500 bg-pink-500/15 text-white shadow-md shadow-pink-500/20'
+                      : 'border-[#232634] bg-[#08090A] text-[#94A3B8] hover:text-white'
+                  }`}
+                >
+                  <Send className="h-3.5 w-3.5" />
+                  <span>Publish Immediately</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIgMode('schedule')}
+                  className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs font-semibold transition ${
+                    igMode === 'schedule'
+                      ? 'border-pink-500 bg-pink-500/15 text-white shadow-md shadow-pink-500/20'
+                      : 'border-[#232634] bg-[#08090A] text-[#94A3B8] hover:text-white'
+                  }`}
+                >
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span>Schedule for Later</span>
+                </button>
+              </div>
+
+              {/* Scheduling Date/Time Picker */}
+              {igMode === 'schedule' && (
+                <div className="rounded-xl border border-[#232634] bg-[#08090A] p-3 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-white flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 text-pink-400" />
+                      Select Publication Time
+                    </span>
+                    <span className="text-[10px] font-mono text-[#94A3B8]">
+                      Min 15m, Max 75d ahead
+                    </span>
+                  </div>
+                  <input
+                    type="datetime-local"
+                    value={igScheduleDateTime}
+                    onChange={(e) => setIgScheduleDateTime(e.target.value)}
+                    className="w-full rounded-lg border border-[#232634] bg-[#14161F] p-2 text-xs font-mono text-white focus:outline-none focus:border-pink-500"
+                  />
+                </div>
+              )}
+
+              {/* Optional Custom Credentials Drawer */}
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => setShowIgConfig(!showIgConfig)}
+                  className="text-[11px] font-mono text-[#94A3B8] hover:text-white inline-flex items-center gap-1 transition"
+                >
+                  <Sliders className="h-3 w-3" />
+                  <span>{showIgConfig ? 'Hide Custom Meta Credentials' : 'Configure Custom Meta Token / Account ID'}</span>
+                </button>
+              </div>
+
+              {showIgConfig && (
+                <div className="rounded-xl border border-[#232634] bg-[#08090A] p-3 space-y-3 animate-in fade-in">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-mono text-[#94A3B8] block">Instagram Page Access Token (Optional)</label>
+                    <input
+                      type="password"
+                      placeholder="EAA..."
+                      value={igCustomToken}
+                      onChange={(e) => setIgCustomToken(e.target.value)}
+                      className="w-full rounded-lg border border-[#232634] bg-[#14161F] p-2 text-xs font-mono text-white placeholder-[#64748B] focus:border-pink-500 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-mono text-[#94A3B8] block">Instagram Business Account ID (Optional)</label>
+                    <input
+                      type="text"
+                      placeholder="17841400000000000"
+                      value={igCustomAccountId}
+                      onChange={(e) => setIgCustomAccountId(e.target.value)}
+                      className="w-full rounded-lg border border-[#232634] bg-[#14161F] p-2 text-xs font-mono text-white placeholder-[#64748B] focus:border-pink-500 focus:outline-none"
+                    />
+                  </div>
+                  <p className="text-[10px] text-[#64748B]">
+                    Note: If left blank, AutoReel will use environment variables (or simulated sandbox if none configured).
+                  </p>
+                </div>
+              )}
+
+              {/* Status / Step Loader */}
+              {isPublishingIg && (
+                <div className="rounded-xl border border-pink-500/30 bg-pink-500/10 p-3 flex items-center gap-3">
+                  <Loader2 className="h-4 w-4 animate-spin text-pink-400 shrink-0" />
+                  <span className="text-xs font-mono text-pink-300">{igPublishStep}</span>
+                </div>
+              )}
+
+              {/* Error Alert */}
+              {igPublishError && (
+                <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 flex items-center gap-2 text-xs text-red-400">
+                  <AlertTriangle className="h-4 w-4 shrink-0" />
+                  <span>{igPublishError}</span>
+                </div>
+              )}
+
+              {/* Success Result */}
+              {igPublishResult && (
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span>{igPublishResult.status === 'SCHEDULED' ? 'Reel Scheduled Successfully!' : 'Reel Published Successfully!'}</span>
+                    </div>
+                    <span className="text-[10px] font-mono uppercase bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full">
+                      {igPublishResult.mode === 'sandbox' ? 'Sandbox Mode' : 'Live Graph API'}
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-[#EDEDED] leading-relaxed">
+                    {igPublishResult.message}
+                  </p>
+
+                  {igPublishResult.permalink && (
+                    <div className="pt-2 flex items-center gap-2">
+                      <a
+                        href={igPublishResult.permalink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-pink-600 hover:bg-pink-500 text-white px-3 py-1.5 text-xs font-semibold transition"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                        <span>View Reel on Instagram</span>
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(igPublishResult.permalink!, 'ig_link')}
+                        className="p-1.5 rounded-lg border border-[#232634] bg-[#08090A] text-xs text-[#94A3B8] hover:text-white transition"
+                        title="Copy Reel link"
+                      >
+                        {copiedKey === 'ig_link' ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Action Button */}
+              <button
+                type="button"
+                onClick={handlePublishInstagram}
+                disabled={isPublishingIg}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-600 via-rose-600 to-amber-600 py-3 px-4 text-xs font-bold text-white shadow-xl shadow-pink-600/25 hover:opacity-95 transition active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {isPublishingIg ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Processing Meta Container...</span>
+                  </>
+                ) : igMode === 'schedule' ? (
+                  <>
+                    <Calendar className="h-4 w-4" />
+                    <span>Schedule Instagram Reel</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" />
+                    <span>🚀 Publish to Instagram Reels Now</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
