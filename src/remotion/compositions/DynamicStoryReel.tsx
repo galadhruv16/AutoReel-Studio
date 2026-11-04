@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  AbsoluteFill,
   interpolate,
   spring,
   useCurrentFrame,
@@ -9,6 +8,25 @@ import {
   Audio,
   staticFile,
 } from 'remotion';
+
+// Custom ref-forwarding AbsoluteFill that eliminates React 18 ref warnings from Remotion's internal AbsoluteFillInner
+const AbsoluteFill = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ style, ...rest }, ref) => (
+  <div
+    ref={ref}
+    style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      width: '100%',
+      height: '100%',
+      ...style,
+    }}
+    {...rest}
+  />
+));
+AbsoluteFill.displayName = 'AbsoluteFill';
 import { StudioScene } from '../../types/studio';
 
 export interface DynamicStoryReelProps {
