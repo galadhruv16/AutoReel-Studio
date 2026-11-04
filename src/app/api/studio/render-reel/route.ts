@@ -71,6 +71,12 @@ export async function POST(request: Request) {
       timestampsUrl = '/audio/reel_kubernetes.json';
     }
 
+    // Default preview fallback if not rendering dynamic and no preset specified
+    if (!videoUrl && !renderDynamic) {
+      videoUrl = '/videos/reel_genetics.mp4';
+      posterUrl = '/videos/poster_genetics.png';
+    }
+
     // On serverless environments (Vercel, AWS Lambda), headless Chromium & FFMPEG are unavailable.
     // Prevent 10-15s execution timeouts by skipping server-side Remotion CLI and returning serverless status.
     const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT);
