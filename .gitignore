@@ -47,10 +47,10 @@ Thumbs.db
 /public/renders/*.mp3
 
 # Persistent local project storage
-/data/*.json
+/data/*
 !/data/.gitkeep
 
-
-docs/OBSERVABILITY_LOGGING.md
+# Internal documentation, specifications & agile changelogs
+/docs/
+docs/
 CHANGELOG_AGILE.md
-

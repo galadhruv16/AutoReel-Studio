@@ -8,7 +8,7 @@ if (!fs.existsSync(outDir)) {
 }
 
 const samples = [
-  { id: 'rohan', voice: 'en-IN-PrabhatNeural', text: "Namaste! I'm Rohan. Ready to narrate your educational explainer with natural cadence." },
+  { id: 'rohan', voice: 'en-IN-PrabhatNeural', text: "Hello! I'm Rohan. Ready to narrate your educational explainer with natural cadence." },
   { id: 'priya', voice: 'en-IN-NeerjaNeural', text: "Hello! I'm Priya. Ready to deliver warm, articulate, and engaging educational narration." },
   { id: 'alloy', voice: 'en-US-JennyNeural', text: "Hi! I'm Alloy. Let's make a compelling, balanced documentary explainer together." },
   { id: 'echo', voice: 'en-US-BrianMultilingualNeural', text: "Hey! I'm Echo, your fast, crisp, and authoritative technical explainer voice." },
