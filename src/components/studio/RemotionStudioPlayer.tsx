@@ -70,6 +70,7 @@ export interface RemotionStudioPlayerHandle {
   toggleMute: () => boolean;
   setVolume: (volume: number) => void;
   getCurrentTime: () => number;
+  getContainerNode: () => HTMLDivElement | null;
 }
 
 export interface RemotionStudioPlayerProps {
@@ -270,6 +271,12 @@ export const RemotionStudioPlayer = forwardRef<RemotionStudioPlayerHandle, Remot
             return frame / fps;
           }
           return videoRef.current?.currentTime || 0;
+        },
+        getContainerNode: () => {
+          if (remotionPlayerRef.current?.getContainerNode) {
+            return remotionPlayerRef.current.getContainerNode();
+          }
+          return null;
         },
       }),
       [renderMode, fps, totalDurationSec, isMutedState, syncCurrentSeconds, onPlayStateChange]

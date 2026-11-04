@@ -48,6 +48,78 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const [srtSuccess, setSrtSuccess] = useState<boolean>(false);
   const [jsonSuccess, setJsonSuccess] = useState<boolean>(false);
   const [isBatchDownloading, setIsBatchDownloading] = useState<boolean>(false);
+  const [isInstantRecording, setIsInstantRecording] = useState<boolean>(false);
+  const [instantProgress, setInstantProgress] = useState<number>(0);
+  const [instantDownloadUrl, setInstantDownloadUrl] = useState<string | null>(null);
+
+  const handleInstantBrowserExport = async () => {
+    setIsInstantRecording(true);
+    setInstantProgress(0);
+    try {
+      const canvas = document.querySelector('canvas') as HTMLCanvasElement | null;
+      if (!canvas) {
+        alert('Video player canvas not detected. Please ensure the Stage 03 Player is rendered.');
+        setIsInstantRecording(false);
+        return;
+      }
+
+      const stream = canvas.captureStream ? canvas.captureStream(30) : null;
+      if (!stream) {
+        alert('Browser does not support canvas captureStream.');
+        setIsInstantRecording(false);
+        return;
+      }
+
+      const mimeType = MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')
+        ? 'video/mp4;codecs=avc1'
+        : MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+        ? 'video/webm;codecs=vp9'
+        : 'video/webm';
+
+      const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+      const recorder = new MediaRecorder(stream, { mimeType });
+      const chunks: Blob[] = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunks.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        setInstantDownloadUrl(url);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${getTopicSlug(project.topic)}_instant.${ext}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setIsInstantRecording(false);
+      };
+
+      recorder.start();
+
+      const startTime = Date.now();
+      const durationMs = Math.max(5000, totalDuration * 1000);
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const pct = Math.min(100, Math.round((elapsed / durationMs) * 100));
+        setInstantProgress(pct);
+        if (elapsed >= durationMs) {
+          clearInterval(interval);
+          if (recorder.state === 'recording') {
+            recorder.stop();
+          }
+        }
+      }, 250);
+
+    } catch (err: any) {
+      console.error('Instant export failed:', err);
+      alert('Instant export failed: ' + err.message);
+      setIsInstantRecording(false);
+    }
+  };
 
   const voiceObj = VOICES.find((v) => v.id === project.voice) || VOICES[0];
   const scenes = project.scenes || [];
@@ -205,6 +277,51 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
         {/* Main Asset Cards Grid */}
         <div className="mt-6 space-y-3.5">
+          {/* Card 0: Instant Browser Canvas Export (Free & Zero Serverless Timeout) */}
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition hover:border-emerald-500/60 shadow-lg shadow-emerald-500/5">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-sm text-white">⚡ Instant Browser Export (Free &amp; Zero Timeout)</span>
+                <span className="rounded-md bg-emerald-500/20 px-2 py-0.5 text-[10px] font-mono font-bold text-emerald-400">
+                  Instant • WebM / MP4
+                </span>
+              </div>
+              <p className="text-xs text-[#94A3B8]">
+                Captures directly from the Remotion canvas in your browser. 100% free, zero cloud queue, works on Vercel without timeouts.
+              </p>
+            </div>
+
+            {instantDownloadUrl ? (
+              <a
+                href={instantDownloadUrl}
+                download={`${getTopicSlug(project.topic)}_instant.webm`}
+                className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-3 text-xs font-bold text-white shadow-lg shadow-emerald-500/25 hover:from-emerald-400 hover:to-teal-400 transition active:scale-95 cursor-pointer text-center no-underline"
+              >
+                <Download className="h-4 w-4 stroke-[2.5]" />
+                <span>Save Instant Video</span>
+              </a>
+            ) : (
+              <button
+                type="button"
+                onClick={handleInstantBrowserExport}
+                disabled={isInstantRecording || isRendering}
+                className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-3 text-xs font-bold text-white shadow-lg shadow-emerald-500/25 hover:from-emerald-400 hover:to-teal-400 transition active:scale-95 cursor-pointer disabled:opacity-60"
+              >
+                {isInstantRecording ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Recording ({instantProgress}%)...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 stroke-[2.5]" />
+                    <span>Instant Download</span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+
           {/* Card 1: 1080p 60FPS Video (.MP4) */}
           <div className="rounded-2xl border border-[#FF4F00]/30 bg-[#FF4F00]/5 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition hover:border-[#FF4F00]/60">
             <div className="space-y-1">

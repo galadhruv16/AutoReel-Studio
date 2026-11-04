@@ -1789,21 +1789,47 @@ const SynchronizedCaption: React.FC<SynchronizedCaptionProps> = ({
 
   if (wordCount === 0) return null;
 
-  // Responsive font scaling: ensures text NEVER overflows the 9:16 safe area
-  // 1-8 words: 32px | 9-13 words: 28px | 14+ words: 24px
-  const fontSize = wordCount > 13 ? 24 : wordCount > 8 ? 28 : 32;
+  // Natural phrase chunking: groups words into compact 3-5 word phrases so subtitles never clutter diagrams
+  const chunks: Array<{ startIndex: number; words: string[] }> = [];
+  let cur: string[] = [];
+  let start = 0;
+  for (let i = 0; i < words.length; i++) {
+    cur.push(words[i]);
+    const isPunctuation = /[,.!?;:]$/.test(words[i]);
+    if (cur.length >= 4 || (cur.length >= 3 && isPunctuation) || i === words.length - 1) {
+      chunks.push({ startIndex: start, words: [...cur] });
+      start = i + 1;
+      cur = [];
+    }
+  }
+  if (cur.length > 0) {
+    if (chunks.length > 0 && cur.length <= 2) {
+      chunks[chunks.length - 1].words.push(...cur);
+    } else {
+      chunks.push({ startIndex: start, words: cur });
+    }
+  }
 
-  // Word-by-word kinetic highlight index based on scene playback progress
+  // Current active word based on audio/frame progress
   const progress = durationFrames > 0 ? Math.min(1, Math.max(0, frame / durationFrames)) : 0;
   const currentWordIdx = Math.min(wordCount - 1, Math.floor(progress * wordCount));
+
+  // Active phrase chunk
+  const activeChunk = chunks.find((c, cIdx) => {
+    const nextChunk = chunks[cIdx + 1];
+    if (!nextChunk) return true;
+    return currentWordIdx >= c.startIndex && currentWordIdx < nextChunk.startIndex;
+  }) || chunks[0];
+
+  const fontSize = activeChunk.words.length > 5 ? 30 : 34;
 
   return (
     <div
       style={{
         position: 'absolute',
-        bottom: 220,
-        left: 48,
-        right: 48,
+        bottom: 330, // Instagram action-safe zone (clears comments, author handle, & audio ticker)
+        left: 64,
+        right: 130, // Clears Instagram Like/Comment vertical icon stack on right
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -1817,36 +1843,37 @@ const SynchronizedCaption: React.FC<SynchronizedCaptionProps> = ({
           style={{
             maxWidth: '100%',
             boxSizing: 'border-box',
-            backgroundColor: 'rgba(8, 9, 10, 0.90)',
-            backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
+            backgroundColor: 'rgba(8, 9, 10, 0.92)',
+            backdropFilter: 'blur(20px)',
+            border: '1.5px solid rgba(255, 255, 255, 0.16)',
             borderRadius: 22,
-            padding: '14px 22px',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.85)',
+            padding: '12px 22px',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.9)',
             display: 'flex',
             flexWrap: 'wrap',
             justifyContent: 'center',
             alignItems: 'center',
-            gap: '6px 8px',
+            gap: '8px 10px',
           }}
         >
-          {words.map((word, wIdx) => {
-            const isActive = wIdx === currentWordIdx;
-            const isPast = wIdx < currentWordIdx;
+          {activeChunk.words.map((word, relIdx) => {
+            const globalIdx = activeChunk.startIndex + relIdx;
+            const isActive = globalIdx === currentWordIdx;
+            const isPast = globalIdx < currentWordIdx;
             const isKeyword = (scene.highlightWords || []).some((hw) =>
               hw.toLowerCase().includes(word.toLowerCase().replace(/[^a-z0-9]/g, ''))
             );
 
             return (
               <span
-                key={wIdx}
+                key={globalIdx}
                 style={{
                   fontSize,
                   fontWeight: isActive ? 900 : 700,
                   textTransform: 'uppercase',
                   letterSpacing: '0.02em',
                   lineHeight: 1.25,
-                  padding: isActive ? '3px 8px' : '3px 2px',
+                  padding: isActive ? '4px 10px' : '4px 2px',
                   borderRadius: 8,
                   backgroundColor: isActive ? accentColor : 'transparent',
                   color: isActive
@@ -1857,10 +1884,10 @@ const SynchronizedCaption: React.FC<SynchronizedCaptionProps> = ({
                     ? '#FFFFFF'
                     : '#94A3B8',
                   transform: isActive ? 'scale(1.08)' : 'scale(1)',
-                  boxShadow: isActive ? `0 4px 18px ${accentColor}60` : 'none',
+                  boxShadow: isActive ? `0 4px 20px ${accentColor}80` : 'none',
                   whiteSpace: 'nowrap',
                   wordBreak: 'break-word',
-                  transition: 'background-color 0.1s ease, transform 0.1s ease',
+                  transition: 'background-color 0.08s ease, transform 0.08s ease',
                 }}
               >
                 {word}
@@ -2194,6 +2221,15 @@ export const DynamicStoryReel = React.forwardRef<HTMLDivElement, DynamicStoryRee
           >
             <AbsoluteFill
               style={{
+                paddingTop: 220, // Mobile safe-zone: clears camera notch & header
+                paddingBottom: 400, // Mobile safe-zone: clears captions, comments, & audio pill
+                paddingLeft: 64,
+                paddingRight: 130, // Mobile safe-zone: clears Instagram Like/Comment vertical buttons
+                boxSizing: 'border-box',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
                 transform: `scale(${interpolate(frame - fromFrame, [0, durationFrames], [1.0, 1.045], { extrapolateRight: 'clamp' })}) translateX(${idx % 2 === 1 ? interpolate(frame - fromFrame, [0, durationFrames], [-8, 8], { extrapolateRight: 'clamp' }) : 0}px)`,
                 transformOrigin: 'center center',
               }}
