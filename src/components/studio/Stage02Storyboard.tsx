@@ -36,6 +36,53 @@ export const Stage02Storyboard: React.FC = () => {
     project.scriptMode || 'ai_generate'
   );
 
+  // Conversational AI Revision Copilot state
+  const [revisionPrompt, setRevisionPrompt] = useState<string>('');
+  const [targetSceneIdx, setTargetSceneIdx] = useState<number | 'all'>('all');
+  const [isRevising, setIsRevising] = useState<boolean>(false);
+  const [revisionSuccess, setRevisionSuccess] = useState<string | null>(null);
+
+  const handleReviseWithAI = async (promptToUse?: string, specificIdx?: number) => {
+    const instruction = (promptToUse || revisionPrompt).trim();
+    if (!instruction || isRevising) return;
+    setIsRevising(true);
+    setError(null);
+    setRevisionSuccess(null);
+    try {
+      const res = await fetch('/api/studio/revise-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          instruction,
+          targetSceneIndex: specificIdx !== undefined ? specificIdx + 1 : (targetSceneIdx !== 'all' ? targetSceneIdx : undefined),
+          scenes: project.scenes,
+          topic: project.topic,
+          duration: project.duration,
+          tone: project.tone,
+          voice: project.voice,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.data?.scenes) {
+        const revisedScenes: StudioScene[] = data.data.scenes;
+        const modified = data.data.modifiedIndices || [];
+        updateProject({ scenes: revisedScenes, videoUrl: null });
+        setRevisionSuccess(data.data.explanation || `Updated ${modified.length} scene(s) according to instruction.`);
+        setRevisionPrompt('');
+        // Re-synthesize audio only for modified scene(s)
+        syncScenesAudio(revisedScenes).then((synced) => {
+          updateProject({ scenes: synced });
+        });
+      } else {
+        setError(data.error || 'Revision failed.');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Network error during AI revision.');
+    } finally {
+      setIsRevising(false);
+    }
+  };
+
   const durationMeta = DURATION_CONFIGS[project.duration];
   const voiceObj = VOICES.find((v) => v.id === project.voice) || VOICES[0];
 
@@ -117,7 +164,8 @@ export const Stage02Storyboard: React.FC = () => {
     try {
       const updatedScenes = [...inputScenes];
       const synthesisPromises = updatedScenes.map(async (sc, i) => {
-        if (!sc.narration) return;
+        // SMART CACHE: If audio already exists, reuse it without re-synthesizing!
+        if (!sc.narration || sc.audioUrl) return;
         try {
           const controller = new AbortController();
           const timer = setTimeout(() => controller.abort(), 6000);
@@ -556,6 +604,93 @@ export const Stage02Storyboard: React.FC = () => {
               <div className="h-6 w-3/4 bg-[#232634] rounded" />
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Conversational AI Revision Assistant */}
+      {!isLoading && project.scenes.length > 0 && (
+        <div className="mt-8 rounded-2xl border border-[#FF4F00]/30 bg-gradient-to-b from-[#1C1822] to-[#14161F] p-5 sm:p-6 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 h-40 w-40 bg-[#FF4F00]/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#232634] pb-3 mb-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-[#FF4F00] animate-pulse" />
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                Conversational AI Director // Revise Storyboard
+              </span>
+            </div>
+            <span className="text-[11px] font-mono text-[#94A3B8] bg-[#08090A] px-2.5 py-0.5 rounded-full border border-[#232634]">
+              Targeted scene revisions with instant audio caching
+            </span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={revisionPrompt}
+                onChange={(e) => setRevisionPrompt(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !isRevising && revisionPrompt.trim()) {
+                    handleReviseWithAI();
+                  }
+                }}
+                placeholder="e.g. Make scene 3 punchier with casualty stats, or make the opening hook more dramatic..."
+                className="w-full rounded-xl border border-[#232634] bg-[#08090A] px-4 py-3 text-sm text-[#EDEDED] placeholder-[#64748B] focus:border-[#FF4F00] focus:outline-none transition pr-32"
+              />
+              <select
+                value={targetSceneIdx}
+                onChange={(e) => setTargetSceneIdx(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                className="absolute right-2 top-2 rounded-lg border border-[#232634] bg-[#14161F] px-2.5 py-1 text-xs text-[#94A3B8] focus:border-[#FF4F00] focus:outline-none cursor-pointer"
+              >
+                <option value="all">Auto-detect</option>
+                {project.scenes.map((s, i) => (
+                  <option key={s.id || i} value={i + 1}>
+                    Scene {i + 1}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => handleReviseWithAI()}
+              disabled={isRevising || !revisionPrompt.trim()}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF4F00] px-5 py-3 text-xs font-bold text-white shadow-md shadow-[#FF4F00]/25 hover:bg-[#FF3B00] transition active:scale-95 disabled:opacity-50 cursor-pointer shrink-0"
+            >
+              <Sparkles className={`h-3.5 w-3.5 ${isRevising ? 'animate-spin' : ''}`} />
+              <span>{isRevising ? 'Applying Revision...' : 'Apply Revision'}</span>
+            </button>
+          </div>
+
+          {/* Quick Suggestion Chips */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="text-[11px] text-[#94A3B8] font-mono mr-1">Quick Suggestions:</span>
+            {[
+              '🔥 More dramatic beat 1 hook',
+              '📊 Add numerical & statistical scale',
+              '⚡ Shorter punchier cadence',
+              '💻 Switch to Code Terminal view',
+              '🏛️ Switch to Declassified Dossier'
+            ].map((chip) => (
+              <button
+                key={chip}
+                type="button"
+                onClick={() => handleReviseWithAI(chip)}
+                disabled={isRevising}
+                className="rounded-lg border border-[#232634] bg-[#0F1015] px-2.5 py-1 text-[11px] text-[#94A3B8] hover:border-[#FF4F00]/50 hover:text-white transition active:scale-95"
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+
+          {revisionSuccess && (
+            <div className="mt-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-xs text-emerald-300 flex items-center gap-2">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+              <span>{revisionSuccess}</span>
+            </div>
+          )}
         </div>
       )}
 

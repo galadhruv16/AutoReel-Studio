@@ -40,6 +40,45 @@ export const Stage03Review: React.FC = () => {
   const [voiceVolume, setVoiceVolume] = useState<number>(100);
   const [ambientVolume, setAmbientVolume] = useState<number>(25);
 
+  // Conversational AI Scene Revision Copilot
+  const [aiRevisionText, setAiRevisionText] = useState<string>('');
+  const [isAiRevising, setIsAiRevising] = useState<boolean>(false);
+  const [aiRevisionMsg, setAiRevisionMsg] = useState<string | null>(null);
+
+  const handleAiReviseScene = async (promptOverride?: string) => {
+    const instruction = (promptOverride || aiRevisionText).trim();
+    if (!instruction || isAiRevising) return;
+    setIsAiRevising(true);
+    setAiRevisionMsg(null);
+    try {
+      const res = await fetch('/api/studio/revise-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          instruction,
+          targetSceneIndex: selectedScene.index,
+          scenes: project.scenes,
+          topic: project.topic,
+          duration: project.duration,
+          tone: project.tone,
+          voice: project.voice,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.data?.scenes) {
+        updateProject({ scenes: data.data.scenes, videoUrl: null });
+        setAiRevisionMsg(data.data.explanation || 'Scene updated successfully.');
+        setAiRevisionText('');
+      } else {
+        setAiRevisionMsg(`Error: ${data.error || 'Revision failed'}`);
+      }
+    } catch (err: any) {
+      setAiRevisionMsg(`Network error: ${err.message}`);
+    } finally {
+      setIsAiRevising(false);
+    }
+  };
+
   const playerHandleRef = useRef<RemotionStudioPlayerHandle | null>(null);
   const sceneAudioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -483,6 +522,70 @@ export const Stage03Review: React.FC = () => {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* AI Copilot Scene Revision Box */}
+          <div className="rounded-2xl border border-[#FF4F00]/30 bg-gradient-to-b from-[#1C1822] to-[#14161F] p-4 shadow-lg space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                <Zap className="h-3.5 w-3.5 text-[#FF4F00] animate-pulse" />
+                <span>AI Copilot // Revise Scene {selectedScene.index}</span>
+              </span>
+              <span className="text-[10px] font-mono text-[#94A3B8]">
+                Instant scene-level audio re-sync
+              </span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="text"
+                value={aiRevisionText}
+                onChange={(e) => setAiRevisionText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !isAiRevising && aiRevisionText.trim()) {
+                    handleAiReviseScene();
+                  }
+                }}
+                placeholder={`Instruct AI how to rewrite Scene ${selectedScene.index} (e.g. Add casualty stats, change archetype to code terminal...)`}
+                className="flex-1 rounded-xl border border-[#232634] bg-[#08090A] px-3.5 py-2 text-xs text-[#EDEDED] placeholder-[#64748B] focus:border-[#FF4F00] focus:outline-none transition"
+              />
+              <button
+                type="button"
+                onClick={() => handleAiReviseScene()}
+                disabled={isAiRevising || !aiRevisionText.trim()}
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#FF4F00] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[#FF4F00]/25 hover:bg-[#FF3B00] transition active:scale-95 disabled:opacity-50 cursor-pointer shrink-0"
+              >
+                <Zap className={`h-3.5 w-3.5 ${isAiRevising ? 'animate-spin' : ''}`} />
+                <span>{isAiRevising ? 'Revising...' : 'Tweak Scene'}</span>
+              </button>
+            </div>
+
+            {/* Quick Scene Chips */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {[
+                '🔥 Punchier Hook',
+                '📊 Add Numerical Stat',
+                '⚡ Shorter Spoken Cadence',
+                '🏛️ Investigative Dossier',
+                '💻 Code Terminal'
+              ].map((chip) => (
+                <button
+                  key={chip}
+                  type="button"
+                  onClick={() => handleAiReviseScene(chip)}
+                  disabled={isAiRevising}
+                  className="rounded-lg border border-[#232634] bg-[#0F1015] px-2 py-0.5 text-[10px] text-[#94A3B8] hover:border-[#FF4F00]/40 hover:text-white transition"
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+
+            {aiRevisionMsg && (
+              <p className="text-[11px] text-emerald-400 font-mono mt-1">
+                ✓ {aiRevisionMsg}
+              </p>
+            )}
           </div>
 
           {/* Control Card 1: Narration Script & Edge TTS Resynthesis */}
