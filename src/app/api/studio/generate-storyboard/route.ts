@@ -87,6 +87,10 @@ CRITICAL DIRECTIVE RULES:
    - "whoosh": For "investigative_dossier", comparative shifts, or fast transitions.
    - "pop": For statistical number highlights, badge pop-ups, and sudden revelations.
    - "none": Clean silent cuts for standard narrative flow.
+8. MANDATORY PHONETIC WORDS FOR NUMBERS (ZERO SUBTITLE DRIFT):
+   - In the "narration" string, you MUST spell out all numbers, currencies, and percentages phonetically as spoken words (e.g. write "twenty-four thousand dollars" instead of "$24,000", "nineteen seventy-one" instead of "1971", "ninety-three thousand" instead of "93,000", "fifty percent" instead of "50%", "ten million" instead of "10M").
+   - In "graphicData" ("statNumber", "statLabel", "headline", "milestones"), provide the clean numeric figures (e.g. "93,000", "1971", "50%").
+   - Spoken words for numbers in narration guarantee 1:1 token alignment with the speech synthesis engine and completely eliminate subtitle drift!
 
 ${
   scriptMode === 'own_script' && customScript.trim().length > 10
@@ -149,6 +153,77 @@ Respond STRICTLY with valid JSON (no markdown formatting, no code blocks):
                   generationConfig: {
                     responseMimeType: 'application/json',
                     temperature: 0.3,
+                    responseSchema: {
+                      type: 'OBJECT',
+                      properties: {
+                        scenes: {
+                          type: 'ARRAY',
+                          items: {
+                            type: 'OBJECT',
+                            properties: {
+                              duration: { type: 'NUMBER' },
+                              narration: { type: 'STRING' },
+                              cue: { type: 'STRING' },
+                              decisionCue: { type: 'STRING' },
+                              sfxCue: { type: 'STRING', enum: ['bass_drop', 'whoosh', 'pop', 'typewriter', 'none'] },
+                              visualDirection: { type: 'STRING' },
+                              visualType: {
+                                type: 'STRING',
+                                enum: [
+                                  'kinetic_text',
+                                  'vector_schematic',
+                                  'crosshair_target',
+                                  'split_comparison',
+                                  'process_flow',
+                                  'dynamic_chart',
+                                  'timeline',
+                                  'step_sequence',
+                                  'code_terminal',
+                                  'investigative_dossier'
+                                ]
+                              },
+                              highlightWords: { type: 'ARRAY', items: { type: 'STRING' } },
+                              graphicData: {
+                                type: 'OBJECT',
+                                properties: {
+                                  badge: { type: 'STRING' },
+                                  headline: { type: 'STRING' },
+                                  subtext: { type: 'STRING' },
+                                  statNumber: { type: 'STRING' },
+                                  statLabel: { type: 'STRING' },
+                                  leftItem: {
+                                    type: 'OBJECT',
+                                    properties: { title: { type: 'STRING' }, desc: { type: 'STRING' } }
+                                  },
+                                  rightItem: {
+                                    type: 'OBJECT',
+                                    properties: { title: { type: 'STRING' }, desc: { type: 'STRING' } }
+                                  },
+                                  steps: {
+                                    type: 'ARRAY',
+                                    items: {
+                                      type: 'OBJECT',
+                                      properties: { num: { type: 'STRING' }, title: { type: 'STRING' }, desc: { type: 'STRING' } }
+                                    }
+                                  },
+                                  milestones: {
+                                    type: 'ARRAY',
+                                    items: {
+                                      type: 'OBJECT',
+                                      properties: { date: { type: 'STRING' }, title: { type: 'STRING' } }
+                                    }
+                                  },
+                                  keyTags: { type: 'ARRAY', items: { type: 'STRING' } }
+                                },
+                                required: ['headline']
+                              }
+                            },
+                            required: ['duration', 'narration', 'cue', 'visualDirection', 'visualType', 'sfxCue']
+                          }
+                        }
+                      },
+                      required: ['scenes']
+                    }
                   },
                 }),
               }

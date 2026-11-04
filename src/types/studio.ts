@@ -2,7 +2,7 @@ export type StudioDuration = 30 | 60 | 90;
 
 export type StudioTone = 'engaging' | 'academic' | 'narrative' | 'casual';
 
-export type VoiceId = 'alloy' | 'echo' | 'fable' | 'nova';
+export type VoiceId = 'rohan' | 'priya' | 'alloy' | 'echo' | 'fable' | 'nova' | 'ryan' | 'sonia';
 
 export interface VoiceOption {
   id: VoiceId;
@@ -10,6 +10,8 @@ export interface VoiceOption {
   edgeVoice: string;
   description: string;
   gender: 'Female' | 'Male';
+  region: 'Indian English' | 'US English' | 'British English';
+  flag: string;
   sampleAudio: string;
 }
 
@@ -98,20 +100,44 @@ export interface StudioProject {
 
 export const VOICES: VoiceOption[] = [
   {
+    id: 'rohan',
+    name: 'Rohan',
+    edgeVoice: 'en-IN-PrabhatNeural',
+    description: 'Clear, natural, and authoritative Indian English educational delivery',
+    gender: 'Male',
+    region: 'Indian English',
+    flag: '🇮🇳',
+    sampleAudio: '/audio/samples/rohan.mp3',
+  },
+  {
+    id: 'priya',
+    name: 'Priya',
+    edgeVoice: 'en-IN-NeerjaNeural',
+    description: 'Warm, articulate, and engaging Indian English educator voice',
+    gender: 'Female',
+    region: 'Indian English',
+    flag: '🇮🇳',
+    sampleAudio: '/audio/samples/priya.mp3',
+  },
+  {
     id: 'alloy',
     name: 'Alloy',
     edgeVoice: 'en-US-JennyNeural',
-    description: 'Warm, clear, and natural documentary cadence',
+    description: 'Clear, balanced, and documentary-style US cadence',
     gender: 'Female',
-    sampleAudio: '/audio/reel_genetics.mp3',
+    region: 'US English',
+    flag: '🇺🇸',
+    sampleAudio: '/audio/samples/alloy.mp3',
   },
   {
     id: 'echo',
     name: 'Echo',
     edgeVoice: 'en-US-BrianMultilingualNeural',
-    description: 'Energetic, crisp, and authoritative technical explainer',
+    description: 'Energetic, crisp, and high-tech modern explainer',
     gender: 'Male',
-    sampleAudio: '/audio/reel_kubernetes.mp3',
+    region: 'US English',
+    flag: '🇺🇸',
+    sampleAudio: '/audio/samples/echo.mp3',
   },
   {
     id: 'fable',
@@ -119,7 +145,9 @@ export const VOICES: VoiceOption[] = [
     edgeVoice: 'en-US-AndrewMultilingualNeural',
     description: 'Deep, resonant, and editorial narrative voice',
     gender: 'Male',
-    sampleAudio: '/audio/reel_saraighat.mp3',
+    region: 'US English',
+    flag: '🇺🇸',
+    sampleAudio: '/audio/samples/fable.mp3',
   },
   {
     id: 'nova',
@@ -127,7 +155,29 @@ export const VOICES: VoiceOption[] = [
     edgeVoice: 'en-US-AvaMultilingualNeural',
     description: 'Calm, polished, and confident modern delivery',
     gender: 'Female',
-    sampleAudio: '/audio/spike_test.mp3',
+    region: 'US English',
+    flag: '🇺🇸',
+    sampleAudio: '/audio/samples/nova.mp3',
+  },
+  {
+    id: 'ryan',
+    name: 'Ryan',
+    edgeVoice: 'en-GB-RyanNeural',
+    description: 'Distinguished, articulate, and formal British narration',
+    gender: 'Male',
+    region: 'British English',
+    flag: '🇬🇧',
+    sampleAudio: '/audio/samples/ryan.mp3',
+  },
+  {
+    id: 'sonia',
+    name: 'Sonia',
+    edgeVoice: 'en-GB-SoniaNeural',
+    description: 'Expressive, clear, and modern British storytelling',
+    gender: 'Female',
+    region: 'British English',
+    flag: '🇬🇧',
+    sampleAudio: '/audio/samples/sonia.mp3',
   },
 ];
 

@@ -287,6 +287,9 @@ export const Stage01Topic: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-bold text-white flex items-center gap-1.5">
+                      <span className="text-sm" role="img" aria-label={v.region}>
+                        {v.flag}
+                      </span>
                       {v.name}
                       <span className="text-[10px] font-mono text-[#94A3B8] font-normal">
                         ({v.gender})
@@ -297,6 +300,11 @@ export const Stage01Topic: React.FC = () => {
                         <Check className="h-2.5 w-2.5 stroke-[3]" />
                       </span>
                     )}
+                  </div>
+                  <div className="mt-1">
+                    <span className="inline-block text-[10px] font-mono font-medium text-[#FF4F00] bg-[#FF4F00]/10 px-1.5 py-0.2 rounded">
+                      {v.region}
+                    </span>
                   </div>
                   <p className="mt-1.5 text-xs text-[#94A3B8] leading-snug">
                     {v.description}

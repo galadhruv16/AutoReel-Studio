@@ -5,10 +5,14 @@ import fs from 'fs/promises';
 import crypto from 'crypto';
 
 export const VOICE_MAP: Record<string, string> = {
+  rohan: 'en-IN-PrabhatNeural',
+  priya: 'en-IN-NeerjaNeural',
   alloy: 'en-US-JennyNeural',
   echo: 'en-US-BrianMultilingualNeural',
   fable: 'en-US-AndrewMultilingualNeural',
   nova: 'en-US-AvaMultilingualNeural',
+  ryan: 'en-GB-RyanNeural',
+  sonia: 'en-GB-SoniaNeural',
   onyx: 'en-US-GuyNeural',
   shimmer: 'en-US-MichelleNeural',
 };

@@ -11,7 +11,7 @@ const DEFAULT_PROJECT: StudioProject = {
   topic: '',
   duration: 60,
   tone: 'engaging',
-  voice: 'alloy',
+  voice: 'rohan',
   scriptMode: 'ai_generate',
   customScript: '',
   scenes: [],
