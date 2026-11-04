@@ -25,8 +25,10 @@ export function downloadBlob(blob: Blob, filename: string): void {
 }
 
 /**
- * Downloads a file from a URL using streaming Content-Disposition: attachment
- * and hidden iframe trigger to bypass browser popup and user-activation expiration limits.
+ * Downloads a file from a URL using streaming Content-Disposition: attachment.
+ * Uses top-level window.location.assign + synthetic anchor fallback to ensure
+ * reliable downloads even when browser transient user-activation has expired
+ * after long background renders.
  */
 export async function downloadFileFromUrl(url: string, filename: string): Promise<void> {
   const cleanFilename = filename.endsWith('.mp4') ? filename : `${filename}.mp4`;
@@ -43,7 +45,38 @@ export async function downloadFileFromUrl(url: string, filename: string): Promis
     ? `/api/studio/download?file=${encodeURIComponent(url.replace(/^\/+/, ''))}&name=${encodeURIComponent(cleanFilename)}`
     : url;
 
-  // 1. Direct hidden iframe download (industry standard for attachment streaming without navigation or popup blocking)
+  // 1. Direct top-level navigation trigger.
+  // Because the download endpoint returns 'Content-Disposition: attachment',
+  // modern browsers hand the stream directly to the native download manager
+  // without navigating away or unloading the React app.
+  try {
+    if (typeof window !== 'undefined') {
+      window.location.assign(targetUrl);
+    }
+  } catch (navErr) {
+    console.warn('Direct navigation download trigger:', navErr);
+  }
+
+  // 2. Synthetic anchor click with download attribute as secondary trigger
+  try {
+    const link = document.createElement('a');
+    link.href = targetUrl;
+    link.download = cleanFilename;
+    link.target = '_self';
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      try {
+        if (document.body.contains(link)) {
+          document.body.removeChild(link);
+        }
+      } catch {}
+    }, 1500);
+  } catch (linkErr) {
+    console.warn('Anchor download fallback:', linkErr);
+  }
+
+  // 3. Hidden iframe fallback (for environments where navigation is blocked)
   try {
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
@@ -63,25 +96,6 @@ export async function downloadFileFromUrl(url: string, filename: string): Promis
     }, 120000);
   } catch (iframeErr) {
     console.warn('Iframe download fallback:', iframeErr);
-  }
-
-  // 2. Also trigger synthetic anchor click as dual guarantee
-  try {
-    const link = document.createElement('a');
-    link.href = targetUrl;
-    link.download = cleanFilename;
-    link.target = '_self';
-    document.body.appendChild(link);
-    link.click();
-    setTimeout(() => {
-      try {
-        if (document.body.contains(link)) {
-          document.body.removeChild(link);
-        }
-      } catch {}
-    }, 1000);
-  } catch (linkErr) {
-    console.warn('Anchor download fallback:', linkErr);
   }
 }
 

@@ -278,6 +278,20 @@ export const Stage04Publish: React.FC = () => {
         setDynamicVideoUrl(result.videoUrl);
         updateProject({ videoUrl: result.videoUrl });
         setRenderStatus('Custom MP4 Master Ready (1080p 60FPS)');
+
+        // Persist immediately to project store
+        fetch('/api/studio/projects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            project: {
+              ...project,
+              videoUrl: result.videoUrl,
+              updatedAt: new Date().toISOString(),
+            },
+          }),
+        }).catch(() => {});
+
         if (andDownload) {
           await downloadFileFromUrl(result.videoUrl, `${getTopicSlug(project.topic)}_1080p.mp4`);
         }
@@ -428,9 +442,22 @@ export const Stage04Publish: React.FC = () => {
               </div>
 
               {dynamicVideoUrl && (
-                <div className="mb-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
-                  <Check className="h-3 w-3" />
-                  <span>1080p Master Compiled &amp; Ready</span>
+                <div className="mb-3 p-3 rounded-xl bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-emerald-500/20 border-2 border-emerald-400/50 shadow-lg shadow-emerald-500/10 text-center animate-fadeIn">
+                  <div className="flex items-center justify-center gap-1.5 text-emerald-400 font-bold text-xs mb-1">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                    <span>1080p Master Reel Ready!</span>
+                  </div>
+                  <p className="text-[11px] text-[#94A3B8] mb-2 leading-relaxed">
+                    Rendered in full 1080×1920 60FPS. Click below to save directly to your computer:
+                  </p>
+                  <a
+                    href={`/api/studio/download?file=${encodeURIComponent(dynamicVideoUrl.replace(/^\/+/,''))}&name=${encodeURIComponent(`${getTopicSlug(project.topic)}_1080p.mp4`)}`}
+                    download={`${getTopicSlug(project.topic)}_1080p.mp4`}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 py-3 px-4 text-xs font-bold text-white shadow-xl shadow-emerald-500/30 hover:from-emerald-400 hover:to-teal-400 transition active:scale-95 cursor-pointer text-center no-underline"
+                  >
+                    <Download className="h-4 w-4 stroke-[2.5]" />
+                    <span>Save 1080p Master MP4</span>
+                  </a>
                 </div>
               )}
 

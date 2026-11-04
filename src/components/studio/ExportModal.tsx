@@ -53,13 +53,17 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const [instantDownloadUrl, setInstantDownloadUrl] = useState<string | null>(null);
 
   const handleInstantBrowserExport = async () => {
+    if (renderedVideoUrl) {
+      await downloadFileFromUrl(renderedVideoUrl, `${getTopicSlug(project.topic)}_1080p.mp4`);
+      return;
+    }
     setIsInstantRecording(true);
     setInstantProgress(0);
     try {
       const canvas = document.querySelector('canvas') as HTMLCanvasElement | null;
       if (!canvas) {
-        alert('Video player canvas not detected. Please ensure the Stage 03 Player is rendered.');
         setIsInstantRecording(false);
+        await handleRenderAndDownloadVideo();
         return;
       }
 
@@ -180,6 +184,20 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         setRenderedVideoUrl(result.videoUrl);
         updateProject({ videoUrl: result.videoUrl });
         setRenderStatus('Finalizing MP4 file...');
+
+        // Persist immediately to project store
+        fetch('/api/studio/projects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            project: {
+              ...project,
+              videoUrl: result.videoUrl,
+              updatedAt: new Date().toISOString(),
+            },
+          }),
+        }).catch(() => {});
+
         await downloadFileFromUrl(result.videoUrl, `${getTopicSlug(project.topic)}_1080p.mp4`);
       } else {
         setShowServerlessNotice(true);
