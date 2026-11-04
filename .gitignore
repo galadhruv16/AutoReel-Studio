@@ -3,9 +3,6 @@
 /.pnp
 .pnp.js
 
-/docs
-CHANGELOG_AGILE.md
-
 
 # Next.js build output
 /.next/
@@ -56,5 +53,4 @@ Thumbs.db
 
 docs/OBSERVABILITY_LOGGING.md
 CHANGELOG_AGILE.md
-CHANGELOG_AGILE.md
-docs/OBSERVABILITY_LOGGING.md
+
